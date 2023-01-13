@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "unloadedactivity",
+  "version": "${version}",
+
+  "custom": {
+    "cardinal-components": [
+      "unloadedactivity:magik"
+    ],
+    "loom:injected_interfaces": {
+      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateRandomTicks"]
+    }
+  },
+
+  "name": "Unloaded Activity",
+  "description": "Make certain blocks such as crops grow as if they've always grown when put into simulation distance.",
+  "authors": [
+    "Zan"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "GNU GPL",
+  "icon": "assets/unloadedactivity/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.inzan123.UnloadedActivity"
+    ],
+    "cardinal-components": [
+      "com.github.inzan123.MyComponents"
+    ]
+  },
+  "mixins": [
+    "unloadedactivity.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.11",
+    "fabric-api": "*",
+    "minecraft": "~1.19.3",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
