@@ -1,10 +1,7 @@
 package com.github.inzan123.mixin;
 
-import com.github.inzan123.ChunkLastTickComponent;
 import com.github.inzan123.ChunkLongComponent;
-import com.github.inzan123.SimulateRandomTicks;
-import com.github.inzan123.UnloadedActivity;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import com.github.inzan123.SimulateTimePassing;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -45,8 +42,8 @@ public abstract class ServerWorldMixin {
 							BlockPos position = new BlockPos(x,y,z);
 							BlockState state = chunk.getBlockState(position);
 							Block block = state.getBlock();
-							if (block instanceof SimulateRandomTicks) {
-								SimulateRandomTicks tickSimulator = (SimulateRandomTicks) block;
+							if (block instanceof SimulateTimePassing) {
+								SimulateTimePassing tickSimulator = (SimulateTimePassing) block;
 								ChunkPos chunkPos = chunk.getPos();
 								BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
 								tickSimulator.simulateRandomTicks(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);

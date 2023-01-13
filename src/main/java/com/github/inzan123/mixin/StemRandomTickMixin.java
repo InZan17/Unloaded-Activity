@@ -1,9 +1,7 @@
 package com.github.inzan123.mixin;
 
 
-import com.github.inzan123.SimulateRandomTicks;
-import com.github.inzan123.UnloadedActivity;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import com.github.inzan123.SimulateTimePassing;
 import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
@@ -21,7 +19,7 @@ import java.util.List;
 import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
-public abstract class StemRandomTickMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class StemRandomTickMixin extends PlantBlock implements SimulateTimePassing {
 
     public StemRandomTickMixin(Settings settings, GourdBlock gourdBlock) {
         super(settings);

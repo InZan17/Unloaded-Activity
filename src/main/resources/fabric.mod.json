@@ -8,8 +8,8 @@
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateRandomTicks"]
+      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateTimePassing"],
+      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateTimePassing"]
     }
   },
 

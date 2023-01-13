@@ -5,7 +5,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 
-public interface SimulateRandomTicks {
+public interface SimulateTimePassing {
 
     default double getChoose(long successes, long draws) {
         double choose = 1;

@@ -1,9 +1,8 @@
 package com.github.inzan123.mixin;
 
 
-import com.github.inzan123.SimulateRandomTicks;
+import com.github.inzan123.SimulateTimePassing;
 import com.github.inzan123.UnloadedActivity;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
@@ -12,15 +11,13 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+
 import static java.lang.Math.pow;
-import static net.minecraft.Bootstrap.println;
 
 @Mixin(CropBlock.class)
-public abstract class CropRandomTickMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class CropRandomTickMixin extends PlantBlock implements SimulateTimePassing {
 
     public CropRandomTickMixin(Settings settings) {
         super(settings);
@@ -72,14 +69,9 @@ public abstract class CropRandomTickMixin extends PlantBlock implements Simulate
 
             double choose = getChoose(i,cycles);
 
-            UnloadedActivity.LOGGER.info("Cycles " + cycles);
-            UnloadedActivity.LOGGER.info("Choose " + choose);
-            UnloadedActivity.LOGGER.info("totalChance " + totalChance);
-            UnloadedActivity.LOGGER.info("invertedTotalChance " + invertedTotalChance);
-
             double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, cycles-i); //Probability of it growing "i" steps
 
-            UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
+            //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
 
             totalProbability += finalProbability;
 
@@ -88,7 +80,7 @@ public abstract class CropRandomTickMixin extends PlantBlock implements Simulate
                 return;
             }
         }
-        UnloadedActivity.LOGGER.info("odds for growing to max age: " + (1 - totalProbability));
+        //UnloadedActivity.LOGGER.info("odds for growing to max age: " + (1 - totalProbability));
         world.setBlockState(pos, this.withAge(maxAge), 2);
     }
 }
