@@ -20,9 +20,9 @@ import java.util.List;
 import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
-public abstract class StemRandomTickMixin extends PlantBlock implements SimulateTimePassing {
+public abstract class StemSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
 
-    public StemRandomTickMixin(Settings settings, GourdBlock gourdBlock) {
+    public StemSimulateTimeMixin(Settings settings, GourdBlock gourdBlock) {
         super(settings);
         this.gourdBlock = gourdBlock;
     }

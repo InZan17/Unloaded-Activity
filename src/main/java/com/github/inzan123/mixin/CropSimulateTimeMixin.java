@@ -17,9 +17,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(CropBlock.class)
-public abstract class CropRandomTickMixin extends PlantBlock implements SimulateTimePassing {
+public abstract class CropSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
 
-    public CropRandomTickMixin(Settings settings) {
+    public CropSimulateTimeMixin(Settings settings) {
         super(settings);
     }
 
