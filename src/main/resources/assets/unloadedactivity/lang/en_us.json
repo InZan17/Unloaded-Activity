@@ -3,7 +3,7 @@
   "text.config.unloaded-activity.option.debugLogs": "Debug Logs",
   "text.config.unloaded-activity.option.debugLogs.tooltip": "If enabled, the mod will \n send more info in the logs.",
   "text.config.unloaded-activity.option.growCrops": "Update Crops",
-  "text.config.unloaded-activity.option.growCrops.tooltip": "If enabled, the mod will update crops \n when they just got into simulation distance",
+  "text.config.unloaded-activity.option.growCrops.tooltip": "If enabled, the mod will update crops \n when they get within simulation distance.",
   "text.config.unloaded-activity.option.growStems": "Update Stems",
-  "text.config.unloaded-activity.option.growStems.tooltip": "If enabled, the mod will update stems \n when they just got into simulation distance."
+  "text.config.unloaded-activity.option.growStems.tooltip": "If enabled, the mod will update stems \n when they get within simulation distance."
 }
