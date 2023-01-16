@@ -37,7 +37,7 @@ public abstract class ServerWorldMixin {
 
 			if (timeDifference > 20) {
 
-				long now;
+				long now = 0;
 				if (UnloadedActivity.CONFIG.debugLogs()) now = Instant.now().toEpochMilli();
 
 				int minY = world.getBottomY();
