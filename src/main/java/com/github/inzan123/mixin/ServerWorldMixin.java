@@ -53,7 +53,7 @@ public abstract class ServerWorldMixin {
 								SimulateTimePassing tickSimulator = (SimulateTimePassing) block;
 								ChunkPos chunkPos = chunk.getPos();
 								BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-								tickSimulator.simulateRandomTicks(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
+								tickSimulator.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
 							}
 						}
 					}

@@ -17,6 +17,6 @@ public interface SimulateTimePassing {
     default double getGrowthOdds(ServerWorld world, BlockPos pos) {
         return 0;
     }
-    default void simulateRandomTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long cycles, int randomTickSpeed) {
+    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
     }
 }

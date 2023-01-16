@@ -91,7 +91,7 @@ public abstract class StemRandomTickMixin extends PlantBlock implements Simulate
     }
 
     @Override
-    public void simulateRandomTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long cycles, int randomTickSpeed) {
+    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         if (!UnloadedActivity.CONFIG.growStems()) return;
 
@@ -117,9 +117,9 @@ public abstract class StemRandomTickMixin extends PlantBlock implements Simulate
 
             for (int i = 0; i < ageDifference+1; i++) {
 
-                double choose = getChoose(i,cycles);
+                double choose = getChoose(i,timePassed);
 
-                double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, cycles - i); //Probability of it growing "i" steps
+                double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed - i); //Probability of it growing "i" steps
 
                 //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
 
@@ -144,7 +144,7 @@ public abstract class StemRandomTickMixin extends PlantBlock implements Simulate
             if (chanceForFreeSpace == 0) return;
 
             totalChance = chanceForFreeSpace*randomPickChance;
-            double chanceForFruit = (1-pow(totalChance, cycles));
+            double chanceForFruit = (1-pow(totalChance, timePassed));
             // i think thats how its done
 
             //UnloadedActivity.LOGGER.info("odds for picking an invalid spot: " + probabilityForNoPick);

@@ -44,7 +44,7 @@ public abstract class CropRandomTickMixin extends PlantBlock implements Simulate
     }
 
     @Override
-    public void simulateRandomTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long cycles, int randomTickSpeed) {
+    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         if (!UnloadedActivity.CONFIG.growCrops()) return;
 
@@ -70,9 +70,9 @@ public abstract class CropRandomTickMixin extends PlantBlock implements Simulate
 
         for (int i = 0; i<ageDifference;i++) {
 
-            double choose = getChoose(i,cycles);
+            double choose = getChoose(i,timePassed);
 
-            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, cycles-i); //Probability of it growing "i" steps
+            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed-i); //Probability of it growing "i" steps
 
             //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
 
