@@ -2,7 +2,9 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.ChunkLongComponent;
 import com.github.inzan123.SimulateTimePassing;
-import net.minecraft.block.*;
+import com.github.inzan123.UnloadedActivity;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -11,6 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.time.Instant;
 
 import static com.github.inzan123.MyComponents.MAGIK;
 import static java.lang.Long.max;
@@ -33,6 +37,9 @@ public abstract class ServerWorldMixin {
 
 			if (timeDifference > 20) {
 
+				long now;
+				if (UnloadedActivity.CONFIG.debugLogs()) now = Instant.now().toEpochMilli();
+
 				int minY = world.getBottomY();
 				int maxY = world.getTopY();
 
@@ -51,6 +58,7 @@ public abstract class ServerWorldMixin {
 						}
 					}
 				}
+				if (UnloadedActivity.CONFIG.debugLogs()) UnloadedActivity.LOGGER.info("Milliseconds to loop through chunk: " + (Instant.now().toEpochMilli() - now));
 			}
 		}
 

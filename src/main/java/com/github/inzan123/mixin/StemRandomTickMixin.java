@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 
 import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
@@ -91,6 +92,9 @@ public abstract class StemRandomTickMixin extends PlantBlock implements Simulate
 
     @Override
     public void simulateRandomTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long cycles, int randomTickSpeed) {
+
+        if (!UnloadedActivity.CONFIG.growStems()) return;
+
         if (world.getBaseLightLevel(pos, 0) < 9) return;
 
         int currentAge = this.getAge(state);

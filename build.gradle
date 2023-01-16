@@ -15,15 +15,10 @@ repositories {
 		name = 'Ladysnake Mods'
 		url = 'https://ladysnake.jfrog.io/artifactory/mods'
 	}
-	maven {
-		url 'https://jitpack.io'
-	}
-	maven {
-		url "https://maven.terraformersmc.com/"
-	}
-	maven {
-		url "https://maven.shedaniel.me/"
-	}
+	maven {url 'https://jitpack.io'}
+	maven {url "https://maven.terraformersmc.com/"}
+	maven {url "https://maven.shedaniel.me/"}
+	maven { url 'https://maven.wispforest.io' }
 }
 
 dependencies {
@@ -45,7 +40,14 @@ dependencies {
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional)
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.1.0"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.1.0"
-	// NOTE FROM ME, ZAN: I have no idea why but when I include them as a Jar-in-Jar dependency the mod breaks.
+
+	modImplementation "io.wispforest:owo-lib:${project.owo_version}"
+	// only if you plan to use owo-config
+	annotationProcessor "io.wispforest:owo-lib:${project.owo_version}"
+
+	// include this if you don't want force your users to install owo
+	// sentinel will warn them and give the option to download it automatically
+	include "io.wispforest:owo-sentinel:${project.owo_version}"
 }
 
 processResources {

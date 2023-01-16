@@ -45,6 +45,9 @@ public abstract class CropRandomTickMixin extends PlantBlock implements Simulate
 
     @Override
     public void simulateRandomTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long cycles, int randomTickSpeed) {
+
+        if (!UnloadedActivity.CONFIG.growCrops()) return;
+
         if (world.getBaseLightLevel(pos, 0) < 9) return;
 
         int currentAge = this.getAge(state);
