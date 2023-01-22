@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 public class MyConfig extends ConfigWrapper<com.github.inzan123.MyConfigModel> {
 
     private final Option<java.lang.Boolean> debugLogs = this.optionForKey(new Option.Key("debugLogs"));
+    private final Option<java.lang.Boolean> randomizeXZBlockPicks = this.optionForKey(new Option.Key("randomizeXZBlockPicks"));
     private final Option<java.lang.Boolean> growCrops = this.optionForKey(new Option.Key("growCrops"));
     private final Option<java.lang.Boolean> growStems = this.optionForKey(new Option.Key("growStems"));
 
@@ -30,6 +31,14 @@ public class MyConfig extends ConfigWrapper<com.github.inzan123.MyConfigModel> {
 
     public void debugLogs(boolean value) {
         debugLogs.set(value);
+    }
+
+    public boolean randomizeXZBlockPicks() {
+        return randomizeXZBlockPicks.value();
+    }
+
+    public void randomizeXZBlockPicks(boolean value) {
+        randomizeXZBlockPicks.set(value);
     }
 
     public boolean growCrops() {

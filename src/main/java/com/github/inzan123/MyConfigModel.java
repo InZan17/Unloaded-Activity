@@ -7,6 +7,7 @@ import io.wispforest.owo.config.annotation.Modmenu;
 @Config(name = "unloaded-activity", wrapperName = "MyConfig")
 public class MyConfigModel {
     public boolean debugLogs = false;
+    public boolean randomizeXZBlockPicks = false;
     public boolean growCrops = true;
     public boolean growStems = true;
 }

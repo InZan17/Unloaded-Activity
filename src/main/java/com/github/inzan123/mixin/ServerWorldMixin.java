@@ -15,6 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import static com.github.inzan123.MyComponents.MAGIK;
 import static java.lang.Long.max;
@@ -43,26 +45,50 @@ public abstract class ServerWorldMixin {
 				int minY = world.getBottomY();
 				int maxY = world.getTopY();
 
-				for (int x=0; x<16;x++) {
+				if (UnloadedActivity.CONFIG.randomizeXZBlockPicks()) {
+					ArrayList<BlockPos> blockPosArray = new ArrayList<BlockPos>();
+
+					for (int z=0; z<16;z++) {
+						for (int x=0; x<16;x++) {
+							blockPosArray.add(new BlockPos(x,0,z));
+						}
+					}
+
+					Collections.shuffle(blockPosArray);
+
 					for (int y=minY; y<maxY;y++) {
-						for (int z=0; z<16;z++) {
-							BlockPos position = new BlockPos(x,y,z);
-							BlockState state = chunk.getBlockState(position);
-							Block block = state.getBlock();
-							if (block instanceof SimulateTimePassing) {
-								SimulateTimePassing tickSimulator = (SimulateTimePassing) block;
-								ChunkPos chunkPos = chunk.getPos();
-								BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-								tickSimulator.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
+						for (int i=0; i<blockPosArray.size(); i++) {
+							BlockPos position = new BlockPos(blockPosArray.get(i).getX(),y,blockPosArray.get(i).getZ());
+							simulateTime(position, chunk, world, timeDifference, randomTickSpeed);
+						}
+					}
+				} else {
+					for (int z=0; z<16;z++) {
+						for (int x=0; x<16;x++) {
+							for (int y=minY; y<maxY;y++) {
+								BlockPos position = new BlockPos(x,y,z);
+								simulateTime(position, chunk, world, timeDifference, randomTickSpeed);
 							}
 						}
 					}
 				}
+
 				if (UnloadedActivity.CONFIG.debugLogs()) UnloadedActivity.LOGGER.info("Milliseconds to loop through chunk: " + (Instant.now().toEpochMilli() - now));
 			}
 		}
 
 		lastTick.setValue(currentTime);
+	}
+
+	private void simulateTime(BlockPos position, WorldChunk chunk, ServerWorld world, long timeDifference, int randomTickSpeed) {
+		BlockState state = chunk.getBlockState(position);
+		Block block = state.getBlock();
+		if (block instanceof SimulateTimePassing) {
+			SimulateTimePassing tickSimulator = (SimulateTimePassing) block;
+			ChunkPos chunkPos = chunk.getPos();
+			BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+			tickSimulator.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
+		}
 	}
 
 }
