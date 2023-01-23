@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "unloadedactivity",
-  "version": "${version}",
+  "version": "0.2.0",
 
   "custom": {
     "cardinal-components": [
@@ -21,10 +21,11 @@
   ],
   "contact": {
     "homepage": "https://zanspace.lol",
-    "sources": "https://github.com/InZan123/Unloaded-Activity-Fabric"
+    "sources": "https://github.com/InZan123/Unloaded-Activity-Fabric",
+    "issues": "https://github.com/InZan123/Unloaded-Activity-Fabric/issues"
   },
 
-  "license": "GNU GPL",
+  "license": "GNU GPLv3",
   "icon": "assets/unloadedactivity/icon.png",
 
   "environment": "*",
