@@ -12,6 +12,7 @@ public class MyConfig extends ConfigWrapper<com.github.inzan123.MyConfigModel> {
 
     private final Option<java.lang.Boolean> debugLogs = this.optionForKey(new Option.Key("debugLogs"));
     private final Option<java.lang.Boolean> randomizeXZBlockPicks = this.optionForKey(new Option.Key("randomizeXZBlockPicks"));
+    private final Option<java.lang.Boolean> growSaplings = this.optionForKey(new Option.Key("growSaplings"));
     private final Option<java.lang.Boolean> growCrops = this.optionForKey(new Option.Key("growCrops"));
     private final Option<java.lang.Boolean> growStems = this.optionForKey(new Option.Key("growStems"));
 
@@ -39,6 +40,14 @@ public class MyConfig extends ConfigWrapper<com.github.inzan123.MyConfigModel> {
 
     public void randomizeXZBlockPicks(boolean value) {
         randomizeXZBlockPicks.set(value);
+    }
+
+    public boolean growSaplings() {
+        return growSaplings.value();
+    }
+
+    public void growSaplings(boolean value) {
+        growSaplings.set(value);
     }
 
     public boolean growCrops() {

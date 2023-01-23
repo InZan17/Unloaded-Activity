@@ -8,6 +8,7 @@ import io.wispforest.owo.config.annotation.Modmenu;
 public class MyConfigModel {
     public boolean debugLogs = false;
     public boolean randomizeXZBlockPicks = false;
+    public boolean growSaplings = true;
     public boolean growCrops = true;
     public boolean growStems = true;
 }
