@@ -1,0 +1,71 @@
+package com.github.inzan123.mixin;
+
+import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.UnloadedActivity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CropBlock;
+import net.minecraft.block.PlantBlock;
+import net.minecraft.block.SweetBerryBushBlock;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.IntProperty;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.event.GameEvent;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+import static java.lang.Math.pow;
+
+@Mixin(SweetBerryBushBlock.class)
+public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
+    public BerryBushSimulateTimeMixin(Settings settings) {
+        super(settings);
+    }
+
+    @Shadow @Final public static IntProperty AGE;
+    @Shadow @Final public static int MAX_AGE;
+    @Override
+    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+        int age = (Integer)state.get(AGE);
+        if (age >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return;
+
+        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+
+        int ageDifference = MAX_AGE - age;
+
+        double totalChance = 0.2 * randomPickChance;
+
+        double invertedTotalChance = 1-totalChance;
+
+        double totalProbability = 0;
+
+        double randomFloat = random.nextDouble();
+
+        for (int i = 0; i<ageDifference;i++) {
+
+            double choose = getChoose(i,timePassed);
+
+            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed-i); //Probability of it growing "i" steps
+
+            UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
+
+            totalProbability += finalProbability;
+
+            if (randomFloat < totalProbability) {
+                if (i == 0) return;
+                BlockState blockState = (BlockState)state.with(AGE, age + i);
+                world.setBlockState(pos, blockState, 2);
+                world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(blockState));
+                return;
+            }
+        }
+
+        UnloadedActivity.LOGGER.info("growing to its fullest rn");
+
+        BlockState blockState = (BlockState)state.with(AGE, MAX_AGE);
+        world.setBlockState(pos, blockState, 2);
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(blockState));
+
+    }
+}
