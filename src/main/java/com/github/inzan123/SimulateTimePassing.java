@@ -34,9 +34,11 @@ public interface SimulateTimePassing {
         double randomFloat = random.nextDouble();
 
         for (int i = 0; i<maxOccurrences;i++) {
+            
+            if (i == cycles) return i;
 
             if (i != 0) {
-                choose *= (cycles - i - 1)/(i);
+                choose *= (cycles - (i - 1))/i;
             }
 
             double finalProbability = choose * pow(odds, i) * pow(invertedOdds, cycles-i); //Probability of it happening "i" times
