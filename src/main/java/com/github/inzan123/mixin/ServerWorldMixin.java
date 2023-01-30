@@ -45,23 +45,23 @@ public abstract class ServerWorldMixin {
 				int minY = world.getBottomY();
 				int maxY = world.getTopY();
 
-				if (UnloadedActivity.CONFIG.randomizeXZBlockPicks()) {
+				if (UnloadedActivity.CONFIG.randomizeBlockUpdates()) {
 					ArrayList<BlockPos> blockPosArray = new ArrayList<BlockPos>();
 
-					for (int z=0; z<16;z++) {
-						for (int x=0; x<16;x++) {
-							blockPosArray.add(new BlockPos(x,0,z));
-						}
+					for (int z=0; z<16;z++)
+						for (int x=0; x<16;x++)
+							for (int y=minY; y<maxY;y++) {
+								BlockPos position = new BlockPos(x,y,z);
+								BlockState state = chunk.getBlockState(position);
+								Block block = state.getBlock();
+								if (block instanceof SimulateTimePassing) blockPosArray.add(position);
 					}
 
 					Collections.shuffle(blockPosArray);
 
-					for (int y=minY; y<maxY;y++) {
-						for (int i=0; i<blockPosArray.size(); i++) {
-							BlockPos position = new BlockPos(blockPosArray.get(i).getX(),y,blockPosArray.get(i).getZ());
-							simulateTime(position, chunk, world, timeDifference, randomTickSpeed);
-						}
-					}
+					for (int i = 0; i < blockPosArray.size(); i++)
+						simulateTime(blockPosArray.get(i), chunk, world, timeDifference, randomTickSpeed);
+
 				} else {
 					for (int z=0; z<16;z++) {
 						for (int x=0; x<16;x++) {
