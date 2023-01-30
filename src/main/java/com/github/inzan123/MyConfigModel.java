@@ -12,4 +12,5 @@ public class MyConfigModel {
     public boolean growCrops = true;
     public boolean growStems = true;
     public boolean growSweetBerries = true;
+    public boolean growCocoa = true;
 }

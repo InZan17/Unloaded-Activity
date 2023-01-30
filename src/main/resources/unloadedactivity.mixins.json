@@ -9,7 +9,8 @@
     "ServerWorldMixin",
     "StemSimulateTimeMixin",
     "SaplingSimulateTimeMixin",
-    "BerryBushSimulateTimeMixin"
+    "BerryBushSimulateTimeMixin",
+    "CocoaSimulateTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

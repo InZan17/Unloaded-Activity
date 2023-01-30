@@ -11,7 +11,8 @@
       "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateTimePassing"],
       "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateTimePassing"],
       "net/minecraft/block/SweetBerryBushBlock": ["com/github/inzan123/SimulateTimePassing"],
-      "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateTimePassing"]
+      "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateTimePassing"],
+      "net/minecraft/block/CocoaBlock": ["com/github/inzan123/SimulateTimePassing"]
     }
   },
 
