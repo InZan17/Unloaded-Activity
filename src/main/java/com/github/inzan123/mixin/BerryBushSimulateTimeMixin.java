@@ -25,6 +25,11 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
 
     @Shadow @Final public static IntProperty AGE;
     @Shadow @Final public static int MAX_AGE;
+
+    @Override
+    public double getGrowthOdds(ServerWorld world, BlockPos pos) {
+        return 0.2;
+    }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
         int age = (Integer)state.get(AGE);
@@ -34,36 +39,13 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
 
         int ageDifference = MAX_AGE - age;
 
-        double totalChance = 0.2 * randomPickChance;
+        double totalOdds = getGrowthOdds(world, pos) * randomPickChance;
 
-        double invertedTotalChance = 1-totalChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        double totalProbability = 0;
+        if (growthAmount == 0) return;
 
-        double randomFloat = random.nextDouble();
-
-        for (int i = 0; i<ageDifference;i++) {
-
-            double choose = getChoose(i,timePassed);
-
-            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed-i); //Probability of it growing "i" steps
-
-            UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
-
-            totalProbability += finalProbability;
-
-            if (randomFloat < totalProbability) {
-                if (i == 0) return;
-                BlockState blockState = (BlockState)state.with(AGE, age + i);
-                world.setBlockState(pos, blockState, 2);
-                world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(blockState));
-                return;
-            }
-        }
-
-        UnloadedActivity.LOGGER.info("growing to its fullest rn");
-
-        BlockState blockState = (BlockState)state.with(AGE, MAX_AGE);
+        BlockState blockState = (BlockState)state.with(AGE, age + growthAmount);
         world.setBlockState(pos, blockState, 2);
         world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(blockState));
 

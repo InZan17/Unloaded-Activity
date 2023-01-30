@@ -11,12 +11,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
+import static java.lang.Math.min;
 import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
@@ -33,11 +33,9 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
     @Shadow
     private final GourdBlock gourdBlock;
 
-    @Shadow @Final public static int MAX_AGE;
-
     protected int getAge(BlockState state) {
-        return (Integer)state.get(AGE);
-    };
+        return state.get(AGE);
+    }
 
     public int getMaxAge() {
         return 7;
@@ -53,7 +51,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
                 BlockState blockState = world.getBlockState(blockPos.add(i, 0, j));
                 if (blockState.isOf(Blocks.FARMLAND)) {
                     g = 1.0F;
-                    if ((Integer)blockState.get(FarmlandBlock.MOISTURE) > 0) {
+                    if (blockState.get(FarmlandBlock.MOISTURE) > 0) {
                         g = 3.0F;
                     }
                 }
@@ -103,55 +101,28 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
 
         if (ageDifference >= 0) { //if age difference is 0 then it will calculate pumpkin/melon growth instead
 
-            double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, Double.valueOf(randomTickSpeed)); //chance to get picked by random ticks (this will unfortunately not take into account crops being picked twice on high random tick speeds)
+            double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed); //chance to get picked by random ticks (this will unfortunately not take into account crops being picked twice on high random tick speeds)
 
             double randomGrowChance = getGrowthOdds(world, pos); //chance to grow for every pick
 
-            double totalChance = randomPickChance * randomGrowChance;
+            double totalOdds = randomPickChance * randomGrowChance;
 
-            double invertedTotalChance = 1 - totalChance;
+            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference+1, random);
 
-            double randomFloat = random.nextDouble();
+            if (growthAmount == 0) return;
 
-            double totalProbability = 0;
-
-            for (int i = 0; i < ageDifference+1; i++) {
-
-                double choose = getChoose(i,timePassed);
-
-                double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed - i); //Probability of it growing "i" steps
-
-                //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
-
-                totalProbability += finalProbability;
-
-                if (randomFloat < totalProbability) {
-                    state = (BlockState)state.with(AGE, currentAge + i);
-                    world.setBlockState(pos, state, 2);
-                    return;
-                }
-            }
-
-            //UnloadedActivity.LOGGER.info("odds for growing to max age aswell as maybe growing a melon/pumpkin: " + (1 - totalProbability));
-
-            state = (BlockState)state.with(AGE, maxAge);
+            state = state.with(AGE, min(currentAge+growthAmount, maxAge));
             world.setBlockState(pos, state, 2);
 
-            //we calculate chance for it not growing at all. If it doesnt not grow then we know to grow a melon/pumpkin
+            if (currentAge+growthAmount <= maxAge) return; //if it doesn't surpass the max age of crop, don't try to grow fruit
 
             double chanceForFreeSpace = 0.25*NumOfValidPositions(pos,world);
 
             if (chanceForFreeSpace == 0) return;
 
-            totalChance = chanceForFreeSpace*randomPickChance;
-            double chanceForFruit = (1-pow(totalChance, timePassed));
-            // i think thats how its done
+            int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
 
-            //UnloadedActivity.LOGGER.info("odds for picking an invalid spot: " + probabilityForNoPick);
-
-            randomFloat = random.nextDouble();
-
-            if (randomFloat > chanceForFruit) return;
+            if (growsFruit == 0) return;
 
             List<Direction> directions = Direction.Type.HORIZONTAL.getShuffled(random);
             for (int i = 0; i < directions.size(); i++) {
@@ -162,7 +133,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
 
                 BlockPos blockPos = pos.offset(direction);
                 world.setBlockState(blockPos, this.gourdBlock.getDefaultState());
-                world.setBlockState(pos, (BlockState)this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction));
+                world.setBlockState(pos, this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction));
                 return;
             }
         }

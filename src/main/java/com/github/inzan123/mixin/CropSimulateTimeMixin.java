@@ -52,38 +52,17 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
 
         int currentAge = this.getAge(state);
         int maxAge = this.getMaxAge();
-        int ageDifference = maxAge-currentAge;
-
+        int ageDifference = maxAge - currentAge;
         if (ageDifference <= 0) return;
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed); //chance to get picked by random ticks (this will unfortunately not take into account crops being picked twice on high random tick speeds)
+        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 
-        double randomGrowChance = getGrowthOdds(world,pos); //chance to grow for every pick
+        double totalOdds = getGrowthOdds(world, pos) * randomPickChance;
 
-        double totalChance = randomPickChance*randomGrowChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        double invertedTotalChance = 1-totalChance;
+        if (growthAmount == 0) return;
 
-        double randomFloat = random.nextDouble();
-
-        double totalProbability = 0;
-
-        for (int i = 0; i<ageDifference;i++) {
-
-            double choose = getChoose(i,timePassed);
-
-            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed-i); //Probability of it growing "i" steps
-
-            //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
-
-            totalProbability += finalProbability;
-
-            if (randomFloat < totalProbability) {
-                world.setBlockState(pos, this.withAge(currentAge + i), 2);
-                return;
-            }
-        }
-        //UnloadedActivity.LOGGER.info("odds for growing to max age: " + (1 - totalProbability));
-        world.setBlockState(pos, this.withAge(maxAge), 2);
+        world.setBlockState(pos, this.withAge(currentAge + growthAmount), 2);
     }
 }

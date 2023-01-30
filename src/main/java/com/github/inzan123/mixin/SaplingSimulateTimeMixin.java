@@ -38,7 +38,7 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateTime
 
     @Override
     public double getGrowthOdds(ServerWorld world, BlockPos pos) {
-        return 0.14285714285; // 1/7 * canGrow()
+        return 0.14285714285; // 1/7
     }
 
     @Override
@@ -49,9 +49,9 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateTime
         if (world.getBaseLightLevel(pos, 0) < 9) return; //if this is false then there isnt enough block lights and sky
 
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
-            long stopGrowTime = 12973;
-            long startGrowTime = 23029;
-            long offset = 24000 - startGrowTime; // we use this offset to pretend crops start growing at 0 and not 23029
+            long stopGrowTime = 12973; //stops growing at 12739 ticks when raining, 13027 when no rain
+            long startGrowTime = 23029; //starts growing at 23267 ticks when raining, 22974 when no rain
+            long offset = 24000 - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
 
             long growTimeWindow = stopGrowTime+offset;
 
@@ -73,38 +73,18 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateTime
 
         double randomPickChance = 1.0 - pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
         double randomGrowChance = getGrowthOdds(world, pos);
-        double totalChance = randomPickChance * randomGrowChance;
-        double invertedTotalChance = 1 - totalChance;
+        double totalOdds = randomPickChance * randomGrowChance;
 
-        double randomFloat = random.nextDouble();
-
-        int currentAge = (Integer)state.get(STAGE);
+        int currentAge = state.get(STAGE);
 
         int ageDifference = 2-currentAge;
 
-        double totalProbability = 0;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        for (int i = 0; i<ageDifference;i++) {
-
-            double choose = getChoose(i,timePassed);
-
-            double finalProbability = choose * pow(totalChance, i) * pow(invertedTotalChance, timePassed-i); //Probability of it growing "i" steps
-
-            //UnloadedActivity.LOGGER.info("odds for growing " + i + " times: " + finalProbability);
-
-            totalProbability += finalProbability;
-
-            if (randomFloat < totalProbability) {
-                if (i == 0) return;
-                this.generate(world, pos, state, random);
-                return;
-            }
-        }
-
-        //UnloadedActivity.LOGGER.info("odds for growing to max age: " + (1 - totalProbability));
+        if (growthAmount == 0) return;
 
         this.generate(world, pos, state, random);
-        if (ageDifference == 2) {
+        if (growthAmount == 2) {
             this.generate(world, pos, world.getBlockState(pos), random);
         }
 
