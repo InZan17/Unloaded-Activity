@@ -2,12 +2,14 @@
   "text.config.unloaded-activity.title": "Unloaded Activity Settings",
   "text.config.unloaded-activity.option.debugLogs": "Debug Logs",
   "text.config.unloaded-activity.option.debugLogs.tooltip": "If enabled, the mod will \nsend more info in the logs.",
-  "text.config.unloaded-activity.option.randomizeBlockUpdates": "Randomize block updates.",
+  "text.config.unloaded-activity.option.randomizeBlockUpdates": "Randomize Block Updates",
   "text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip": "If enabled, the mod will randomly update \nblocks to make updating slightly more accurate. \nThis is only noticeable on things that gets affected by \nother things when they grow, like trees/saplings.",
   "text.config.unloaded-activity.option.growCrops": "Update Crops",
   "text.config.unloaded-activity.option.growCrops.tooltip": "If enabled, the mod will update crops \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growStems": "Update Stems",
   "text.config.unloaded-activity.option.growStems.tooltip": "If enabled, the mod will update stems \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growSaplings": "Update Saplings",
-  "text.config.unloaded-activity.option.growSaplings.tooltip": "If enabled, the mod will update saplings \nwhen they get within simulation distance."
+  "text.config.unloaded-activity.option.growSaplings.tooltip": "If enabled, the mod will update saplings \nwhen they get within simulation distance.",
+  "text.config.unloaded-activity.option.growSweetBerries": "Update Sweet Berries",
+  "text.config.unloaded-activity.option.growSweetBerries.tooltip": "If enabled, the mod will update sweet berry bushes \nwhen they get within simulation distance."
 }
