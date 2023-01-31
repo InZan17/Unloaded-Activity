@@ -7,7 +7,7 @@ This also works similarly when skipping the night, crops will grow as if you wer
 ## Here is a video showcasing the mod.
 [![The video showcasing the mod](https://img.youtube.com/vi/c1hAEfe_zVY/sddefault.jpg)](https://www.youtube.com/watch?v=c1hAEfe_zVY)
 
-## Currently supported blocks/entities (if you use the latest version)
+## Currently supported blocks/entities (if you use the latest release)
 - All crops
 
 ## Blocks/entities planned to be supported:
