@@ -46,7 +46,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.CONFIG.growCrops()) return;
+        if (!UnloadedActivity.instance.config.growCrops) return;
 
         if (world.getBaseLightLevel(pos, 0) < 9) return;
 

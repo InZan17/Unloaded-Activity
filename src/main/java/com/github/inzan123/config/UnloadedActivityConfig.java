@@ -1,11 +1,7 @@
-package com.github.inzan123;
+package com.github.inzan123.config;
 
-import io.wispforest.owo.config.annotation.Config;
-import io.wispforest.owo.config.annotation.Modmenu;
+public class UnloadedActivityConfig {
 
-@Modmenu(modId = "unloadedactivity")
-@Config(name = "unloaded-activity", wrapperName = "MyConfig")
-public class MyConfigModel {
     public boolean debugLogs = false;
     public boolean randomizeBlockUpdates = false;
     public boolean growSaplings = true;
@@ -13,4 +9,5 @@ public class MyConfigModel {
     public boolean growStems = true;
     public boolean growSweetBerries = true;
     public boolean growCocoa = true;
+
 }

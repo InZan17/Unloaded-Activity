@@ -91,7 +91,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.CONFIG.growStems()) return;
+        if (!UnloadedActivity.instance.config.growStems) return;
 
         if (world.getBaseLightLevel(pos, 0) < 9) return;
 

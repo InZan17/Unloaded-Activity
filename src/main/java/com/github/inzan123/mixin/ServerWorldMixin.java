@@ -40,12 +40,12 @@ public abstract class ServerWorldMixin {
 			if (timeDifference > 20) {
 
 				long now = 0;
-				if (UnloadedActivity.CONFIG.debugLogs()) now = Instant.now().toEpochMilli();
+				if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
 
 				int minY = world.getBottomY();
 				int maxY = world.getTopY();
 
-				if (UnloadedActivity.CONFIG.randomizeBlockUpdates()) {
+				if (UnloadedActivity.instance.config.randomizeBlockUpdates) {
 					ArrayList<BlockPos> blockPosArray = new ArrayList<BlockPos>();
 
 					for (int z=0; z<16;z++)
@@ -73,7 +73,7 @@ public abstract class ServerWorldMixin {
 					}
 				}
 
-				if (UnloadedActivity.CONFIG.debugLogs()) UnloadedActivity.LOGGER.info("Milliseconds to loop through chunk: " + (Instant.now().toEpochMilli() - now));
+				if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info("Milliseconds to loop through chunk: " + (Instant.now().toEpochMilli() - now));
 			}
 		}
 

@@ -37,6 +37,9 @@
     ],
     "cardinal-components": [
       "com.github.inzan123.MyComponents"
+    ],
+    "modmenu": [
+      "com.github.inzan123.config.UnloadedActivityModMenu"
     ]
   },
   "mixins": [

@@ -28,7 +28,7 @@ public class CocoaSimulateTimeMixin implements SimulateTimePassing {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.CONFIG.growCocoa()) return;
+        if (!UnloadedActivity.instance.config.growCocoa) return;
 
         int currentAge = state.get(AGE);
         int ageDifference = MAX_AGE - currentAge;

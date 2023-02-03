@@ -44,7 +44,7 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateTime
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.CONFIG.growSaplings()) return;
+        if (!UnloadedActivity.instance.config.growSaplings) return;
 
         if (world.getBaseLightLevel(pos, 0) < 9) return; //if this is false then there isnt enough block lights and sky
 

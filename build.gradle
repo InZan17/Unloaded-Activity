@@ -15,6 +15,7 @@ repositories {
 		name = 'Ladysnake Mods'
 		url = 'https://ladysnake.jfrog.io/artifactory/mods'
 	}
+	maven { url "https://maven.terraformersmc.com/releases/" }
 	maven {url 'https://jitpack.io'}
 	maven {url "https://maven.terraformersmc.com/"}
 	maven {url "https://maven.shedaniel.me/"}
@@ -41,13 +42,8 @@ dependencies {
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.1.0"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.1.0"
 
-	modImplementation "io.wispforest:owo-lib:${project.owo_version}"
-	// only if you plan to use owo-config
-	annotationProcessor "io.wispforest:owo-lib:${project.owo_version}"
-
-	// include this if you don't want force your users to install owo
-	// sentinel will warn them and give the option to download it automatically
-	include "io.wispforest:owo-sentinel:${project.owo_version}"
+	modImplementation "com.terraformersmc:modmenu:5.0.2"
+	modImplementation "me.shedaniel.cloth:cloth-config-fabric:9.0.94"
 }
 
 processResources {
