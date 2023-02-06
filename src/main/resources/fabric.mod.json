@@ -5,6 +5,8 @@
 
   "custom": {
     "cardinal-components": [
+      "unloadedactivity:last-tick",
+      "unloadedactivity:last-loaded",
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {

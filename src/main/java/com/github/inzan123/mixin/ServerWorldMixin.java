@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.ChunkLongComponent;
 import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.TimeMachine;
 import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,7 +19,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static com.github.inzan123.MyComponents.MAGIK;
+import static com.github.inzan123.MyComponents.LASTTICK;
 import static java.lang.Long.max;
 
 
@@ -29,7 +30,7 @@ public abstract class ServerWorldMixin {
 
 		ServerWorld world = (ServerWorld)(Object)this;
 
-		ChunkLongComponent lastTick = chunk.getComponent(MAGIK);
+		ChunkLongComponent lastTick = chunk.getComponent(LASTTICK);
 
 		long currentTime = world.getTimeOfDay();
 
@@ -37,59 +38,12 @@ public abstract class ServerWorldMixin {
 
 			long timeDifference = max(currentTime - lastTick.getValue(),0);
 
-			if (timeDifference > 20) {
+			if (timeDifference > 20)
+				TimeMachine.simulateRandomTicks(timeDifference, world, chunk, randomTickSpeed);
 
-				long now = 0;
-				if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
-
-				int minY = world.getBottomY();
-				int maxY = world.getTopY();
-
-				if (UnloadedActivity.instance.config.randomizeBlockUpdates) {
-					ArrayList<BlockPos> blockPosArray = new ArrayList<BlockPos>();
-
-					for (int z=0; z<16;z++)
-						for (int x=0; x<16;x++)
-							for (int y=minY; y<maxY;y++) {
-								BlockPos position = new BlockPos(x,y,z);
-								BlockState state = chunk.getBlockState(position);
-								Block block = state.getBlock();
-								if (block instanceof SimulateTimePassing) blockPosArray.add(position);
-					}
-
-					Collections.shuffle(blockPosArray);
-
-					for (int i = 0; i < blockPosArray.size(); i++)
-						simulateTime(blockPosArray.get(i), chunk, world, timeDifference, randomTickSpeed);
-
-				} else {
-					for (int z=0; z<16;z++) {
-						for (int x=0; x<16;x++) {
-							for (int y=minY; y<maxY;y++) {
-								BlockPos position = new BlockPos(x,y,z);
-								simulateTime(position, chunk, world, timeDifference, randomTickSpeed);
-							}
-						}
-					}
-				}
-
-				if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info("Milliseconds to loop through chunk: " + (Instant.now().toEpochMilli() - now));
-			}
 		}
 
 		lastTick.setValue(currentTime);
 	}
-
-	private void simulateTime(BlockPos position, WorldChunk chunk, ServerWorld world, long timeDifference, int randomTickSpeed) {
-		BlockState state = chunk.getBlockState(position);
-		Block block = state.getBlock();
-		if (block instanceof SimulateTimePassing) {
-			SimulateTimePassing tickSimulator = (SimulateTimePassing) block;
-			ChunkPos chunkPos = chunk.getPos();
-			BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-			tickSimulator.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
-		}
-	}
-
 }
 
