@@ -19,4 +19,4 @@ This also works similarly when skipping the night, crops will grow as if you wer
 
 # Contributing
 You are free to contribute so feel free to open issues and pull requests.
-When you submit a pull request, you agree to license your contribution under the terms of the GPL-3.0 license.
+When you submit a pull request, you agree to license your contribution under the terms of the LGPL-3.0 license.
