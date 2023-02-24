@@ -109,7 +109,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         if (fuelTime == 0)
             fuelTime = this.fuelTime;
 
-        if (!canAcceptRecipeOutput(recipe, this.inventory, maxPerStack) || fuelTime == 0)
+        if (fuelTime == 0)
             return;
 
         int spacesLeft = maxPerStack-finishedStack.getCount();
@@ -118,15 +118,14 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         int availableBurning = (int)min(timeDifference, (long)this.cookTimeTotal*min(inputCount,spacesLeft)-this.cookTime);
         availableBurning = min(availableBurning, fuelTime*fuelCount + this.burnTime);
 
-        int fuelsConsumed = (int)ceil((float)max(availableBurning-this.burnTime,0)/(float)fuelTime);
-        int tempFuelTime = max(this.burnTime-availableBurning,fuelTime); // If the player puts in one fuel with a big fueltime and then another fuel with a smaller fueltime it shouldnt break the calculations.
-        int itemsCrafted = (availableBurning+this.cookTime)/this.cookTimeTotal;
-
         long leftoverTime = timeDifference-availableBurning;
+        int tempFuelTime = max(this.burnTime-availableBurning,fuelTime); // If the player puts in one fuel with a big fueltime and then another fuel with a smaller fueltime it shouldnt break the calculations.
 
+        int fuelsConsumed = (int)ceil((float)max(availableBurning-this.burnTime,0)/(float)fuelTime);
+        this.burnTime = (int)max((this.burnTime-availableBurning+fuelsConsumed*fuelTime)-leftoverTime, 0);
 
+        int itemsCrafted = (availableBurning+this.cookTime)/this.cookTimeTotal;
         this.cookTime = (int)max(((availableBurning+this.cookTime)%this.cookTimeTotal)-leftoverTime*2, 0);
-        this.burnTime = (int)max(tempFuelTime-floorMod(availableBurning-this.burnTime, tempFuelTime)-leftoverTime, 0);
 
         if (fuelsConsumed > 0) {
             stateChanged = true;
@@ -149,6 +148,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             state = state.with(AbstractFurnaceBlock.LIT, this.isBurning());
             world.setBlockState(pos, state, Block.NOTIFY_ALL);
         }
+
+        if (!this.isBurning())
+            this.fuelTime = 0;
 
         if (stateChanged) {
             AbstractFurnaceBlockEntity.markDirty(world, pos, state);
