@@ -4,11 +4,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.event.GameEvent;
 
 import static java.lang.Math.pow;
 
-public interface SimulateTimePassing {
+public interface SimulateRandomTicks {
 
     default double getChoose(long successes, long draws) {
         double choose = 1;
@@ -17,7 +16,7 @@ public interface SimulateTimePassing {
         }
         return choose;
     }
-    default double getGrowthOdds(ServerWorld world, BlockPos pos) {
+    default double getOdds(ServerWorld world, BlockPos pos) {
         return 0;
     }
     default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {

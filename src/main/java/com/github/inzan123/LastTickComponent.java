@@ -2,7 +2,7 @@ package com.github.inzan123;
 
 import net.minecraft.nbt.NbtCompound;
 
-public class ChunkLastTickComponent implements ChunkLongComponent {
+public class LastTickComponent implements LongComponent {
     private long value = 0;
 
     @Override
@@ -12,12 +12,12 @@ public class ChunkLastTickComponent implements ChunkLongComponent {
 
     @Override
     public void readFromNbt(NbtCompound tag) {
-        this.value = tag.getLong("value");
+        this.value = tag.getLong("last-tick");
     }
 
     @Override
     public void writeToNbt(NbtCompound tag) {
-        tag.putLong("value", this.value);
+        tag.putLong("last-tick", this.value);
     }
 
     @Override

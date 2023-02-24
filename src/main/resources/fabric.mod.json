@@ -5,16 +5,17 @@
 
   "custom": {
     "cardinal-components": [
-      "unloadedactivity:last-tick",
-      "unloadedactivity:last-loaded",
+      "unloadedactivity:last-chunk-tick",
+      "unloadedactivity:last-blockentity-tick",
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateTimePassing"],
-      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateTimePassing"],
-      "net/minecraft/block/SweetBerryBushBlock": ["com/github/inzan123/SimulateTimePassing"],
-      "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateTimePassing"],
-      "net/minecraft/block/CocoaBlock": ["com/github/inzan123/SimulateTimePassing"]
+      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/SweetBerryBushBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/CocoaBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/entity/FurnaceBlockEntity": ["com/github/inzan123/SimulateBlockEntity"]
     }
   },
 

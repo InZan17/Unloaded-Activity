@@ -1,7 +1,7 @@
 package com.github.inzan123.mixin;
 
 
-import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(CropBlock.class)
-public abstract class CropSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
+public abstract class CropSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
 
     public CropSimulateTimeMixin(Settings settings) {
         super(settings);
@@ -38,7 +38,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
     public abstract BlockState withAge(int age);
 
     @Override
-    public double getGrowthOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerWorld world, BlockPos pos) {
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
@@ -57,7 +57,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 
-        double totalOdds = getGrowthOdds(world, pos) * randomPickChance;
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
         int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 

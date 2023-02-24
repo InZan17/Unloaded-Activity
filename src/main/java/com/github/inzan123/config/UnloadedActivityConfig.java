@@ -9,5 +9,6 @@ public class UnloadedActivityConfig {
     public boolean growStems = true;
     public boolean growSweetBerries = true;
     public boolean growCocoa = true;
+    public boolean updateFurnace = true;
 
 }

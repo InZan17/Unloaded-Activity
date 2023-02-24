@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.1-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -38,9 +38,11 @@ dependencies {
 	// Replace modImplementation with modApi if you expose components in your own API
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.1.0"
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.1.0"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.1.0"
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional)
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.1.0"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.1.0"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.1.0"
 
 	modImplementation "com.terraformersmc:modmenu:5.0.2"
 	modImplementation "me.shedaniel.cloth:cloth-config-fabric:9.0.94"

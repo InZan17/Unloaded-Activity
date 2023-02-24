@@ -1,7 +1,7 @@
 {
   "text.config.unloaded-activity.title": "Unloaded Activity Settings",
   "text.config.unloaded-activity.option.debugLogs": "Debug Logs",
-  "text.config.unloaded-activity.option.debugLogs.tooltip": "If enabled, the mod will \nsend more info in the logs.",
+  "text.config.unloaded-activity.option.debugLogs.tooltip": "If enabled, the mod will send more info in the logs.",
   "text.config.unloaded-activity.option.randomizeBlockUpdates": "Randomize Block Updates",
   "text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip": "If enabled, the mod will update blocks in \na random order to make updating slightly more realistic. \nThis is only noticeable on things that gets affected by \nother things when they grow, like trees/saplings.",
   "text.config.unloaded-activity.option.growCrops": "Update Crops",
@@ -13,5 +13,7 @@
   "text.config.unloaded-activity.option.growSweetBerries": "Update Sweet Berries",
   "text.config.unloaded-activity.option.growSweetBerries.tooltip": "If enabled, the mod will update sweet berry bushes \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growCocoa": "Update Cocoa Beans",
-  "text.config.unloaded-activity.option.growCocoa.tooltip": "If enabled, the mod will update cocoa beans \nwhen they get within simulation distance."
+  "text.config.unloaded-activity.option.growCocoa.tooltip": "If enabled, the mod will update cocoa beans \nwhen they get within simulation distance.",
+  "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
+  "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they get start getting ticked again."
 }

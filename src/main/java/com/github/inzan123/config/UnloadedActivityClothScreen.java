@@ -15,7 +15,7 @@ public class UnloadedActivityClothScreen {
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("text.config.unloaded-activity.title"));
 
-        builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dirt.png"));
+        builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dark_oak_planks.png"));
         builder.setSavingRunnable(() -> UnloadedActivity.instance.saveConfig());
         ConfigCategory general = builder.getOrCreateCategory(Text.of("general"));
         ConfigEntryBuilder configEntryBuilder = builder.entryBuilder();
@@ -80,6 +80,15 @@ public class UnloadedActivityClothScreen {
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.growCocoa = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.growCocoa.tooltip"))
+                        .build()
+        );
+
+        general.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateFurnace"), config.updateFurnace)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.updateFurnace = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateFurnace.tooltip"))
                         .build()
         );
 

@@ -1,9 +1,8 @@
 package com.github.inzan123.mixin;
 
-import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SweetBerryBushBlock;
 import net.minecraft.server.world.ServerWorld;
@@ -18,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(SweetBerryBushBlock.class)
-public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
+public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
     public BerryBushSimulateTimeMixin(Settings settings) {
         super(settings);
     }
@@ -27,7 +26,7 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
     @Shadow @Final public static int MAX_AGE;
 
     @Override
-    public double getGrowthOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
     @Override
@@ -42,7 +41,7 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
 
         int ageDifference = MAX_AGE - age;
 
-        double totalOdds = getGrowthOdds(world, pos) * randomPickChance;
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
         int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 

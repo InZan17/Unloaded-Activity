@@ -13,7 +13,7 @@ public class BeetrootsMixin extends CropBlock{
     }
 
     @Override
-    public double getGrowthOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerWorld world, BlockPos pos) {
         float f = getAvailableMoisture(this, world, pos);
         return (1.0/(double)((int)(25.0F / f) + 1))/3;
     }

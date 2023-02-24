@@ -1,7 +1,7 @@
 package com.github.inzan123.mixin;
 
 
-import com.github.inzan123.SimulateTimePassing;
+import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
@@ -20,7 +20,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
-public abstract class StemSimulateTimeMixin extends PlantBlock implements SimulateTimePassing {
+public abstract class StemSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
 
     public StemSimulateTimeMixin(Settings settings, GourdBlock gourdBlock) {
         super(settings);
@@ -83,7 +83,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
     }
 
     @Override
-    public double getGrowthOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerWorld world, BlockPos pos) {
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
@@ -103,7 +103,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
 
             double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed); //chance to get picked by random ticks (this will unfortunately not take into account crops being picked twice on high random tick speeds)
 
-            double randomGrowChance = getGrowthOdds(world, pos); //chance to grow for every pick
+            double randomGrowChance = getOdds(world, pos); //chance to grow for every pick
 
             double totalOdds = randomPickChance * randomGrowChance;
 
