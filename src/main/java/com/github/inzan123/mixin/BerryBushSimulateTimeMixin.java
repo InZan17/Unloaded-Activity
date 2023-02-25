@@ -29,13 +29,18 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
+
+    @Override
+    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growSweetBerries) return false;
+        if (state.get(AGE) >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        return true;
+    }
+
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.instance.config.growSweetBerries) return;
-
-        int age = (Integer)state.get(AGE);
-        if (age >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return;
+        int age = state.get(AGE);
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 

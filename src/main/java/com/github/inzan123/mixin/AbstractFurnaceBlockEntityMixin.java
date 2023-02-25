@@ -38,8 +38,6 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int cookTimeTotal;
     @Shadow @Final private RecipeManager.MatchGetter<Inventory, ? extends AbstractCookingRecipe> matchGetter;
 
-
-
     @Shadow private static boolean craftRecipe(@Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count) {
         return true;
     }
@@ -90,9 +88,13 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             this.recipesUsed.addTo(identifier, quantity);
         }
     }
-    @Override public <T extends BlockEntity> void simulateTime(World world, BlockPos pos, BlockState state, T blockEntityExtend, long timeDifference)  {
 
-        if (!UnloadedActivity.instance.config.updateFurnace) return;
+    @Override
+    public <T extends BlockEntity> boolean canSimulate(World world, BlockPos pos, BlockState blockState, T blockEntity) {
+        return UnloadedActivity.instance.config.updateFurnace;
+    }
+
+    @Override public <T extends BlockEntity> void simulateTime(World world, BlockPos pos, BlockState state, T blockEntityExtend, long timeDifference)  {
 
         AbstractFurnaceBlockEntity blockEntity = (AbstractFurnaceBlockEntity)blockEntityExtend;
         boolean oldIsBurning = this.isBurning();

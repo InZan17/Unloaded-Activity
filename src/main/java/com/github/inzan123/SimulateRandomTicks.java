@@ -9,10 +9,13 @@ import static java.lang.Math.pow;
 
 public interface SimulateRandomTicks {
 
+    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        return true;
+    }
     default double getChoose(long successes, long draws) {
         double choose = 1;
         for (int j = 0; j < successes; j++) {
-            choose *= (draws - j)/(j+1);
+            choose *= (double) (draws - j) /(j+1);
         }
         return choose;
     }

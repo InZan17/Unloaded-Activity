@@ -37,17 +37,19 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
         return 0.14285714285; // 1/7
     }
 
+    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growSaplings) return false;
+        if (world.getBaseLightLevel(pos, 0) < 9) return false;
+        return true;
+    }
+
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.instance.config.growSaplings) return;
-
-        if (world.getBaseLightLevel(pos, 0) < 9) return; //if this is false then there isnt enough block lights and sky
-
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             long dayLength = 24000;
-            long stopGrowTime = 12973; //stops growing at 12739 ticks when raining, 13027 when no rain
-            long startGrowTime = 23029; //starts growing at 23267 ticks when raining, 22974 when no rain
+            long stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
+            long startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
             long offset = dayLength - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
 
             long growTimeWindow = stopGrowTime+offset;

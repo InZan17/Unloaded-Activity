@@ -25,14 +25,18 @@ public class CocoaSimulateTimeMixin implements SimulateRandomTicks {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2; //1/5
     }
+
+    @Override
+    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growCocoa) return false;
+        return state.get(AGE) < MAX_AGE;
+    }
+
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!UnloadedActivity.instance.config.growCocoa) return;
-
         int currentAge = state.get(AGE);
         int ageDifference = MAX_AGE - currentAge;
-        if (ageDifference <= 0) return;
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 

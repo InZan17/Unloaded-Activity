@@ -88,12 +88,14 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
 
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growStems) return false;
+        if (world.getBaseLightLevel(pos, 0) < 9) return false;
+        return true;
+    }
+
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
-
-        if (!UnloadedActivity.instance.config.growStems) return;
-
-        if (world.getBaseLightLevel(pos, 0) < 9) return;
 
         int currentAge = this.getAge(state);
         int maxAge = this.getMaxAge();

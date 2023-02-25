@@ -44,16 +44,18 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
     }
 
     @Override
+    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growCrops) return false;
+        if (this.getAge(state) >= this.getMaxAge() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        return true;
+    }
+
+    @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
-
-        if (!UnloadedActivity.instance.config.growCrops) return;
-
-        if (world.getBaseLightLevel(pos, 0) < 9) return;
 
         int currentAge = this.getAge(state);
         int maxAge = this.getMaxAge();
         int ageDifference = maxAge - currentAge;
-        if (ageDifference <= 0) return;
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 
