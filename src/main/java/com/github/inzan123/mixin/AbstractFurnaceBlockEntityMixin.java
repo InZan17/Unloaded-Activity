@@ -124,7 +124,6 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         availableBurning = min(availableBurning, fuelTime*fuelCount + this.burnTime);
 
         long leftoverTime = timeDifference-availableBurning;
-        int tempFuelTime = max(this.burnTime-availableBurning,fuelTime); // If the player puts in one fuel with a big fueltime and then another fuel with a smaller fueltime it shouldnt break the calculations.
 
         int fuelsConsumed = (int)ceil((float)max(availableBurning-this.burnTime,0)/(float)fuelTime);
         this.burnTime = (int)max((this.burnTime-availableBurning+fuelsConsumed*fuelTime)-leftoverTime, 0);
@@ -148,7 +147,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             setLastRecipe(recipe, itemsCrafted);
         }
 
-        if (itemStack.getCount() == 0)
+        if (itemStack.getCount() == 0 || maxPerStack-finishedStack.getCount() == 0)
             this.cookTime = 0;
 
         if (oldIsBurning != this.isBurning()) {
