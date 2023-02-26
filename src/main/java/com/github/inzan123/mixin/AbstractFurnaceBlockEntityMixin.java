@@ -148,6 +148,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             setLastRecipe(recipe, itemsCrafted);
         }
 
+        if (itemStack.getCount() == 0)
+            this.cookTime = 0;
+
         if (oldIsBurning != this.isBurning()) {
             stateChanged = true;
             state = state.with(AbstractFurnaceBlock.LIT, this.isBurning());
