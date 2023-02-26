@@ -114,6 +114,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         if (fuelTime == 0)
             return;
 
+        if (this.cookTimeTotal == 0)
+            this.cookTimeTotal = getCookTime(this.world, blockEntity);
+
         int spacesLeft = maxPerStack-finishedStack.getCount();
 
         //The amount of time to burn before we catch up to now or until we run out of something.
