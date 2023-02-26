@@ -85,6 +85,15 @@ public class UnloadedActivityClothScreen {
 
         general.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSugarCane"), config.growSugarCane)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growSugarCane = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growSugarCane.tooltip"))
+                        .build()
+        );
+
+        general.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateFurnace"), config.updateFurnace)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.updateFurnace = newValue)

@@ -14,6 +14,8 @@
   "text.config.unloaded-activity.option.growSweetBerries.tooltip": "If enabled, the mod will update sweet berry bushes \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growCocoa": "Update Cocoa Beans",
   "text.config.unloaded-activity.option.growCocoa.tooltip": "If enabled, the mod will update cocoa beans \nwhen they get within simulation distance.",
+  "text.config.unloaded-activity.option.growSugarCane": "Update Sugar Canes",
+  "text.config.unloaded-activity.option.growSugarCane.tooltip": "If enabled, the mod will update sugar canes \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
   "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they get start getting ticked again."
 }

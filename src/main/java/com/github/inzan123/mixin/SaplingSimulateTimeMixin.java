@@ -37,7 +37,7 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
         return 0.14285714285; // 1/7
     }
 
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         return true;

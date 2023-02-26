@@ -12,7 +12,8 @@
     "StemSimulateTimeMixin",
     "SaplingSimulateTimeMixin",
     "BerryBushSimulateTimeMixin",
-    "CocoaSimulateTimeMixin"
+    "CocoaSimulateTimeMixin",
+    "SugarCaneMixin"
   ],
   "injectors": {
     "defaultRequire": 1
