@@ -13,7 +13,10 @@
     "SaplingSimulateTimeMixin",
     "BerryBushSimulateTimeMixin",
     "CocoaSimulateTimeMixin",
-    "SugarCaneMixin"
+    "SugarCaneMixin",
+    "OxidizableBlockMixin",
+    "OxidizableSlabBlockMixin",
+    "OxidizableStairsBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -15,6 +15,7 @@
       "net/minecraft/block/SweetBerryBushBlock": ["com/github/inzan123/SimulateRandomTicks"],
       "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateRandomTicks"],
       "net/minecraft/block/CocoaBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/block/OxidizableBlock": ["com/github/inzan123/SimulateRandomTicks"],
       "net/minecraft/block/SugarCaneBlock": ["com/github/inzan123/SimulateRandomTicks"],
       "net/minecraft/block/entity/FurnaceBlockEntity": ["com/github/inzan123/SimulateBlockEntity"]
     }
