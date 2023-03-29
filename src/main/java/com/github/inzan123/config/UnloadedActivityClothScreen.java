@@ -101,6 +101,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        general.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageCopper"), config.ageCopper)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.ageCopper = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageCopper.tooltip"))
+                        .build()
+        );
+
         return builder.setTransparentBackground(isTransparent).build();
 
     }

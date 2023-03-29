@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateRandomTicks;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +26,9 @@ public class OxidizableStairsBlockMixin implements SimulateRandomTicks, Oxidizab
     }
 
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.ageCopper) return false;
+        int currentAge = (this.getDegradationLevel()).ordinal();
+        if (currentAge == 3) return false;
         return true;
     }
 

@@ -11,5 +11,6 @@ public class UnloadedActivityConfig {
     public boolean growCocoa = true;
     public boolean growSugarCane = true;
     public boolean updateFurnace = true;
+    public boolean ageCopper = true;
 
 }

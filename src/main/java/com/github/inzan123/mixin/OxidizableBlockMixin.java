@@ -27,6 +27,9 @@ public class OxidizableBlockMixin implements SimulateRandomTicks, Oxidizable {
     }
 
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.ageCopper) return false;
+        int currentAge = (this.getDegradationLevel()).ordinal();
+        if (currentAge == 3) return false;
         return true;
     }
 
