@@ -17,7 +17,10 @@ public class UnloadedActivityClothScreen {
 
         builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dark_oak_planks.png"));
         builder.setSavingRunnable(() -> UnloadedActivity.instance.saveConfig());
-        ConfigCategory general = builder.getOrCreateCategory(Text.of("general"));
+        ConfigCategory general = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.general"));
+        ConfigCategory randomTicks = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.randomTicks"));
+        ConfigCategory blockEntities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.blockEntities"));
+        ConfigCategory Entities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.entities"));
         ConfigEntryBuilder configEntryBuilder = builder.entryBuilder();
 
         general.addEntry(
@@ -38,7 +41,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSaplings"), config.growSaplings)
                         .setDefaultValue(true)
@@ -47,7 +50,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCrops"), config.growCrops)
                         .setDefaultValue(true)
@@ -56,7 +59,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growStems"), config.growStems)
                         .setDefaultValue(true)
@@ -65,7 +68,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSweetBerries"), config.growSweetBerries)
                         .setDefaultValue(true)
@@ -74,7 +77,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCocoa"), config.growCocoa)
                         .setDefaultValue(true)
@@ -83,7 +86,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSugarCane"), config.growSugarCane)
                         .setDefaultValue(true)
@@ -92,21 +95,21 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        general.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateFurnace"), config.updateFurnace)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.updateFurnace = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateFurnace.tooltip"))
-                        .build()
-        );
-
-        general.addEntry(
+        randomTicks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageCopper"), config.ageCopper)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.ageCopper = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageCopper.tooltip"))
+                        .build()
+        );
+
+        blockEntities.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateFurnace"), config.updateFurnace)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.updateFurnace = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateFurnace.tooltip"))
                         .build()
         );
 
