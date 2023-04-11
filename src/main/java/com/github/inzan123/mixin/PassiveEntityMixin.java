@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateEntity;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.PathAwareEntity;
@@ -21,6 +22,7 @@ public abstract class PassiveEntityMixin extends PathAwareEntity implements Simu
 
     @Override
     public boolean canSimulate(Entity entity) {
+        if (!UnloadedActivity.instance.config.ageEntities) return false;
         if (entity.isRemoved()) return false;
         if (!entity.isAlive()) return false;
         if (((PassiveEntity)entity).getBreedingAge() == 0) return false;

@@ -20,6 +20,8 @@
   "text.config.unloaded-activity.option.ageCopper.tooltip": "If enabled, the mod will age copper blocks \nwhen they get within simulation distance..",
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
   "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they start getting ticked again.",
+  "text.config.unloaded-activity.option.ageEntities": "Age Entities",
+  "text.config.unloaded-activity.option.ageEntities.tooltip": "If enabled, the mod will age entities \nwhen they start getting ticked again.",
   "text.config.unloaded-activity.category.general": "General",
   "text.config.unloaded-activity.category.randomTicks": "Random Ticks",
   "text.config.unloaded-activity.category.blockEntities": "Block Entities",

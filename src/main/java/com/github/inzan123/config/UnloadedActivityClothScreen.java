@@ -113,6 +113,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        Entities.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageEntities"), config.ageEntities)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.ageEntities = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageEntities.tooltip"))
+                        .build()
+        );
+
         return builder.setTransparentBackground(isTransparent).build();
 
     }
