@@ -3,6 +3,7 @@ package com.github.inzan123;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -60,6 +61,16 @@ public class TimeMachine {
             if (!simulator.canSimulate(world, pos, blockState, blockEntity)) return;
             simulator.simulateTime(world, pos, blockState, blockEntity, timeDifference);
             if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on blockEntity after " + timeDifference + " ticks.");
+        }
+    }
+
+    public static <T extends BlockEntity> void simulateEntity(Entity entity, long timeDifference) {
+        long now = 0;
+        if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
+        if (entity instanceof SimulateEntity simulator) {
+            if (!simulator.canSimulate(entity)) return;
+            simulator.simulateTime(entity, timeDifference);
+            if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on entity after " + timeDifference + " ticks.");
         }
     }
 }

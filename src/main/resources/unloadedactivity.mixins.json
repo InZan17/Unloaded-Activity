@@ -16,7 +16,9 @@
     "SugarCaneMixin",
     "OxidizableBlockMixin",
     "OxidizableSlabBlockMixin",
-    "OxidizableStairsBlockMixin"
+    "OxidizableStairsBlockMixin",
+    "EntityMixin",
+    "PassiveEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
