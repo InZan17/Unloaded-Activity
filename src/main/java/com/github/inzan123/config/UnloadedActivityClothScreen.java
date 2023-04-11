@@ -1,12 +1,15 @@
 package com.github.inzan123.config;
 
 import com.github.inzan123.UnloadedActivity;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+
+import java.util.List;
 
 public class UnloadedActivityClothScreen {
     public Screen getScreen(Screen parent, boolean isTransparent) {
@@ -39,6 +42,15 @@ public class UnloadedActivityClothScreen {
                         .setSaveConsumer(newValue -> config.randomizeBlockUpdates = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip"))
                         .build()
+        );
+
+        randomTicks.addEntry(
+            configEntryBuilder
+                .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
+                .setDefaultValue(true)
+                .setSaveConsumer(newValue -> config.enableRandomTicks = newValue)
+                .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks.tooltip"))
+                .build()
         );
 
         randomTicks.addEntry(
@@ -106,10 +118,28 @@ public class UnloadedActivityClothScreen {
 
         blockEntities.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities"), config.enableBlockEntities)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.enableBlockEntities = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities.tooltip"))
+                        .build()
+        );
+
+        blockEntities.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateFurnace"), config.updateFurnace)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.updateFurnace = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateFurnace.tooltip"))
+                        .build()
+        );
+
+        Entities.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableEntities"), config.enableEntities)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.enableEntities = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableEntities.tooltip"))
                         .build()
         );
 

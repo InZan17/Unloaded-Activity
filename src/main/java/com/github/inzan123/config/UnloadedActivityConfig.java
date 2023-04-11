@@ -13,5 +13,8 @@ public class UnloadedActivityConfig {
     public boolean updateFurnace = true;
     public boolean ageCopper = true;
     public boolean ageEntities = true;
+    public boolean enableRandomTicks = true;
+    public boolean enableBlockEntities = true;
+    public boolean enableEntities = true;
 
 }

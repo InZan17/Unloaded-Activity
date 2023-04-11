@@ -16,6 +16,8 @@ import java.util.Collections;
 
 public class TimeMachine {
     public static void simulateRandomTicks(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
+        if (!UnloadedActivity.instance.config.enableRandomTicks) return;
+        
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
 
@@ -44,6 +46,8 @@ public class TimeMachine {
     }
 
     public static void simulateBlockRandomTicks(BlockPos position, WorldChunk chunk, ServerWorld world, long timeDifference, int randomTickSpeed) {
+        if (!UnloadedActivity.instance.config.enableRandomTicks) return;
+
         BlockState state = chunk.getBlockState(position);
         Block block = state.getBlock();
         if (block instanceof SimulateRandomTicks simulator) {
@@ -55,6 +59,8 @@ public class TimeMachine {
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
+        if (!UnloadedActivity.instance.config.enableBlockEntities) return;
+
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
         if (blockEntity instanceof SimulateBlockEntity simulator) {
@@ -65,6 +71,8 @@ public class TimeMachine {
     }
 
     public static <T extends BlockEntity> void simulateEntity(Entity entity, long timeDifference) {
+        if (!UnloadedActivity.instance.config.enableEntities) return;
+
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
         if (entity instanceof SimulateEntity simulator) {
