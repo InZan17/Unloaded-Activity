@@ -14,11 +14,16 @@ This also works similarly when skipping the night, crops will have grown and fur
 - Bushes
 - Cocoa beans
 - Sugar canes
-
-
-## Blocks/entities planned to be supported:
 - Baby animals
 - Copper blocks
+
+
+## Currently planned:
+- More flexible system for other mod makers
+- Optimization options
+
+# Feedback / Suggestions
+If you got any feedback or suggestions for this mod, feel free to join my [discord server](https://discord.gg/aF3sqRN5Ja)!
 
 # Contributing
 You are free to contribute so feel free to open issues and pull requests.
