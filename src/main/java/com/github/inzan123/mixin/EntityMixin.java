@@ -2,9 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.TimeMachine;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

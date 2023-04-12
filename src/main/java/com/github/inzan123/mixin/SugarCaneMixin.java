@@ -2,7 +2,9 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SugarCaneBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;

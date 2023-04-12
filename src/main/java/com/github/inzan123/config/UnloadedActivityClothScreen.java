@@ -1,15 +1,12 @@
 package com.github.inzan123.config;
 
 import com.github.inzan123.UnloadedActivity;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-
-import java.util.List;
 
 public class UnloadedActivityClothScreen {
     public Screen getScreen(Screen parent, boolean isTransparent) {

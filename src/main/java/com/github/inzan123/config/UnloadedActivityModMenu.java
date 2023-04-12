@@ -1,6 +1,5 @@
 package com.github.inzan123.config;
 
-import com.github.inzan123.UnloadedActivity;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;
