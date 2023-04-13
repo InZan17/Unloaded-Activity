@@ -16,5 +16,6 @@ public class UnloadedActivityConfig {
     public boolean enableRandomTicks = true;
     public boolean enableBlockEntities = true;
     public boolean enableEntities = true;
+    public int tickDifferenceThreshold = 100;
 
 }

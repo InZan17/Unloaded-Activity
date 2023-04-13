@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.TimeMachine;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +46,9 @@ public abstract class DirectBlockEntityTickInvokerMixin<T extends BlockEntity> {
 
             long timeDifference = max(currentTime - lastTick.getValue(),0);
 
-            if (timeDifference > 20)
+            int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
+
+            if (timeDifference > differenceThreshold)
                 TimeMachine.simulateBlockEntity(world, ((BlockEntity)this.blockEntity).getPos(), blockState, this.blockEntity, timeDifference);
         }
         lastTick.setValue(currentTime);
