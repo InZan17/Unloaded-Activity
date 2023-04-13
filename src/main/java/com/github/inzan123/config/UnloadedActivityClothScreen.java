@@ -41,6 +41,16 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        general.addEntry(
+                configEntryBuilder
+                        .startIntField(Text.translatable("text.config.unloaded-activity.option.tickDifferenceThreshold"), config.tickDifferenceThreshold)
+                        .setDefaultValue(100)
+                        .setMin(1)
+                        .setSaveConsumer(newValue -> config.tickDifferenceThreshold = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.tickDifferenceThreshold.tooltip"))
+                        .build()
+        );
+
         randomTicks.addEntry(
             configEntryBuilder
                 .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
