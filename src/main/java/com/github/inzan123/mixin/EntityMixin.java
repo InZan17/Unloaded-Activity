@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.TimeMachine;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +29,9 @@ public class EntityMixin{
 
             long timeDifference = max(currentTime - lastTick.getValue(),0);
 
-            if (timeDifference > 20)
+            int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
+
+            if (timeDifference > differenceThreshold)
                 TimeMachine.simulateEntity(entity, timeDifference);
         }
         lastTick.setValue(currentTime);

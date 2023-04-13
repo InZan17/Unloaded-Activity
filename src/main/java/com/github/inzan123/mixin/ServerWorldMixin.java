@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.TimeMachine;
+import com.github.inzan123.UnloadedActivity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +29,9 @@ public abstract class ServerWorldMixin {
 
 			long timeDifference = max(currentTime - lastTick.getValue(),0);
 
-			if (timeDifference > 20)
+			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
+
+			if (timeDifference > differenceThreshold)
 				TimeMachine.simulateRandomTicks(timeDifference, world, chunk, randomTickSpeed);
 
 		}
