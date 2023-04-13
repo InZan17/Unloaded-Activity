@@ -4,6 +4,8 @@
   "text.config.unloaded-activity.option.debugLogs.tooltip": "If enabled, the mod will send more info in the logs.",
   "text.config.unloaded-activity.option.randomizeBlockUpdates": "Randomize Block Updates",
   "text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip": "If enabled, the mod will update blocks in \na random order to make updating slightly more realistic. \nThis is only noticeable on things that gets affected by \nother things when they grow, like trees/saplings.",
+  "text.config.unloaded-activity.option.tickDifferenceThreshold": "Tick Difference Threshold",
+  "text.config.unloaded-activity.option.tickDifferenceThreshold.tooltip": "How many ticks are needed to be skipped before \nthe mod should start simulating the ticks.",
   "text.config.unloaded-activity.option.growCrops": "Update Crops",
   "text.config.unloaded-activity.option.growCrops.tooltip": "If enabled, the mod will update crops \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growStems": "Update Stems",
