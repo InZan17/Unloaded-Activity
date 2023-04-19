@@ -18,7 +18,9 @@
     "OxidizableSlabBlockMixin",
     "OxidizableStairsBlockMixin",
     "EntityMixin",
-    "PassiveEntityMixin"
+    "PassiveEntityMixin",
+    "AbstractBlockMixin",
+    "BlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

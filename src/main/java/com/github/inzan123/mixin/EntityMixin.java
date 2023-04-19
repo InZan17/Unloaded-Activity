@@ -1,8 +1,6 @@
 package com.github.inzan123.mixin;
 
-import com.github.inzan123.LongComponent;
-import com.github.inzan123.TimeMachine;
-import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +12,7 @@ import static com.github.inzan123.MyComponents.LASTENTITYTICK;
 import static java.lang.Long.max;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin{
+public abstract class EntityMixin implements SimulateEntity {
     @Inject(at = @At("HEAD"), method = "tick")
     public void tickMovement(CallbackInfo ci) {
         Entity entity = (Entity)(Object)this;
