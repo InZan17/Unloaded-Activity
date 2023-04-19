@@ -67,7 +67,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
         int maxAge = this.getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
         double totalOdds = getOdds(world, pos) * randomPickChance;
 

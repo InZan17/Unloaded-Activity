@@ -54,7 +54,7 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
         int currentAge = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - currentAge;
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
         double totalOdds = getOdds(world, pos) * randomPickChance;
 

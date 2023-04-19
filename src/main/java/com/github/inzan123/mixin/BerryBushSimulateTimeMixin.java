@@ -52,7 +52,7 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
 
         int age = getCurrentAgeUA(state);
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
         int ageDifference = getMaxAgeUA() - age;
 

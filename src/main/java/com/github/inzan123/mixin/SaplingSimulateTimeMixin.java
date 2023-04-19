@@ -81,7 +81,7 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
         }
 
 
-        double randomPickChance = 1.0 - pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
         double randomGrowChance = getOdds(world, pos);
         double totalOdds = randomPickChance * randomGrowChance;
 

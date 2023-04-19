@@ -16,6 +16,9 @@ public interface SimulateRandomTicks {
         }
         return choose;
     }
+    default double getRandomPickOdds(int randomTickSpeed) {
+        return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+    }
     default double getOdds(ServerWorld world, BlockPos pos) {
         return 0;
     }

@@ -50,7 +50,7 @@ public abstract class OxidizableBlockMixin extends Block implements Oxidizable {
         if (!shouldSimulate(state, world, pos))
             return;
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
         double tryDegradeOdds = getOdds(world, pos);
 

@@ -107,7 +107,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
 
         if (ageDifference >= 0) { //if age difference is 0 then it will calculate pumpkin/melon growth instead
 
-            double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed); //chance to get picked by random ticks (this will unfortunately not take into account crops being picked twice on high random tick speeds)
+            double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
             double randomGrowChance = getOdds(world, pos); //chance to grow for every pick
 
