@@ -37,6 +37,7 @@ public abstract class ServerWorldMixin {
 		}
 
 		lastTick.setValue(currentTime);
+		chunk.setNeedsSaving(true);
 	}
 }
 
