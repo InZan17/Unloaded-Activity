@@ -14,13 +14,17 @@ import static java.lang.Math.min;
 
 
 @Mixin(PassiveEntity.class)
-public abstract class PassiveEntityMixin extends PathAwareEntity implements SimulateEntity {
+public abstract class PassiveEntityMixin extends PathAwareEntity {
     protected PassiveEntityMixin(EntityType<? extends PassiveEntity> entityType, World world) {
         super(entityType, world);
     }
 
     @Override
-    public boolean canSimulate(Entity entity) {
+    public boolean canSimulate() {
+        return true;
+    }
+
+    public boolean shouldSimulate(Entity entity) {
         if (!UnloadedActivity.instance.config.ageEntities) return false;
         if (entity.isRemoved()) return false;
         if (!entity.isAlive()) return false;
@@ -30,6 +34,10 @@ public abstract class PassiveEntityMixin extends PathAwareEntity implements Simu
 
     @Override
     public void simulateTime(Entity entity, long timeDifference) {
+
+        if (!shouldSimulate(entity))
+            return;
+
         PassiveEntity passiveEntity = (PassiveEntity)entity;
         int age = passiveEntity.getBreedingAge();
         if (age < 0) {

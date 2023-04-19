@@ -5,6 +5,7 @@ import com.github.inzan123.UnloadedActivity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CocoaBlock;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
@@ -16,26 +17,32 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(CocoaBlock.class)
-public class CocoaSimulateTimeMixin implements SimulateRandomTicks {
+public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
 
     @Shadow @Final
     public static int MAX_AGE;
     @Shadow @Final
     public static IntProperty AGE;
 
+    protected CocoaSimulateTimeMixin(Settings settings) {
+        super(settings);
+    }
+
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2; //1/5
     }
-
-    @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCocoa) return false;
         return state.get(AGE) < MAX_AGE;
     }
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         int currentAge = state.get(AGE);
         int ageDifference = MAX_AGE - currentAge;

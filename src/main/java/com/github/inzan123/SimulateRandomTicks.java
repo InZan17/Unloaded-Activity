@@ -8,10 +8,6 @@ import net.minecraft.util.math.random.Random;
 import static java.lang.Math.pow;
 
 public interface SimulateRandomTicks {
-
-    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        return true;
-    }
     default double getChoose(long successes, long draws) {
         double choose = 1;
         for (int j = 0; j < successes; j++) {
@@ -21,6 +17,10 @@ public interface SimulateRandomTicks {
     }
     default double getOdds(ServerWorld world, BlockPos pos) {
         return 0;
+    }
+
+    default boolean canSimulate() {
+        return false;
     }
     default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
     }

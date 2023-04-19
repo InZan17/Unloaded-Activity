@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(SweetBerryBushBlock.class)
-public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     public BerryBushSimulateTimeMixin(Settings settings) {
         super(settings);
     }
@@ -29,9 +29,8 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
-
-    @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
         if (state.get(AGE) >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
@@ -39,6 +38,9 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         int age = state.get(AGE);
 

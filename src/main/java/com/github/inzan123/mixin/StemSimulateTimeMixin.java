@@ -12,6 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
@@ -20,7 +21,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
-public abstract class StemSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class StemSimulateTimeMixin extends PlantBlock {
 
     public StemSimulateTimeMixin(Settings settings, GourdBlock gourdBlock) {
         super(settings);
@@ -87,8 +88,8 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
-
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growStems) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         return true;
@@ -96,6 +97,9 @@ public abstract class StemSimulateTimeMixin extends PlantBlock implements Simula
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         int currentAge = this.getAge(state);
         int maxAge = this.getMaxAge();

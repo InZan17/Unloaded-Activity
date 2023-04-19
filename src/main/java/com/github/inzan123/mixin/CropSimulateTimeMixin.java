@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(CropBlock.class)
-public abstract class CropSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class CropSimulateTimeMixin extends PlantBlock {
 
     public CropSimulateTimeMixin(Settings settings) {
         super(settings);
@@ -42,9 +42,8 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
-
-    @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCrops) return false;
         if (this.getAge(state) >= this.getMaxAge() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
@@ -52,6 +51,9 @@ public abstract class CropSimulateTimeMixin extends PlantBlock implements Simula
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         int currentAge = this.getAge(state);
         int maxAge = this.getMaxAge();

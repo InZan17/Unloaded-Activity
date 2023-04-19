@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.*;
 
 @Mixin(SaplingBlock.class)
-public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class SaplingSimulateTimeMixin extends PlantBlock {
 
     public SaplingSimulateTimeMixin(Settings settings) {
         super(settings);
@@ -36,8 +36,8 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.14285714285; // 1/7
     }
-
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         return true;
@@ -45,6 +45,9 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             long dayLength = 24000;

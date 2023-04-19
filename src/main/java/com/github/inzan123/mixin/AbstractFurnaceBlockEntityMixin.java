@@ -81,13 +81,20 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     }
 
     @Override
-    public <T extends BlockEntity> boolean canSimulate(World world, BlockPos pos, BlockState blockState, T blockEntity) {
+    public boolean canSimulate() {
+        return true;
+    }
+
+    public boolean shouldSimulate(World world, BlockPos pos, BlockState blockState, BlockEntity blockEntity) {
         return UnloadedActivity.instance.config.updateFurnace;
     }
 
-    @Override public <T extends BlockEntity> void simulateTime(World world, BlockPos pos, BlockState state, T blockEntityExtend, long timeDifference)  {
+    @Override public void simulateTime(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {
 
-        AbstractFurnaceBlockEntity blockEntity = (AbstractFurnaceBlockEntity)blockEntityExtend;
+        if (!shouldSimulate(world, pos, state, blockEntity))
+            return;
+
+        AbstractFurnaceBlockEntity abstractFurnaceBlockEntity = (AbstractFurnaceBlockEntity)blockEntity;
         boolean oldIsBurning = this.isBurning();
         boolean stateChanged = false;
         ItemStack itemStack = this.inventory.get(0);
@@ -95,8 +102,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         ItemStack finishedStack = this.inventory.get(2);
         int inputCount = itemStack.getCount();
         int fuelCount = fuelStack.getCount();
-        Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(blockEntity, world).orElse(null) : null;
-        int maxPerStack = blockEntity.getMaxCountPerStack();
+        Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+        int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
         int fuelTime = this.getFuelTime(fuelStack);
         if (fuelTime == 0)
@@ -106,7 +113,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             return;
 
         if (this.cookTimeTotal == 0)
-            this.cookTimeTotal = getCookTime(this.world, blockEntity);
+            this.cookTimeTotal = getCookTime(this.world, abstractFurnaceBlockEntity);
 
         int spacesLeft = maxPerStack-finishedStack.getCount();
 

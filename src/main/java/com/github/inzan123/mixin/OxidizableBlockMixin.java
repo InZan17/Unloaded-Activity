@@ -2,10 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Degradable;
-import net.minecraft.block.Oxidizable;
-import net.minecraft.block.OxidizableBlock;
+import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -17,7 +14,11 @@ import java.util.Iterator;
 import static java.lang.Math.pow;
 
 @Mixin(OxidizableBlock.class)
-public class OxidizableBlockMixin implements SimulateRandomTicks, Oxidizable {
+public abstract class OxidizableBlockMixin extends Block implements Oxidizable {
+
+    public OxidizableBlockMixin(Settings settings) {
+        super(settings);
+    }
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
@@ -27,8 +28,8 @@ public class OxidizableBlockMixin implements SimulateRandomTicks, Oxidizable {
     public Oxidizable.OxidationLevel getDegradationLevel() {
         return null;
     }
-
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate() {return true;}
+    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.ageCopper) return false;
         int currentAge = (this.getDegradationLevel()).ordinal();
         if (currentAge == 3) return false;
@@ -37,6 +38,9 @@ public class OxidizableBlockMixin implements SimulateRandomTicks, Oxidizable {
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!shouldSimulate(state, world, pos))
+            return;
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 

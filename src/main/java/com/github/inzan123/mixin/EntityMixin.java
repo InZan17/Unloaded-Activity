@@ -14,7 +14,7 @@ import static com.github.inzan123.MyComponents.LASTENTITYTICK;
 import static java.lang.Long.max;
 
 @Mixin(Entity.class)
-public class EntityMixin{
+public abstract class EntityMixin{
     @Inject(at = @At("HEAD"), method = "tick")
     public void tickMovement(CallbackInfo ci) {
         Entity entity = (Entity)(Object)this;
