@@ -14,6 +14,9 @@
       "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateRandomTicks"],
       "net/minecraft/block/entity/BlockEntity": ["com/github/inzan123/SimulateBlockEntity"],
       "net/minecraft/entity/Entity": ["com/github/inzan123/SimulateEntity"]
+    },
+    "lithium:options": {
+      "world.block_entity_ticking.sleeping.furnace": false
     }
   },
 
