@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SaplingBlock;
@@ -43,6 +44,14 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
         return true;
     }
 
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(STAGE);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return 1;
+    }
+
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
@@ -76,16 +85,20 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
         double randomGrowChance = getOdds(world, pos);
         double totalOdds = randomPickChance * randomGrowChance;
 
-        int currentAge = state.get(STAGE);
+        int currentAge = getCurrentAgeUA(state);
 
-        int ageDifference = 2-currentAge;
+        int maxAge = getMaxAgeUA();
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int ageDifference = maxAge-currentAge;
+
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference+1, random);
 
         if (growthAmount == 0) return;
 
-        this.generate(world, pos, state, random);
-        if (growthAmount == 2) {
+        int newAge = currentAge + growthAmount;
+
+        world.setBlockState(pos, state.with(STAGE,  min(newAge,maxAge)), 4);
+        if (newAge > maxAge) {
             this.generate(world, pos, world.getBlockState(pos), random);
         }
 

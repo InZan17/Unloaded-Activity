@@ -45,8 +45,13 @@ public abstract class SugarCaneMixin extends Block {
 
         return height < 3;
     }
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(AGE);
+    }
 
-
+    @Override public int getMaxAgeUA() {
+        return 15;
+    }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
@@ -59,9 +64,10 @@ public abstract class SugarCaneMixin extends Block {
         }
         if (height >= 3) return;
 
-        int age = state.get(AGE);
-        int maxAge = 2*16; //16 per sugar cane block, top block doesn't grow.
-        int remainingAge = maxAge - (age + (height-1)*16);
+        int age = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA()+1;
+        int maxAgeTotal = 2*maxAge; //16 per sugar cane block, top block doesn't grow.
+        int remainingAge = maxAgeTotal - (age + (height-1)*maxAge);
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 

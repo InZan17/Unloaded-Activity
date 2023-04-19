@@ -32,8 +32,16 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     @Override public boolean canSimulate() {return true;}
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
-        if (state.get(AGE) >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(AGE);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return MAX_AGE;
     }
 
     @Override
@@ -42,11 +50,11 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
         if (!shouldSimulate(state, world, pos))
             return;
 
-        int age = state.get(AGE);
+        int age = getCurrentAgeUA(state);
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 
-        int ageDifference = MAX_AGE - age;
+        int ageDifference = getMaxAgeUA() - age;
 
         double totalOdds = getOdds(world, pos) * randomPickChance;
 

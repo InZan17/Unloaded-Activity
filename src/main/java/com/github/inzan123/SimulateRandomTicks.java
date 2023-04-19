@@ -5,6 +5,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 
 public interface SimulateRandomTicks {
@@ -19,6 +20,13 @@ public interface SimulateRandomTicks {
         return 0;
     }
 
+    default int getCurrentAgeUA(BlockState state) {
+        return 0;
+    }
+
+    default int getMaxAgeUA() {
+        return 0;
+    }
     default boolean canSimulate() {
         return false;
     }
@@ -26,6 +34,8 @@ public interface SimulateRandomTicks {
     }
 
     default int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+
+        maxOccurrences = max(maxOccurrences, 0);
 
         double choose = 1;
 

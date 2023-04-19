@@ -34,11 +34,11 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
     @Shadow
     private final GourdBlock gourdBlock;
 
-    protected int getAge(BlockState state) {
+    @Override public int getCurrentAgeUA(BlockState state) {
         return state.get(AGE);
     }
 
-    public int getMaxAge() {
+    @Override public int getMaxAgeUA() {
         return 7;
     }
 
@@ -101,8 +101,8 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
         if (!shouldSimulate(state, world, pos))
             return;
 
-        int currentAge = this.getAge(state);
-        int maxAge = this.getMaxAge();
+        int currentAge = this.getCurrentAgeUA(state);
+        int maxAge = this.getMaxAgeUA();
         int ageDifference = maxAge-currentAge;
 
         if (ageDifference >= 0) { //if age difference is 0 then it will calculate pumpkin/melon growth instead

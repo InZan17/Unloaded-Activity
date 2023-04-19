@@ -45,8 +45,16 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
     @Override public boolean canSimulate() {return true;}
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCrops) return false;
-        if (this.getAge(state) >= this.getMaxAge() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return this.getAge(state);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return this.getMaxAge();
     }
 
     @Override
@@ -55,8 +63,8 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
         if (!shouldSimulate(state, world, pos))
             return;
 
-        int currentAge = this.getAge(state);
-        int maxAge = this.getMaxAge();
+        int currentAge = this.getCurrentAgeUA(state);
+        int maxAge = this.getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);

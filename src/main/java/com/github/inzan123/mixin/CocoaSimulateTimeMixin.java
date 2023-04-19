@@ -35,7 +35,14 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
     @Override public boolean canSimulate() {return true;}
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCocoa) return false;
-        return state.get(AGE) < MAX_AGE;
+        return getCurrentAgeUA(state) < getMaxAgeUA();
+    }
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(AGE);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return MAX_AGE;
     }
 
     @Override
@@ -44,8 +51,8 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
         if (!shouldSimulate(state, world, pos))
             return;
 
-        int currentAge = state.get(AGE);
-        int ageDifference = MAX_AGE - currentAge;
+        int currentAge = getCurrentAgeUA(state);
+        int ageDifference = getMaxAgeUA() - currentAge;
 
         double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
 

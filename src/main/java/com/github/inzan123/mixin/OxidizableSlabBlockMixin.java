@@ -25,15 +25,23 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
         return 0.05688889f;
     }
     @Shadow
-    public Oxidizable.OxidationLevel getDegradationLevel() {
+    public OxidationLevel getDegradationLevel() {
         return null;
     }
     @Override public boolean canSimulate() {return true;}
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.ageCopper) return false;
-        int currentAge = (this.getDegradationLevel()).ordinal();
-        if (currentAge == 3) return false;
+        int currentAge = getCurrentAgeUA(state);
+        if (currentAge == getMaxAgeUA()) return false;
         return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return this.getDegradationLevel().ordinal();
+    }
+
+    @Override public int getMaxAgeUA() {
+        return 3;
     }
 
     @Override
@@ -47,7 +55,6 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
         double tryDegradeOdds = getOdds(world, pos);
 
         BlockPos blockPos;
-        int degradationLevel = ((Enum)this.getDegradationLevel()).ordinal();
         float nearbyBlocks = 0;
         Iterator<BlockPos> iterator = BlockPos.iterateOutwards(pos, 4, 4, 4).iterator();
         while (iterator.hasNext() && (blockPos = iterator.next()).getManhattanDistance(pos) <= 4) {
@@ -59,9 +66,9 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
 
         double totalOdds = randomPickChance * tryDegradeOdds * degradeOdds2;
 
-        int currentAge = (this.getDegradationLevel()).ordinal();
+        int currentAge = getCurrentAgeUA(state);
 
-        int ageDifference = 3-currentAge;
+        int ageDifference = getMaxAgeUA()-currentAge;
 
         int ageAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
