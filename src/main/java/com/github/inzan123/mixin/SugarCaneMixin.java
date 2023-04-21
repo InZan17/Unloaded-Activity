@@ -2,6 +2,7 @@ package com.github.inzan123.mixin;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SugarCaneBlock;
@@ -37,56 +38,56 @@ public abstract class SugarCaneMixin extends Block {
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSugarCane) return false;
         if (!world.isAir(pos.up())) return false;
-
-        int height = 1;
-        while (world.getBlockState(pos.down(height)).isOf(this)) {
-            ++height;
-        }
-
-        return height < 3;
+        return true;
     }
     @Override public int getCurrentAgeUA(BlockState state) {
         return state.get(AGE);
     }
-
     @Override public int getMaxAgeUA() {
         return 15;
     }
+    @Override public int getMaxHeightUA() {return 2;}
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!shouldSimulate(state, world, pos))
-            return;
+        if (shouldSimulate(state, world, pos)) {
+            int height = 0;
+            while (world.getBlockState(pos.down(height)).isOf(this)) {
+                ++height;
+            }
 
-        int height = 1;
-        while (world.getBlockState(pos.down(height)).isOf(this)) {
-            ++height;
+            if (height < getMaxHeightUA()+1) {
+
+                int age = getCurrentAgeUA(state);
+                int maxAge = getMaxAgeUA()+1; // add one for when growing
+                int maxAgeTotal = getMaxHeightUA()*maxAge;
+                int remainingAge = maxAgeTotal - (age + (height-1)*maxAge);
+
+                double randomPickChance = getRandomPickOdds(randomTickSpeed);
+                double totalOdds = getOdds(world, pos) * randomPickChance;
+
+                int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
+
+                if (growthAmount != 0) {
+
+                    int growBlocks = growthAmount/16;
+                    int ageRemainder = growthAmount % 16;
+
+                    if (growBlocks != 0) {
+                        state = state.with(AGE, 0);
+                        world.setBlockState(pos, state, Block.NO_REDRAW);
+                    }
+
+                    for (int i=0;i<growBlocks;i++) {
+
+                        world.setBlockState(pos.up(i+1), this.getDefaultState());
+
+                        if (i+1<growBlocks)
+                            world.setBlockState(pos.up(i+1), this.getDefaultState().with(AGE, ageRemainder));
+                    }
+                }
+            }
         }
-        if (height >= 3) return;
-
-        int age = getCurrentAgeUA(state);
-        int maxAge = getMaxAgeUA()+1;
-        int maxAgeTotal = 2*maxAge; //16 per sugar cane block, top block doesn't grow.
-        int remainingAge = maxAgeTotal - (age + (height-1)*maxAge);
-
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
-
-        double totalOdds = getOdds(world, pos) * randomPickChance;
-
-        int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
-
-        if (growthAmount == 0) return;
-
-        int growBlocks = growthAmount/16;
-        int ageRemainder = growthAmount % 16;
-
-        if (growBlocks != 0)
-            world.setBlockState(pos, state.with(AGE, 0), Block.NO_REDRAW);
-
-        for (int i=0;i<growBlocks;i++) {
-            world.setBlockState(pos.up(i+1), this.getDefaultState());
-            if (i+1<growBlocks)
-                world.setBlockState(pos.up(i+1), this.getDefaultState().with(AGE, ageRemainder));
-        }
+        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 }

@@ -60,21 +60,22 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!shouldSimulate(state, world, pos))
-            return;
+        if (shouldSimulate(state, world, pos)) {
 
-        int currentAge = this.getCurrentAgeUA(state);
-        int maxAge = this.getMaxAgeUA();
-        int ageDifference = maxAge - currentAge;
+            int currentAge = getCurrentAgeUA(state);
+            int maxAge = getMaxAgeUA();
+            int ageDifference = maxAge - currentAge;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+            double randomPickChance = getRandomPickOdds(randomTickSpeed);
+            double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        double totalOdds = getOdds(world, pos) * randomPickChance;
+            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
-
-        if (growthAmount == 0) return;
-
-        world.setBlockState(pos, this.withAge(currentAge + growthAmount), 2);
+            if (growthAmount != 0) {
+                state = this.withAge(currentAge + growthAmount);
+                world.setBlockState(pos, state, 2);
+            }
+        }
+        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 }

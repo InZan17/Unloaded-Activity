@@ -85,84 +85,85 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         return true;
     }
 
-    public boolean shouldSimulate(World world, BlockPos pos, BlockState blockState, BlockEntity blockEntity) {
+    public boolean shouldSimulate(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+        if (state == null) return false;
         return UnloadedActivity.instance.config.updateFurnace;
     }
 
     @Override public void simulateTime(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {
 
-        if (!shouldSimulate(world, pos, state, blockEntity))
-            return;
+        if (shouldSimulate(world, pos, state, blockEntity)) {
+            AbstractFurnaceBlockEntity abstractFurnaceBlockEntity = (AbstractFurnaceBlockEntity) blockEntity;
+            boolean oldIsBurning = this.isBurning();
+            boolean stateChanged = false;
+            ItemStack itemStack = this.inventory.get(0);
+            ItemStack fuelStack = this.inventory.get(1);
+            ItemStack finishedStack = this.inventory.get(2);
+            int inputCount = itemStack.getCount();
+            int fuelCount = fuelStack.getCount();
+            Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+            int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
-        AbstractFurnaceBlockEntity abstractFurnaceBlockEntity = (AbstractFurnaceBlockEntity)blockEntity;
-        boolean oldIsBurning = this.isBurning();
-        boolean stateChanged = false;
-        ItemStack itemStack = this.inventory.get(0);
-        ItemStack fuelStack = this.inventory.get(1);
-        ItemStack finishedStack = this.inventory.get(2);
-        int inputCount = itemStack.getCount();
-        int fuelCount = fuelStack.getCount();
-        Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
-        int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
+            int fuelTime = this.getFuelTime(fuelStack);
+            if (fuelTime == 0)
+                fuelTime = this.fuelTime;
 
-        int fuelTime = this.getFuelTime(fuelStack);
-        if (fuelTime == 0)
-            fuelTime = this.fuelTime;
+            if (fuelTime != 0) {
+                if (this.cookTimeTotal == 0)
+                    this.cookTimeTotal = getCookTime(this.world, abstractFurnaceBlockEntity);
 
-        if (fuelTime == 0)
-            return;
+                int spacesLeft = maxPerStack - finishedStack.getCount();
 
-        if (this.cookTimeTotal == 0)
-            this.cookTimeTotal = getCookTime(this.world, abstractFurnaceBlockEntity);
+                //The amount of time to burn before we catch up to now or until we run out of something.
+                int availableBurning = 0;
 
-        int spacesLeft = maxPerStack-finishedStack.getCount();
+                if (recipe != null) { //if recipe is null then availableBurning will remain 0
+                    availableBurning = (int) min(timeDifference, (long) this.cookTimeTotal * min(inputCount, spacesLeft) - this.cookTime);
+                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.burnTime);
+                }
 
-        //The amount of time to burn before we catch up to now or until we run out of something.
-        int availableBurning = 0;
+                long leftoverTime = timeDifference - availableBurning;
 
-        if (recipe != null) { //if recipe is null then availableBurning will remain 0
-            availableBurning = (int)min(timeDifference, (long)this.cookTimeTotal*min(inputCount,spacesLeft)-this.cookTime);
-            availableBurning = min(availableBurning, fuelTime*fuelCount + this.burnTime);
-        }
+                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.burnTime, 0) / (float) fuelTime);
+                this.burnTime = (int) max((this.burnTime - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0);
 
-        long leftoverTime = timeDifference-availableBurning;
+                int itemsCrafted = (availableBurning + this.cookTime) / this.cookTimeTotal;
+                this.cookTime = (int) max(((availableBurning + this.cookTime) % this.cookTimeTotal) - leftoverTime * 2, 0);
 
-        int fuelsConsumed = (int)ceil((float)max(availableBurning-this.burnTime,0)/(float)fuelTime);
-        this.burnTime = (int)max((this.burnTime-availableBurning+fuelsConsumed*fuelTime)-leftoverTime, 0);
+                if (fuelsConsumed > 0) {
+                    stateChanged = true;
+                    Item fuelItem = fuelStack.getItem();
+                    fuelStack.decrement(fuelsConsumed);
+                    if (fuelStack.isEmpty()) {
+                        Item item2 = fuelItem.getRecipeRemainder();
+                        this.inventory.set(1, item2 == null ? fuelStack.EMPTY : new ItemStack(item2));
+                    }
+                }
 
-        int itemsCrafted = (availableBurning+this.cookTime)/this.cookTimeTotal;
-        this.cookTime = (int)max(((availableBurning+this.cookTime)%this.cookTimeTotal)-leftoverTime*2, 0);
+                if (itemsCrafted > 0) {
+                    stateChanged = true;
+                    craftRecipe(world.getRegistryManager(), recipe, this.inventory, maxPerStack, itemsCrafted);
+                    setLastRecipe(recipe, itemsCrafted);
+                }
 
-        if (fuelsConsumed > 0) {
-            stateChanged = true;
-            Item fuelItem = fuelStack.getItem();
-            fuelStack.decrement(fuelsConsumed);
-            if (fuelStack.isEmpty()) {
-                Item item2 = fuelItem.getRecipeRemainder();
-                this.inventory.set(1, item2 == null ? fuelStack.EMPTY : new ItemStack(item2));
+                if (itemStack.getCount() == 0 || maxPerStack - finishedStack.getCount() == 0)
+                    this.cookTime = 0;
+
+                if (oldIsBurning != this.isBurning()) {
+                    stateChanged = true;
+                    state = state.with(AbstractFurnaceBlock.LIT, this.isBurning());
+                    world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                }
+
+                if (!this.isBurning())
+                    this.fuelTime = 0;
+
+                if (stateChanged) {
+                    AbstractFurnaceBlockEntity.markDirty(world, pos, state);
+                }
             }
         }
 
-        if (itemsCrafted > 0) {
-            stateChanged = true;
-            craftRecipe(world.getRegistryManager(), recipe, this.inventory, maxPerStack, itemsCrafted);
-            setLastRecipe(recipe, itemsCrafted);
-        }
-
-        if (itemStack.getCount() == 0 || maxPerStack-finishedStack.getCount() == 0)
-            this.cookTime = 0;
-
-        if (oldIsBurning != this.isBurning()) {
-            stateChanged = true;
-            state = state.with(AbstractFurnaceBlock.LIT, this.isBurning());
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-        }
-
-        if (!this.isBurning())
-            this.fuelTime = 0;
-
-        if (stateChanged) {
-            AbstractFurnaceBlockEntity.markDirty(world, pos, state);
-        }
+        super.simulateTime(world, pos, state, blockEntity, timeDifference);
     }
 }

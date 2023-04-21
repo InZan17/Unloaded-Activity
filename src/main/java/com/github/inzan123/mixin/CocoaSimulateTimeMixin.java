@@ -34,6 +34,7 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
     }
     @Override public boolean canSimulate() {return true;}
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (state == null) return false;
         if (!UnloadedActivity.instance.config.growCocoa) return false;
         return getCurrentAgeUA(state) < getMaxAgeUA();
     }
@@ -48,20 +49,23 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!shouldSimulate(state, world, pos))
-            return;
+        if (shouldSimulate(state, world, pos)) {
 
-        int currentAge = getCurrentAgeUA(state);
-        int ageDifference = getMaxAgeUA() - currentAge;
+            int currentAge = getCurrentAgeUA(state);
+            int maxAge = getMaxAgeUA();
+            int ageDifference = maxAge - currentAge;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+            double randomPickChance = getRandomPickOdds(randomTickSpeed);
+            double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        double totalOdds = getOdds(world, pos) * randomPickChance;
+            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+            if (growthAmount != 0) {
+                state = state.with(AGE, currentAge + growthAmount);
+                world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
+            }
+        }
 
-        if (growthAmount == 0) return;
-
-        world.setBlockState(pos, (BlockState)state.with(AGE, currentAge + growthAmount), Block.NOTIFY_LISTENERS);
+        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 }

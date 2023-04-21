@@ -30,13 +30,19 @@ public interface SimulateRandomTicks {
     default int getMaxAgeUA() {
         return 0;
     }
+
+    default int getMaxHeightUA() {
+        return 0;
+    }
     default boolean canSimulate() {
         return false;
     }
-    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
-    }
+    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
 
     default int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+
+        if (odds <= 0)
+            return 0;
 
         maxOccurrences = max(maxOccurrences, 0);
 

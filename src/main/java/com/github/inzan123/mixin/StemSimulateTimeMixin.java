@@ -98,14 +98,13 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (!shouldSimulate(state, world, pos))
-            return;
+        if (shouldSimulate(state, world, pos)) {
 
-        int currentAge = this.getCurrentAgeUA(state);
-        int maxAge = this.getMaxAgeUA();
-        int ageDifference = maxAge-currentAge;
+            int currentAge = this.getCurrentAgeUA(state);
+            int maxAge = this.getMaxAgeUA();
+            int ageDifference = maxAge - currentAge;
 
-        if (ageDifference >= 0) { //if age difference is 0 then it will calculate pumpkin/melon growth instead
+            //We dont check ageDifference since if difference is 0 then it still needs to calculate pumpkin/melon growth
 
             double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
@@ -113,36 +112,38 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
 
             double totalOdds = randomPickChance * randomGrowChance;
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference+1, random);
+            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
 
-            if (growthAmount == 0) return;
+            if (growthAmount != 0) {
+                state = state.with(AGE, min(currentAge + growthAmount, maxAge));
+                world.setBlockState(pos, state, 2);
+            }
 
-            state = state.with(AGE, min(currentAge+growthAmount, maxAge));
-            world.setBlockState(pos, state, 2);
+            if (currentAge + growthAmount > maxAge) { // it surpasses the max age of crop, try to grow fruit
 
-            if (currentAge+growthAmount <= maxAge) return; //if it doesn't surpass the max age of crop, don't try to grow fruit
+                double chanceForFreeSpace = 0.25 * NumOfValidPositions(pos, world);
+                int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
 
-            double chanceForFreeSpace = 0.25*NumOfValidPositions(pos,world);
+                if (growsFruit != 0) {
+                    List<Direction> directions = Direction.Type.HORIZONTAL.getShuffled(random);
 
-            if (chanceForFreeSpace == 0) return;
+                    for (int i = 0; i < directions.size(); i++) {
 
-            int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
+                        Direction direction = directions.get(i);
 
-            if (growsFruit == 0) return;
+                        if (!isValidPosition(direction, pos, world)) continue;
 
-            List<Direction> directions = Direction.Type.HORIZONTAL.getShuffled(random);
-            for (int i = 0; i < directions.size(); i++) {
+                        BlockPos blockPos = pos.offset(direction);
+                        world.setBlockState(blockPos, this.gourdBlock.getDefaultState());
 
-                Direction direction = directions.get(i);
-
-                if (!isValidPosition(direction, pos, world)) continue;
-
-                BlockPos blockPos = pos.offset(direction);
-                world.setBlockState(blockPos, this.gourdBlock.getDefaultState());
-                world.setBlockState(pos, this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction));
-                return;
+                        state = this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction);
+                        world.setBlockState(pos, state);
+                        break;
+                    }
+                }
             }
         }
+        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 
     public int NumOfValidPositions(BlockPos pos, ServerWorld world) {

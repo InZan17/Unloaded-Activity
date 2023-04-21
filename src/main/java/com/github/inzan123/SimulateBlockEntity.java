@@ -10,7 +10,5 @@ public interface SimulateBlockEntity {
     default boolean canSimulate() {
         return false;
     }
-    default void simulateTime(World world, BlockPos pos, BlockState blockState, BlockEntity blockEntity, long timeDifference)  {
-
-    }
+    default void simulateTime(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {}
 }

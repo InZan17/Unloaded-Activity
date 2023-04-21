@@ -35,6 +35,8 @@ public abstract class PassiveEntityMixin extends PathAwareEntity {
     @Override
     public void simulateTime(Entity entity, long timeDifference) {
 
+        super.simulateTime(entity, timeDifference);
+
         if (!shouldSimulate(entity))
             return;
 
