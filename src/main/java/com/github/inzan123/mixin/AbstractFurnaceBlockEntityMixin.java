@@ -118,8 +118,12 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         int spacesLeft = maxPerStack-finishedStack.getCount();
 
         //The amount of time to burn before we catch up to now or until we run out of something.
-        int availableBurning = (int)min(timeDifference, (long)this.cookTimeTotal*min(inputCount,spacesLeft)-this.cookTime);
-        availableBurning = min(availableBurning, fuelTime*fuelCount + this.burnTime);
+        int availableBurning = 0;
+
+        if (recipe != null) { //if recipe is null then availableBurning will remain 0
+            availableBurning = (int)min(timeDifference, (long)this.cookTimeTotal*min(inputCount,spacesLeft)-this.cookTime);
+            availableBurning = min(availableBurning, fuelTime*fuelCount + this.burnTime);
+        }
 
         long leftoverTime = timeDifference-availableBurning;
 
