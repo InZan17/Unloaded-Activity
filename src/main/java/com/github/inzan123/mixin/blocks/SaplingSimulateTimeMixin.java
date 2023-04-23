@@ -41,6 +41,7 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
+        if (!state.isOf(this)) return false;
         return true;
     }
 
