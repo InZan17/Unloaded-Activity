@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.blocks;
 
 import net.minecraft.block.BeetrootsBlock;
 import net.minecraft.block.CropBlock;

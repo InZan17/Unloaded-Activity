@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.block_entities;
 
 import com.github.inzan123.SimulateBlockEntity;
 import com.github.inzan123.UnloadedActivity;

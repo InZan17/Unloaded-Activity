@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
@@ -14,10 +14,10 @@ import java.util.Optional;
 
 import static java.lang.Math.pow;
 
-@Mixin(OxidizableBlock.class)
-public abstract class OxidizableBlockMixin extends Block implements Oxidizable {
+@Mixin(OxidizableSlabBlock.class)
+public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxidizable {
 
-    public OxidizableBlockMixin(Settings settings) {
+    public OxidizableSlabBlockMixin(Settings settings) {
         super(settings);
     }
 

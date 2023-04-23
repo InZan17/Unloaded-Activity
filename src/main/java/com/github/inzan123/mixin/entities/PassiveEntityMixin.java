@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.entities;
 
 import com.github.inzan123.SimulateEntity;
 import com.github.inzan123.UnloadedActivity;
