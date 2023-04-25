@@ -39,6 +39,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	public HashMap<ChunkPos, Long> updateList = new HashMap<>();
 	public int currentRandomTickSpeed = 0;
+	public int updateCount = 0;
 
 	@Inject(at = @At("HEAD"), method = "tickChunk")
 	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
@@ -54,11 +55,17 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
 			if (timeDifference > differenceThreshold) {
-				currentRandomTickSpeed = randomTickSpeed;
-				updateList.put(
-						chunk.getPos(),
-						updateList.getOrDefault(chunk.getPos(),0l)+timeDifference
-				);
+				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
+					currentRandomTickSpeed = randomTickSpeed;
+					updateList.put(
+							chunk.getPos(),
+							updateList.getOrDefault(chunk.getPos(),0l)+timeDifference
+					);
+				} else {
+					++updateCount;
+					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, currentRandomTickSpeed);
+				}
+
 			}
 		}
 
@@ -69,23 +76,23 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 
-		long now = 0;
-		if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
-		int count = 0;
 		Iterator<HashMap.Entry<ChunkPos, Long>> iterator = updateList.entrySet().iterator();
-		while (iterator.hasNext() && count < UnloadedActivity.instance.config.maxChunkUpdates) {
-			HashMap.Entry<ChunkPos, Long> entry = iterator.next();
+		if (iterator.hasNext()) {
+			ServerWorld world = (ServerWorld)(Object)this;
+			while (iterator.hasNext() && updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
 
-			ChunkPos pos = entry.getKey();
+				HashMap.Entry<ChunkPos, Long> entry = iterator.next();
 
-			TimeMachine.simulateRandomTicks(entry.getValue(), (ServerWorld)(Object)this, this.getChunk(pos.x,pos.z), currentRandomTickSpeed);
+				ChunkPos pos = entry.getKey();
 
-			iterator.remove();
-			count++;
+				WorldChunk chunk = this.getChunk(pos.x,pos.z);
+
+				TimeMachine.simulateRandomTicks(entry.getValue(), world, chunk, currentRandomTickSpeed);
+
+				iterator.remove();
+				++updateCount;
+			}
 		}
-		if (count != 0 && UnloadedActivity.instance.config.debugLogs)
-		if (UnloadedActivity.instance.config.debugLogs)
-			UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate random ticks on " + count + " chunk(s)");
 	}
 }
 

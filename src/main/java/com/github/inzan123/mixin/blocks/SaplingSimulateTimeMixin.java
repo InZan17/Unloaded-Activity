@@ -100,7 +100,7 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
 
                 world.setBlockState(pos, state, 4);
                 if (newAge > maxAge) {
-                    this.generate(world, pos, world.getBlockState(pos), random);
+                    this.generate(world, pos, state, random);
                     return; //generating a tree causes the sapling to turn into a log. We should not call super.simulationTime
                 }
             }
