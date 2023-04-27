@@ -142,6 +142,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growAmethyst"), config.growAmethyst)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growAmethyst = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growAmethyst.tooltip"))
+                        .build()
+        );
+
         blockEntities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities"), config.enableBlockEntities)
