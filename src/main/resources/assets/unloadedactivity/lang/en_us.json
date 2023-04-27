@@ -14,6 +14,8 @@
   "text.config.unloaded-activity.option.growStems.tooltip": "If enabled, the mod will update stems \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growSaplings": "Update Saplings",
   "text.config.unloaded-activity.option.growSaplings.tooltip": "If enabled, the mod will update saplings \nwhen they get within simulation distance.",
+  "text.config.unloaded-activity.option.decayLeaves": "Decay Leaves",
+  "text.config.unloaded-activity.option.decayLeaves.tooltip": "If enabled, the mod will decay leaves \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growSweetBerries": "Update Sweet Berries",
   "text.config.unloaded-activity.option.growSweetBerries.tooltip": "If enabled, the mod will update sweet berry bushes \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growCocoa": "Update Cocoa Beans",

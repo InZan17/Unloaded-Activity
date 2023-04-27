@@ -133,6 +133,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.decayLeaves"), config.decayLeaves)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.decayLeaves = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.decayLeaves.tooltip"))
+                        .build()
+        );
+
         blockEntities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities"), config.enableBlockEntities)

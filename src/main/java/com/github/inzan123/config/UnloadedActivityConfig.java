@@ -12,11 +12,11 @@ public class UnloadedActivityConfig {
     public boolean growSugarCane = true;
     public boolean updateFurnace = true;
     public boolean ageCopper = true;
+    public boolean decayLeaves = true;
     public boolean ageEntities = true;
     public boolean enableRandomTicks = true;
     public boolean enableBlockEntities = true;
     public boolean enableEntities = true;
     public int tickDifferenceThreshold = 100;
     public int maxChunkUpdates = 16;
-
 }

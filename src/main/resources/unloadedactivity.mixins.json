@@ -16,6 +16,7 @@
     "blocks.OxidizableSlabBlockMixin",
     "blocks.OxidizableStairsBlockMixin",
     "blocks.CactusMixin",
+    "blocks.LeavesMixin",
     "entities.PassiveEntityMixin",
     "EntityMixin",
     "AbstractBlockMixin",
