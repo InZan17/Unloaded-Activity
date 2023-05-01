@@ -16,6 +16,7 @@ public class UnloadedActivityConfig {
     public boolean ageCopper = true;
     public boolean decayLeaves = true;
     public boolean growAmethyst = true;
+    public boolean growPlantStems = true;
 
 
 

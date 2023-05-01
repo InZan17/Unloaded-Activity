@@ -43,7 +43,7 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
         return MAX_AGE;
     }
     public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.decayLeaves) return false;
+        if (!UnloadedActivity.instance.config.growPlantStems) return false;
         return true;
     }
     @Override

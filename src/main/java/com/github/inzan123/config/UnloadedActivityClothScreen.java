@@ -151,6 +151,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growPlantStems"), config.growPlantStems)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growPlantStems = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growPlantStems.tooltip"))
+                        .build()
+        );
+
         blockEntities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities"), config.enableBlockEntities)
