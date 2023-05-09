@@ -64,13 +64,14 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 				} else {
 					++updateCount;
 					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, currentRandomTickSpeed);
+					updateList.remove(chunk.getPos());
+					lastTick.setValue(currentTime);
 				}
-
+				return;
 			}
 		}
 
 		lastTick.setValue(currentTime);
-		chunk.setNeedsSaving(true);
 	}
 
 	@Inject(method = "tick", at = @At(value = "TAIL"))
@@ -89,10 +90,16 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 				TimeMachine.simulateRandomTicks(entry.getValue(), world, chunk, currentRandomTickSpeed);
 
+				LongComponent lastTick = chunk.getComponent(LASTCHUNKTICK);
+
+				long currentTime = this.getTimeOfDay();
+				lastTick.setValue(currentTime);
+
 				iterator.remove();
 				++updateCount;
 			}
 		}
+		updateCount = 0;
 	}
 }
 

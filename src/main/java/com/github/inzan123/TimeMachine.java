@@ -51,6 +51,10 @@ public class TimeMachine {
 
         BlockState state = chunk.getBlockState(position);
         Block block = state.getBlock();
+
+        if (!block.canSimulate())
+            return;
+
         ChunkPos chunkPos = chunk.getPos();
         BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
         block.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
