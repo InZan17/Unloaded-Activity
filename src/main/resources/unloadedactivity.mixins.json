@@ -19,6 +19,8 @@
     "blocks.LeavesMixin",
     "blocks.AmethystMixin",
     "blocks.PlantStemMixin",
+    "blocks.BambooMixin",
+    "blocks.BambooSaplingMixin",
     "entities.PassiveEntityMixin",
     "EntityMixin",
     "AbstractBlockMixin",

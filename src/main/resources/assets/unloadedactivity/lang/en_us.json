@@ -24,6 +24,8 @@
   "text.config.unloaded-activity.option.growCocoa.tooltip": "If enabled, the mod will update cocoa beans \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growSugarCane": "Update Sugar Canes",
   "text.config.unloaded-activity.option.growSugarCane.tooltip": "If enabled, the mod will update sugar canes \nwhen they get within simulation distance.",
+  "text.config.unloaded-activity.option.growBamboo": "Grow Bamboo",
+  "text.config.unloaded-activity.option.growBamboo.tooltip": "If enabled, the mod will grow bamboo \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.ageCopper": "Age Copper",
   "text.config.unloaded-activity.option.ageCopper.tooltip": "If enabled, the mod will age copper blocks \nwhen they get within simulation distance..",
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",

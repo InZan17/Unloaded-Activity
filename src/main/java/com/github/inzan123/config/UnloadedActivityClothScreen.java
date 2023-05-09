@@ -160,6 +160,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growBamboo = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growBamboo.tooltip"))
+                        .build()
+        );
+
         blockEntities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableBlockEntities"), config.enableBlockEntities)

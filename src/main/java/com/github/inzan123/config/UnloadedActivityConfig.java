@@ -17,6 +17,7 @@ public class UnloadedActivityConfig {
     public boolean decayLeaves = true;
     public boolean growAmethyst = true;
     public boolean growPlantStems = true;
+    public boolean growBamboo = true;
 
 
 
