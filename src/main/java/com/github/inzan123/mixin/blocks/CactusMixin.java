@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,21 +43,31 @@ public abstract class CactusMixin extends Block {
         return MAX_AGE;
     }
     @Override public int getMaxHeightUA() {return 2;}
+
+    public int countAirAbove(BlockView world, BlockPos pos, int maxCount) {
+        int i;
+        for (i = 0; i < maxCount && world.getBlockState(pos.up(i + 1)).isAir(); ++i) {
+        }
+        return i;
+    }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         if (shouldSimulate(state, world, pos)) {
             int height = 0;
-            while (world.getBlockState(pos.down(height)).isOf(this)) {
+            while (world.getBlockState(pos.down(height+1)).isOf(this)) {
                 ++height;
             }
 
-            if (height < getMaxHeightUA()+1) {
+            if (height < getMaxHeightUA()) {
 
                 int age = getCurrentAgeUA(state);
                 int maxAge = getMaxAgeUA()+1; // add one for when growing
-                int maxAgeTotal = getMaxHeightUA()*maxAge;
-                int remainingAge = maxAgeTotal - (age + (height-1)*maxAge);
+
+                int heightDifference = getMaxHeightUA()-height-1;
+
+                int maxGrowth = countAirAbove(world, pos, heightDifference);
+                int remainingAge = maxAge - age + maxGrowth*maxAge;
 
                 double randomPickChance = getRandomPickOdds(randomTickSpeed);
                 double totalOdds = getOdds(world, pos) * randomPickChance;
@@ -64,6 +75,8 @@ public abstract class CactusMixin extends Block {
                 int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
 
                 if (growthAmount != 0) {
+
+                    growthAmount += age;
 
                     int growBlocks = growthAmount/16;
                     int ageRemainder = growthAmount % 16;
@@ -73,7 +86,7 @@ public abstract class CactusMixin extends Block {
                         BlockPos newPos = pos.up(i+1);
                         BlockState newState = this.getDefaultState();
 
-                        if (i+1<growBlocks)
+                        if (i+1==growBlocks)
                             newState = newState.with(AGE, ageRemainder);
 
                         world.setBlockState(newPos, newState);
@@ -82,8 +95,10 @@ public abstract class CactusMixin extends Block {
 
                     if (growBlocks != 0) {
                         state = state.with(AGE, 0);
-                        world.setBlockState(pos, state, Block.NO_REDRAW);
+                    } else {
+                        state = state.with(AGE, ageRemainder);
                     }
+                    world.setBlockState(pos, state, Block.NO_REDRAW);
                 }
             }
         }
