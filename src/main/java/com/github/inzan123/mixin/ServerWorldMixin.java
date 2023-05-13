@@ -36,9 +36,6 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
 	}
-
-	public HashMap<ChunkPos, Long> updateList = new HashMap<>();
-	public int currentRandomTickSpeed = 0;
 	public int updateCount = 0;
 
 	@Inject(at = @At("HEAD"), method = "tickChunk")
@@ -56,18 +53,11 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 			if (timeDifference > differenceThreshold) {
 				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
-					currentRandomTickSpeed = randomTickSpeed;
-					updateList.put(
-							chunk.getPos(),
-							updateList.getOrDefault(chunk.getPos(),0l)+timeDifference
-					);
-				} else {
 					++updateCount;
-					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, currentRandomTickSpeed);
-					updateList.remove(chunk.getPos());
-					lastTick.setValue(currentTime);
+					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, randomTickSpeed);
+				} else {
+					return;
 				}
-				return;
 			}
 		}
 
@@ -76,29 +66,6 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-
-		Iterator<HashMap.Entry<ChunkPos, Long>> iterator = updateList.entrySet().iterator();
-		if (iterator.hasNext()) {
-			ServerWorld world = (ServerWorld)(Object)this;
-			while (iterator.hasNext() && updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
-
-				HashMap.Entry<ChunkPos, Long> entry = iterator.next();
-
-				ChunkPos pos = entry.getKey();
-
-				WorldChunk chunk = this.getChunk(pos.x,pos.z);
-
-				TimeMachine.simulateRandomTicks(entry.getValue(), world, chunk, currentRandomTickSpeed);
-
-				LongComponent lastTick = chunk.getComponent(LASTCHUNKTICK);
-
-				long currentTime = this.getTimeOfDay();
-				lastTick.setValue(currentTime);
-
-				iterator.remove();
-				++updateCount;
-			}
-		}
 		updateCount = 0;
 	}
 }
