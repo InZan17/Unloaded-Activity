@@ -37,8 +37,7 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.14285714285; // 1/7
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         if (!state.isOf(this)) return false;
@@ -56,56 +55,51 @@ public abstract class SaplingSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
+            long dayLength = 24000;
+            long stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
+            long startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
+            long offset = dayLength - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
 
-            if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
-                long dayLength = 24000;
-                long stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
-                long startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
-                long offset = dayLength - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
+            long growTimeWindow = stopGrowTime + offset;
 
-                long growTimeWindow = stopGrowTime + offset;
+            long currentTime = floorMod(min(floorMod(world.getTimeOfDay() + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
 
-                long currentTime = floorMod(min(floorMod(world.getTimeOfDay() + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
+            long previousTime = floorMod(min(floorMod(world.getTimeOfDay() - timePassed + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
 
-                long previousTime = floorMod(min(floorMod(world.getTimeOfDay() - timePassed + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
+            long usefulTicks = growTimeWindow * (timePassed / dayLength);
+            long restOfDayTicks = (currentTime - previousTime) % growTimeWindow;
 
-                long usefulTicks = growTimeWindow * (timePassed / dayLength);
-                long restOfDayTicks = (currentTime - previousTime) % growTimeWindow;
+            if (floorMod(timePassed, dayLength) > growTimeWindow)
+                if (restOfDayTicks == 0)
+                    restOfDayTicks = growTimeWindow;
 
-                if (floorMod(timePassed, dayLength) > growTimeWindow)
-                    if (restOfDayTicks == 0)
-                        restOfDayTicks = growTimeWindow;
-
-                timePassed = restOfDayTicks + usefulTicks;
-            }
-
-
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double randomGrowChance = getOdds(world, pos);
-            double totalOdds = randomPickChance * randomGrowChance;
-
-            int currentAge = getCurrentAgeUA(state);
-
-            int maxAge = getMaxAgeUA();
-
-            int ageDifference = maxAge - currentAge;
-
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
-
-            if (growthAmount != 0) {
-                int newAge = currentAge + growthAmount;
-
-                state = state.with(STAGE, min(newAge, maxAge));
-
-                world.setBlockState(pos, state, 4);
-                if (newAge > maxAge) {
-                    this.generate(world, pos, state, random);
-                    return; //generating a tree causes the sapling to turn into a log. We should not call super.simulationTime
-                }
-            }
+            timePassed = restOfDayTicks + usefulTicks;
         }
 
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomGrowChance = getOdds(world, pos);
+        double totalOdds = randomPickChance * randomGrowChance;
+
+        int currentAge = getCurrentAgeUA(state);
+
+        int maxAge = getMaxAgeUA();
+
+        int ageDifference = maxAge - currentAge;
+
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
+
+        if (growthAmount == 0)
+            return;
+
+        int newAge = currentAge + growthAmount;
+
+        state = state.with(STAGE, min(newAge, maxAge));
+
+        world.setBlockState(pos, state, 4);
+        if (newAge > maxAge) {
+            this.generate(world, pos, state, random);
+        }
     }
 }

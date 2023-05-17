@@ -34,9 +34,7 @@ public abstract class SugarCaneMixin extends Block {
         return 1;
     }
 
-    @Override public boolean canSimulate() {return true;}
-
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSugarCane) return false;
         if (!world.isAir(pos.up())) return false;
         return true;
@@ -58,52 +56,49 @@ public abstract class SugarCaneMixin extends Block {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
-            int height = 0;
-            while (world.getBlockState(pos.down(height+1)).isOf(this)) {
-                ++height;
-            }
-
-            if (height < getMaxHeightUA()) {
-
-                int age = getCurrentAgeUA(state);
-                int maxAge = getMaxAgeUA()+1; // add one for when growing
-
-                int heightDifference = getMaxHeightUA()-height-1;
-
-                int maxGrowth = countAirAbove(world, pos, heightDifference);
-                int remainingAge = maxAge - age + maxGrowth*maxAge;
-
-                double randomPickChance = getRandomPickOdds(randomTickSpeed);
-                double totalOdds = getOdds(world, pos) * randomPickChance;
-
-                int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
-
-
-                if (growthAmount != 0) {
-
-                    growthAmount += age;
-
-                    int growBlocks = growthAmount/16;
-                    int ageRemainder = growthAmount % 16;
-
-                    if (growBlocks != 0) {
-                        state = state.with(AGE, 0);
-                    } else {
-                        state = state.with(AGE, ageRemainder);
-                    }
-                    world.setBlockState(pos, state, Block.NO_REDRAW);
-
-                    for (int i=0;i<growBlocks;i++) {
-
-                        world.setBlockState(pos.up(i+1), this.getDefaultState());
-
-                        if (i+1==growBlocks)
-                            world.setBlockState(pos.up(i+1), this.getDefaultState().with(AGE, ageRemainder));
-                    }
-                }
-            }
+        int height = 0;
+        while (world.getBlockState(pos.down(height+1)).isOf(this)) {
+            ++height;
         }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+
+        if (height >= getMaxHeightUA())
+            return;
+
+        int age = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA()+1; // add one for when growing
+
+        int heightDifference = getMaxHeightUA()-height-1;
+
+        int maxGrowth = countAirAbove(world, pos, heightDifference);
+        int remainingAge = maxAge - age + maxGrowth*maxAge;
+
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
+
+        int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
+
+
+        if (growthAmount == 0)
+            return;
+
+        growthAmount += age;
+
+        int growBlocks = growthAmount/16;
+        int ageRemainder = growthAmount % 16;
+
+        if (growBlocks != 0) {
+            state = state.with(AGE, 0);
+        } else {
+            state = state.with(AGE, ageRemainder);
+        }
+        world.setBlockState(pos, state, Block.NO_REDRAW);
+
+        for (int i=0;i<growBlocks;i++) {
+
+            world.setBlockState(pos.up(i+1), this.getDefaultState());
+
+            if (i+1==growBlocks)
+                world.setBlockState(pos.up(i+1), this.getDefaultState().with(AGE, ageRemainder));
+        }
     }
 }

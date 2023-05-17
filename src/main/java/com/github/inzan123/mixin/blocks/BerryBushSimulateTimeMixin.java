@@ -29,8 +29,7 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
         if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -48,22 +47,19 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        int age = getCurrentAgeUA(state);
+        int ageDifference = getMaxAgeUA() - age;
 
-            int age = getCurrentAgeUA(state);
-            int ageDifference = getMaxAgeUA() - age;
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        if (growthAmount == 0)
+            return;
 
-            if (growthAmount != 0) {
-                state = state.with(AGE, age + growthAmount);
-                world.setBlockState(pos, state, 2);
-                world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
-            }
-        }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+        state = state.with(AGE, age + growthAmount);
+        world.setBlockState(pos, state, 2);
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
     }
 }

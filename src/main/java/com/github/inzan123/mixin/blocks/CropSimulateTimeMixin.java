@@ -42,8 +42,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCrops) return false;
         if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
@@ -60,22 +59,19 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        int currentAge = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
-            int currentAge = getCurrentAgeUA(state);
-            int maxAge = getMaxAgeUA();
-            int ageDifference = maxAge - currentAge;
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        if (growthAmount == 0)
+            return;
 
-            if (growthAmount != 0) {
-                state = this.withAge(currentAge + growthAmount);
-                world.setBlockState(pos, state, 2);
-            }
-        }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+        state = this.withAge(currentAge + growthAmount);
+        world.setBlockState(pos, state, 2);
     }
 }

@@ -33,7 +33,7 @@ public class TimeMachine {
                     BlockPos position = new BlockPos(x,y,z);
                     BlockState state = chunk.getBlockState(position);
                     Block block = state.getBlock();
-                    if (block.canSimulate()) blockPosArray.add(position);
+                    if (block.canSimulate(state, world, position)) blockPosArray.add(position);
         }
 
         if (UnloadedActivity.instance.config.randomizeBlockUpdates)
@@ -52,7 +52,7 @@ public class TimeMachine {
         BlockState state = chunk.getBlockState(position);
         Block block = state.getBlock();
 
-        if (!block.canSimulate())
+        if (!block.canSimulate(state, world, position))
             return;
 
         ChunkPos chunkPos = chunk.getPos();

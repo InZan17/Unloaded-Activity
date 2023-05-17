@@ -33,9 +33,7 @@ public abstract class BambooSaplingMixin extends Block {
         return 1d/3d;
     }
 
-    @Override public boolean canSimulate() {return true;}
-
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;
         if (!world.isAir(pos.up())) return false;
         if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -54,33 +52,29 @@ public abstract class BambooSaplingMixin extends Block {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int maxGrowth = countAirAbove(world,pos, getMaxHeightUA());
 
-            int maxGrowth = countAirAbove(world,pos, getMaxHeightUA());
+        int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        for(int i=1;i<growthAmount+1;i++) {
 
-            for(int i=1;i<growthAmount+1;i++) {
+            if (state == null)
+                return;
 
-                if (state == null)
-                    return;
+            if (!canSimulate(state, world, pos))
+                return;
 
-                if (!shouldSimulate(state, world, pos))
-                    return;
-
-                if (i==1) {
-                    state = Blocks.BAMBOO.getDefaultState().with(BambooBlock.LEAVES, BambooLeaves.SMALL);
-                    world.setBlockState(pos.up(), state, Block.NOTIFY_ALL);
-                } else {
-                    state = updateLeaves(state,world,pos,random,i);
-                }
-                pos = pos.up();
+            if (i==1) {
+                state = Blocks.BAMBOO.getDefaultState().with(BambooBlock.LEAVES, BambooLeaves.SMALL);
+                world.setBlockState(pos.up(), state, Block.NOTIFY_ALL);
+            } else {
+                state = updateLeaves(state,world,pos,random,i);
             }
+            pos = pos.up();
         }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 
     public BlockState updateLeaves(BlockState state, World world, BlockPos pos, Random random, int height) {

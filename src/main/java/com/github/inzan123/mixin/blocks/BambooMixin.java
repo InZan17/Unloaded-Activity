@@ -19,11 +19,9 @@ public abstract class BambooMixin extends Block implements Fertilizable {
     public BambooMixin(Settings settings) {
         super(settings);
     }
-
-    @Override public boolean canSimulate() {return true;}
     @Override public double getOdds(ServerWorld world, BlockPos pos) {return 1d/3d;}
-
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override
+    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;
         if (!world.isAir(pos.up())) return false;
         if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -47,34 +45,31 @@ public abstract class BambooMixin extends Block implements Fertilizable {
     }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
-        if (shouldSimulate(state, world, pos)) {
 
-            int height = countBambooBelow(world, pos);
+        int height = countBambooBelow(world, pos);
 
-            if (height < getMaxHeightUA()) {
+        if (height >= getMaxHeightUA())
+            return;
 
-                int heightDifference = getMaxHeightUA() - height;
-                int maxGrowth = countAirAbove(world,pos, heightDifference);
+        int heightDifference = getMaxHeightUA() - height;
+        int maxGrowth = countAirAbove(world,pos, heightDifference);
 
-                double randomPickChance = getRandomPickOdds(randomTickSpeed);
-                double totalOdds = getOdds(world, pos) * randomPickChance;
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-                int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
-                for(int i=1;i<growthAmount+1;i++) {
+        for(int i=1;i<growthAmount+1;i++) {
 
-                    if (state == null)
-                        return;
+            if (state == null)
+                return;
 
-                    if (!shouldSimulate(state, world, pos))
-                        return;
+            if (!canSimulate(state, world, pos))
+                return;
 
-                    state = updateLeaves(state,world,pos,random,i);
-                    pos = pos.up();
-                }
-            }
+            state = updateLeaves(state,world,pos,random,i);
+            pos = pos.up();
         }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 
     public BlockState updateLeaves(BlockState state, World world, BlockPos pos, Random random, int height) {

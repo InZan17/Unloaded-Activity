@@ -32,8 +32,7 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2; //1/5
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growCocoa) return false;
         return getCurrentAgeUA(state) < getMaxAgeUA();
@@ -49,23 +48,19 @@ public abstract class CocoaSimulateTimeMixin extends HorizontalFacingBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        int currentAge = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
-            int currentAge = getCurrentAgeUA(state);
-            int maxAge = getMaxAgeUA();
-            int ageDifference = maxAge - currentAge;
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        if (growthAmount == 0)
+            return;
 
-            if (growthAmount != 0) {
-                state = state.with(AGE, currentAge + growthAmount);
-                world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
-            }
-        }
-
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+        state = state.with(AGE, currentAge + growthAmount);
+        world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
     }
 }

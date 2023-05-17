@@ -88,8 +88,7 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
         float f = getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growStems) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         return true;
@@ -98,52 +97,49 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        int currentAge = this.getCurrentAgeUA(state);
+        int maxAge = this.getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
-            int currentAge = this.getCurrentAgeUA(state);
-            int maxAge = this.getMaxAgeUA();
-            int ageDifference = maxAge - currentAge;
+        //We dont check ageDifference since if difference is 0 then it still needs to calculate pumpkin/melon growth
 
-            //We dont check ageDifference since if difference is 0 then it still needs to calculate pumpkin/melon growth
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomGrowChance = getOdds(world, pos); //chance to grow for every pick
 
-            double randomGrowChance = getOdds(world, pos); //chance to grow for every pick
+        double totalOdds = randomPickChance * randomGrowChance;
 
-            double totalOdds = randomPickChance * randomGrowChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
+        if (growthAmount != 0) {
+            state = state.with(AGE, min(currentAge + growthAmount, maxAge));
+            world.setBlockState(pos, state, 2);
+        }
 
-            if (growthAmount != 0) {
-                state = state.with(AGE, min(currentAge + growthAmount, maxAge));
-                world.setBlockState(pos, state, 2);
-            }
+        if (currentAge + growthAmount > maxAge) { // it surpasses the max age of crop, try to grow fruit
 
-            if (currentAge + growthAmount > maxAge) { // it surpasses the max age of crop, try to grow fruit
+            double chanceForFreeSpace = 0.25 * NumOfValidPositions(pos, world);
+            int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
 
-                double chanceForFreeSpace = 0.25 * NumOfValidPositions(pos, world);
-                int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
+            if (growsFruit == 0)
+                return;
 
-                if (growsFruit != 0) {
-                    List<Direction> directions = Direction.Type.HORIZONTAL.getShuffled(random);
+            List<Direction> directions = Direction.Type.HORIZONTAL.getShuffled(random);
 
-                    for (int i = 0; i < directions.size(); i++) {
+            for (int i = 0; i < directions.size(); i++) {
 
-                        Direction direction = directions.get(i);
+                Direction direction = directions.get(i);
 
-                        if (!isValidPosition(direction, pos, world)) continue;
+                if (!isValidPosition(direction, pos, world)) continue;
 
-                        BlockPos blockPos = pos.offset(direction);
-                        world.setBlockState(blockPos, this.gourdBlock.getDefaultState());
+                BlockPos blockPos = pos.offset(direction);
+                world.setBlockState(blockPos, this.gourdBlock.getDefaultState());
 
-                        state = this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction);
-                        world.setBlockState(pos, state);
-                        break;
-                    }
-                }
+                state = this.gourdBlock.getAttachedStem().getDefaultState().with(HorizontalFacingBlock.FACING, direction);
+                world.setBlockState(pos, state);
+                break;
             }
         }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 
     public int NumOfValidPositions(BlockPos pos, ServerWorld world) {

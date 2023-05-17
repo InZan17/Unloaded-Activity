@@ -34,7 +34,10 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
     public double getOdds(ServerWorld world, BlockPos pos) {
         return growthChance;
     }
-    @Override public boolean canSimulate() {return true;}
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (!UnloadedActivity.instance.config.growPlantStems) return false;
+        return true;
+    }
     @Override public int getCurrentAgeUA(BlockState state) {
         return state.get(AGE);
     }
@@ -42,37 +45,29 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
     @Override public int getMaxAgeUA() {
         return MAX_AGE;
     }
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.growPlantStems) return false;
-        return true;
-    }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        int currentAge = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
-            int currentAge = getCurrentAgeUA(state);
-            int maxAge = getMaxAgeUA();
-            int ageDifference = maxAge - currentAge;
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-            int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        if (growthAmount == 0)
+            return;
 
-
-            if (growthAmount != 0) {
-                BlockPos blockPos = pos.offset(this.growthDirection);
-                BlockState newState = state;
-                int i = 0;
-                while (chooseStemState(world.getBlockState(blockPos)) && i < growthAmount) {
-                    newState = age(newState, world.random);
-                    world.setBlockState(blockPos, newState);
-                    blockPos = blockPos.offset(this.growthDirection);
-                    i++;
-                }
-            }
+        BlockPos blockPos = pos.offset(this.growthDirection);
+        BlockState newState = state;
+        int i = 0;
+        while (chooseStemState(world.getBlockState(blockPos)) && i < growthAmount) {
+            newState = age(newState, world.random);
+            world.setBlockState(blockPos, newState);
+            blockPos = blockPos.offset(this.growthDirection);
+            i++;
         }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
     }
 }

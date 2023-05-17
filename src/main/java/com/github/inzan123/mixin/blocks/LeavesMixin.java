@@ -27,27 +27,22 @@ public abstract class LeavesMixin extends Block{
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 1;
     }
-    @Override public boolean canSimulate() {return true;}
-    public boolean shouldSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.decayLeaves) return false;
         return shouldDecay(state);
     }
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        if (shouldSimulate(state, world, pos)) {
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double totalOdds = getOdds(world, pos) * randomPickChance;
 
-            double randomPickChance = getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(world, pos) * randomPickChance;
+        int decay = getOccurrences(timePassed, totalOdds, 1, random);
 
-            int decay = getOccurrences(timePassed, totalOdds, 1, random);
+        if (decay == 0)
+            return;
 
-            if (decay != 0) {
-                LeavesBlock.dropStacks(state, world, pos);
-                world.removeBlock(pos, false);
-                return;
-            }
-        }
-        super.simulateTime(state, world, pos, random, timePassed, randomTickSpeed);
+        LeavesBlock.dropStacks(state, world, pos);
+        world.removeBlock(pos, false);
     }
 }
