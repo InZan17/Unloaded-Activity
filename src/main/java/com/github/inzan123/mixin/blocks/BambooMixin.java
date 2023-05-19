@@ -59,7 +59,7 @@ public abstract class BambooMixin extends Block implements Fertilizable {
 
         int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
-        for(int i=1;i<growthAmount+1;i++) {
+        for(int i=1+height;i<growthAmount+1+height;i++) {
 
             if (state == null)
                 return;
