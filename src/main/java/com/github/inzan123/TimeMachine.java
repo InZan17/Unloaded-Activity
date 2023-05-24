@@ -33,7 +33,7 @@ public class TimeMachine {
                     BlockPos position = new BlockPos(x,y,z);
                     BlockState state = chunk.getBlockState(position);
                     Block block = state.getBlock();
-                    if (block instanceof SimulateRandomTicks) blockPosArray.add(position);
+                    if (block.canSimulate(state, world, position)) blockPosArray.add(position);
         }
 
         if (UnloadedActivity.instance.config.randomizeBlockUpdates)
@@ -46,16 +46,18 @@ public class TimeMachine {
     }
 
     public static void simulateBlockRandomTicks(BlockPos position, WorldChunk chunk, ServerWorld world, long timeDifference, int randomTickSpeed) {
-        if (!UnloadedActivity.instance.config.enableRandomTicks) return;
+        if (!UnloadedActivity.instance.config.enableRandomTicks)
+            return;
 
         BlockState state = chunk.getBlockState(position);
         Block block = state.getBlock();
-        if (block instanceof SimulateRandomTicks simulator) {
-            ChunkPos chunkPos = chunk.getPos();
-            BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-            if (!simulator.canSimulate(state, world, notChunkBlockPos)) return;
-            simulator.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
-        }
+
+        if (!block.canSimulate(state, world, position))
+            return;
+
+        ChunkPos chunkPos = chunk.getPos();
+        BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+        block.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
@@ -63,22 +65,20 @@ public class TimeMachine {
 
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
-        if (blockEntity instanceof SimulateBlockEntity simulator) {
-            if (!simulator.canSimulate(world, pos, blockState, blockEntity)) return;
-            simulator.simulateTime(world, pos, blockState, blockEntity, timeDifference);
-            if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on blockEntity after " + timeDifference + " ticks.");
-        }
+        if (!blockEntity.canSimulate()) return;
+        blockEntity.simulateTime(world, pos, blockState, blockEntity, timeDifference);
+        if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on blockEntity after " + timeDifference + " ticks.");
     }
 
-    public static <T extends BlockEntity> void simulateEntity(Entity entity, long timeDifference) {
+    public static void simulateEntity(Entity entity, long timeDifference) {
+
         if (!UnloadedActivity.instance.config.enableEntities) return;
+        if (!entity.canSimulate()) return;
 
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
-        if (entity instanceof SimulateEntity simulator) {
-            if (!simulator.canSimulate(entity)) return;
-            simulator.simulateTime(entity, timeDifference);
-            if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on entity after " + timeDifference + " ticks.");
-        }
+
+        entity.simulateTime(entity, timeDifference);
+        if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate ticks on entity after " + timeDifference + " ticks.");
     }
 }

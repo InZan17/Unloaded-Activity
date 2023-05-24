@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.pow;
 
 @Mixin(SweetBerryBushBlock.class)
-public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     public BerryBushSimulateTimeMixin(Settings settings) {
         super(settings);
     }
@@ -29,32 +29,37 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock implements S
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
-
-    @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        if (state == null) return false;
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
-        if (state.get(AGE) >= MAX_AGE || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(AGE);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return MAX_AGE;
     }
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        int age = state.get(AGE);
+        int age = getCurrentAgeUA(state);
+        int ageDifference = getMaxAgeUA() - age;
 
-        double randomPickChance = 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
-
-        int ageDifference = MAX_AGE - age;
-
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
         int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
 
-        if (growthAmount == 0) return;
+        if (growthAmount == 0)
+            return;
 
-        BlockState blockState = (BlockState)state.with(AGE, age + growthAmount);
-        world.setBlockState(pos, blockState, 2);
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(blockState));
-
+        state = state.with(AGE, age + growthAmount);
+        world.setBlockState(pos, state, 2);
+        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
     }
 }
