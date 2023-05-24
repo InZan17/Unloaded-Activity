@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.blocks;
 
 import net.minecraft.block.BeetrootsBlock;
 import net.minecraft.block.CropBlock;
@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(BeetrootsBlock.class)
-public class BeetrootsMixin extends CropBlock{
+public abstract class BeetrootsMixin extends CropBlock{
     public BeetrootsMixin(Settings settings) {
         super(settings);
     }

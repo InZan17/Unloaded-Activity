@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "unloadedactivity",
-  "version": "0.3.1",
+  "version": "0.4.0",
 
   "custom": {
     "cardinal-components": [
@@ -11,14 +11,12 @@
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/CropBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/StemBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/SweetBerryBushBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/SaplingBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/CocoaBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/block/OxidizableBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/SugarCaneBlock": ["com/github/inzan123/SimulateRandomTicks"],
-      "net/minecraft/block/entity/FurnaceBlockEntity": ["com/github/inzan123/SimulateBlockEntity"]
+      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/entity/BlockEntity": ["com/github/inzan123/SimulateBlockEntity"],
+      "net/minecraft/entity/Entity": ["com/github/inzan123/SimulateEntity"]
+    },
+    "lithium:options": {
+      "world.block_entity_ticking.sleeping.furnace": false
     }
   },
 

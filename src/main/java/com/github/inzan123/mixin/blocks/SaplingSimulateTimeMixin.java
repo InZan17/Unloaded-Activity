@@ -1,7 +1,8 @@
-package com.github.inzan123.mixin;
+package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SaplingBlock;
@@ -18,7 +19,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.*;
 
 @Mixin(SaplingBlock.class)
-public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRandomTicks {
+public abstract class SaplingSimulateTimeMixin extends PlantBlock {
 
     public SaplingSimulateTimeMixin(Settings settings) {
         super(settings);
@@ -36,11 +37,19 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.14285714285; // 1/7
     }
-
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
+        if (!state.isOf(this)) return false;
         return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return state.get(STAGE);
+    }
+
+    @Override public int getMaxAgeUA() {
+        return 1;
     }
 
     @Override
@@ -52,14 +61,14 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
             long startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
             long offset = dayLength - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
 
-            long growTimeWindow = stopGrowTime+offset;
+            long growTimeWindow = stopGrowTime + offset;
 
-            long currentTime = floorMod(min(floorMod(world.getTimeOfDay()+offset, dayLength)-offset, stopGrowTime), growTimeWindow);
+            long currentTime = floorMod(min(floorMod(world.getTimeOfDay() + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
 
-            long previousTime = floorMod(min(floorMod(world.getTimeOfDay()-timePassed+offset, dayLength)-offset, stopGrowTime), growTimeWindow);
+            long previousTime = floorMod(min(floorMod(world.getTimeOfDay() - timePassed + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
 
-            long usefulTicks = growTimeWindow*(timePassed / dayLength);
-            long restOfDayTicks = (currentTime-previousTime) % growTimeWindow;
+            long usefulTicks = growTimeWindow * (timePassed / dayLength);
+            long restOfDayTicks = (currentTime - previousTime) % growTimeWindow;
 
             if (floorMod(timePassed, dayLength) > growTimeWindow)
                 if (restOfDayTicks == 0)
@@ -69,22 +78,28 @@ public class SaplingSimulateTimeMixin extends PlantBlock implements SimulateRand
         }
 
 
-        double randomPickChance = 1.0 - pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+        double randomPickChance = getRandomPickOdds(randomTickSpeed);
         double randomGrowChance = getOdds(world, pos);
         double totalOdds = randomPickChance * randomGrowChance;
 
-        int currentAge = state.get(STAGE);
+        int currentAge = getCurrentAgeUA(state);
 
-        int ageDifference = 2-currentAge;
+        int maxAge = getMaxAgeUA();
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int ageDifference = maxAge - currentAge;
 
-        if (growthAmount == 0) return;
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
 
-        this.generate(world, pos, state, random);
-        if (growthAmount == 2) {
-            this.generate(world, pos, world.getBlockState(pos), random);
+        if (growthAmount == 0)
+            return;
+
+        int newAge = currentAge + growthAmount;
+
+        state = state.with(STAGE, min(newAge, maxAge));
+
+        world.setBlockState(pos, state, 4);
+        if (newAge > maxAge) {
+            this.generate(world, pos, state, random);
         }
-
     }
 }

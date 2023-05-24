@@ -49,7 +49,7 @@ public abstract class DirectBlockEntityTickInvokerMixin<T extends BlockEntity> {
             int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
             if (timeDifference > differenceThreshold)
-                TimeMachine.simulateBlockEntity(world, ((BlockEntity)this.blockEntity).getPos(), blockState, this.blockEntity, timeDifference);
+                TimeMachine.simulateBlockEntity(world, this.blockEntity.getPos(), blockState, this.blockEntity, timeDifference);
         }
         lastTick.setValue(currentTime);
     }
