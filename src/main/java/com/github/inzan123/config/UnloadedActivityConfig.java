@@ -35,5 +35,5 @@ public class UnloadedActivityConfig {
     public boolean enableBlockEntities = true;
     public boolean enableEntities = true;
     public int tickDifferenceThreshold = 100;
-    public int maxChunkUpdates = 16;
+    public int maxChunkUpdates = 8;
 }
