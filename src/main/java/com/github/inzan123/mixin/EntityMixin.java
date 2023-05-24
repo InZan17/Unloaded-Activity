@@ -1,8 +1,10 @@
 package com.github.inzan123.mixin;
 
 import com.github.inzan123.LongComponent;
+import com.github.inzan123.SimulateEntity;
 import com.github.inzan123.TimeMachine;
 import com.github.inzan123.UnloadedActivity;
+import dev.onyxstudios.cca.api.v3.component.ComponentAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.util.Nameable;

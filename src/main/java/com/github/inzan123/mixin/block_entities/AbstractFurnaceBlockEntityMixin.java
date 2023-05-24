@@ -17,7 +17,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.*;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -54,9 +53,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
-    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
+    private static boolean craftRecipe(@Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
         ItemStack itemStack = slots.get(0);
-        ItemStack itemStack2 = recipe.getOutput(registryManager);
+        ItemStack itemStack2 = recipe.getOutput();
         ItemStack itemStack3 = slots.get(2);
         if (itemStack3.isEmpty()) {
             ItemStack itemStack2Clone = itemStack2.copy();
@@ -142,7 +141,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
                 if (itemsCrafted > 0) {
                     stateChanged = true;
-                    craftRecipe(world.getRegistryManager(), recipe, this.inventory, maxPerStack, itemsCrafted);
+                    craftRecipe(recipe, this.inventory, maxPerStack, itemsCrafted);
                     setLastRecipe(recipe, itemsCrafted);
                 }
 
