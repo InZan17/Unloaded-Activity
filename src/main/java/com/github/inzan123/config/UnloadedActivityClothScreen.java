@@ -63,7 +63,7 @@ public class UnloadedActivityClothScreen {
         randomTicks.addEntry(
                 configEntryBuilder
                         .startIntField(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates"), config.maxChunkUpdates)
-                        .setDefaultValue(16)
+                        .setDefaultValue(8)
                         .setMin(1)
                         .setSaveConsumer(newValue -> config.maxChunkUpdates = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates.tooltip"))
