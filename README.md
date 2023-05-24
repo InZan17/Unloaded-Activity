@@ -16,6 +16,12 @@ This also works similarly when skipping the night, crops will have grown and fur
 - Sugar canes
 - Baby animals
 - Copper blocks
+- Cactus
+- Leaves
+- Amethyst
+- Kelp
+- Glow berries
+- Bamboo
 
 
 ## Currently planned:
