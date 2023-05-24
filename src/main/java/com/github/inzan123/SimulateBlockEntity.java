@@ -7,10 +7,8 @@ import net.minecraft.world.World;
 
 public interface SimulateBlockEntity {
 
-    default <T extends BlockEntity> boolean canSimulate(World world, BlockPos pos, BlockState blockState, T blockEntity) {
-        return true;
+    default boolean canSimulate() {
+        return false;
     }
-    default <T extends BlockEntity> void simulateTime(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference)  {
-
-    }
+    default void simulateTime(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {}
 }

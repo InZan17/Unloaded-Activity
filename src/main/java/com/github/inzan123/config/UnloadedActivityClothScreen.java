@@ -62,6 +62,16 @@ public class UnloadedActivityClothScreen {
 
         randomTicks.addEntry(
                 configEntryBuilder
+                        .startIntField(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates"), config.maxChunkUpdates)
+                        .setDefaultValue(16)
+                        .setMin(1)
+                        .setSaveConsumer(newValue -> config.maxChunkUpdates = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSaplings"), config.growSaplings)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.growSaplings = newValue)
@@ -120,6 +130,42 @@ public class UnloadedActivityClothScreen {
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.ageCopper = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageCopper.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.decayLeaves"), config.decayLeaves)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.decayLeaves = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.decayLeaves.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growAmethyst"), config.growAmethyst)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growAmethyst = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growAmethyst.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growPlantStems"), config.growPlantStems)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growPlantStems = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growPlantStems.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growBamboo = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growBamboo.tooltip"))
                         .build()
         );
 

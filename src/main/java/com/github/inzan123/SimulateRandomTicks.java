@@ -5,13 +5,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 
 public interface SimulateRandomTicks {
-
-    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        return true;
-    }
     default double getChoose(long successes, long draws) {
         double choose = 1;
         for (int j = 0; j < successes; j++) {
@@ -19,13 +16,35 @@ public interface SimulateRandomTicks {
         }
         return choose;
     }
+    default double getRandomPickOdds(int randomTickSpeed) {
+        return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
+    }
     default double getOdds(ServerWorld world, BlockPos pos) {
         return 0;
     }
-    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+    default int getCurrentAgeUA(BlockState state) {
+        return 0;
     }
 
+    default int getMaxAgeUA() {
+        return 0;
+    }
+
+    default int getMaxHeightUA() {
+        return 0;
+    }
+    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        return false;
+    }
+    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
+
     default int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+
+        if (odds <= 0)
+            return 0;
+
+        maxOccurrences = max(maxOccurrences, 0);
 
         double choose = 1;
 
