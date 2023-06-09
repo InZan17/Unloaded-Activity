@@ -77,13 +77,14 @@ public abstract class OxidizableStairsBlockMixin extends StairsBlock implements 
 
     public BlockState getDegradeResult(int steps, BlockState state, ServerWorld world, BlockPos pos) {
 
+        steps--;
+
         Optional<BlockState> optionalState = this.getDegradationResult(state);
 
         if (optionalState.isEmpty())
             return state;
 
         if (steps != 0) {
-            steps--;
             return getDegradeResult(steps, optionalState.get(), world, pos);
             //im too lazy to see how getDegradationResult actually degrades the thing
         }
