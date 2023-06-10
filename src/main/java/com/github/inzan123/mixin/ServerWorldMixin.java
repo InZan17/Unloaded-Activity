@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,6 +39,8 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	}
 	public int updateCount = 0;
 
+	@Shadow public ServerWorld toServerWorld() {return null;}
+
 	@Inject(at = @At("HEAD"), method = "tickChunk")
 	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
 
@@ -54,7 +57,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			if (timeDifference > differenceThreshold) {
 				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
 					++updateCount;
-					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, randomTickSpeed);
+					TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
 					return;
 				}
