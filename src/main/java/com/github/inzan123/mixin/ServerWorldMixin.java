@@ -38,6 +38,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
 	}
 	public int updateCount = 0;
+	public boolean hasSlept = false;
 
 	@Shadow public ServerWorld toServerWorld() {return null;}
 
@@ -55,7 +56,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
 			if (timeDifference > differenceThreshold) {
-				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
+				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates || hasSlept) {
 					++updateCount;
 					TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
@@ -70,6 +71,13 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		updateCount = 0;
+		hasSlept = false;
+	}
+
+	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.wakeSleepingPlayers ()V"))
+	private void wakeyWakey(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		if (UnloadedActivity.instance.config.updateAllChunksWhenSleep)
+			hasSlept = true;
 	}
 }
 

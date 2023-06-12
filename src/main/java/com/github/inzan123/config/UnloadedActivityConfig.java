@@ -36,4 +36,5 @@ public class UnloadedActivityConfig {
     public boolean enableEntities = true;
     public int tickDifferenceThreshold = 100;
     public int maxChunkUpdates = 8;
+    public boolean updateAllChunksWhenSleep = true;
 }

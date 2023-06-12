@@ -65,8 +65,18 @@ public class UnloadedActivityClothScreen {
                         .startIntField(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates"), config.maxChunkUpdates)
                         .setDefaultValue(8)
                         .setMin(1)
+                        .setMax(32767)
                         .setSaveConsumer(newValue -> config.maxChunkUpdates = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep"), config.updateAllChunksWhenSleep)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.updateAllChunksWhenSleep = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep.tooltip"))
                         .build()
         );
 
