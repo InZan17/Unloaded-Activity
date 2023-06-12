@@ -21,15 +21,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static com.github.inzan123.MyComponents.LASTCHUNKTICK;
 import static java.lang.Long.max;
+import static java.lang.Integer.max;
 
 
 @Mixin(ServerWorld.class)
@@ -56,7 +53,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
 			if (timeDifference > differenceThreshold) {
-				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates || hasSlept) {
+				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
 					++updateCount;
 					TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
@@ -66,6 +63,10 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		}
 
 		lastTick.setValue(currentTime);
+	}
+
+	private int getMultiplier() {
+		return UnloadedActivity.instance.config.multiplyMaxChunkUpdatesPerPlayer ? max(1, this.getPlayers().size()) : 1;
 	}
 
 	@Inject(method = "tick", at = @At(value = "TAIL"))

@@ -73,6 +73,15 @@ public class UnloadedActivityClothScreen {
 
         randomTicks.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer"), config.multiplyMaxChunkUpdatesPerPlayer)
+                        .setDefaultValue(false)
+                        .setSaveConsumer(newValue -> config.multiplyMaxChunkUpdatesPerPlayer = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep"), config.updateAllChunksWhenSleep)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.updateAllChunksWhenSleep = newValue)
