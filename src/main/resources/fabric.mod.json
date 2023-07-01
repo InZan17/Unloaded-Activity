@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "unloadedactivity",
-  "version": "0.4.1",
+  "version": "0.4.2",
 
   "custom": {
     "cardinal-components": [
