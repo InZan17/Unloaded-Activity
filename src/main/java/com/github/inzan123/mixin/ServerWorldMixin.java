@@ -15,19 +15,17 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static com.github.inzan123.MyComponents.LASTCHUNKTICK;
 import static java.lang.Long.max;
+import static java.lang.Integer.max;
 
 
 @Mixin(ServerWorld.class)
@@ -36,6 +34,10 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		super(properties, registryRef, dimension, profiler, isClient, debugWorld, seed, maxChainedNeighborUpdates);
 	}
 	public int updateCount = 0;
+	public boolean hasSlept = false;
+
+	@Shadow public ServerWorld toServerWorld() {return null;}
+
 	@Inject(at = @At("HEAD"), method = "tickChunk")
 	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
 
@@ -50,9 +52,9 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
 			if (timeDifference > differenceThreshold) {
-				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates) {
+				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
 					++updateCount;
-					TimeMachine.simulateRandomTicks(timeDifference, (ServerWorld)(Object)this, chunk, randomTickSpeed);
+					TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
 					return;
 				}
@@ -62,9 +64,20 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		lastTick.setValue(currentTime);
 	}
 
+	private int getMultiplier() {
+		return UnloadedActivity.instance.config.multiplyMaxChunkUpdatesPerPlayer ? max(1, this.getPlayers().size()) : 1;
+	}
+
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		updateCount = 0;
+		hasSlept = false;
+	}
+
+	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.wakeSleepingPlayers ()V"))
+	private void wakeyWakey(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		if (UnloadedActivity.instance.config.updateAllChunksWhenSleep)
+			hasSlept = true;
 	}
 }
 
