@@ -31,9 +31,11 @@ public class TimeMachine {
             for (int x=0; x<16;x++)
                 for (int y=minY; y<maxY;y++) {
                     BlockPos position = new BlockPos(x,y,z);
+                    ChunkPos chunkPos = chunk.getPos();
+                    BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
                     BlockState state = chunk.getBlockState(position);
                     Block block = state.getBlock();
-                    if (block.canSimulate(state, world, position)) blockPosArray.add(position);
+                    if (block.canSimulate(state, world, notChunkBlockPos)) blockPosArray.add(position);
         }
 
         if (UnloadedActivity.instance.config.randomizeBlockUpdates)
@@ -52,11 +54,12 @@ public class TimeMachine {
         BlockState state = chunk.getBlockState(position);
         Block block = state.getBlock();
 
-        if (!block.canSimulate(state, world, position))
-            return;
-
         ChunkPos chunkPos = chunk.getPos();
         BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+
+        if (!block.canSimulate(state, world, notChunkBlockPos))
+            return;
+
         block.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
     }
 
