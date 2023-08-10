@@ -1,8 +1,6 @@
 package com.github.inzan123.mixin.blocks;
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SaplingBlock;
@@ -19,9 +17,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import static java.lang.Math.*;
 
 @Mixin(SaplingBlock.class)
-public abstract class SaplingSimulateTimeMixin extends PlantBlock {
+public abstract class SaplingMixin extends PlantBlock {
 
-    public SaplingSimulateTimeMixin(Settings settings) {
+    public SaplingMixin(Settings settings) {
         super(settings);
     }
 

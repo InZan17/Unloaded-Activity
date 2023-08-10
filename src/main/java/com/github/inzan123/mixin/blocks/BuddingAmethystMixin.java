@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BuddingAmethystBlock.class)
-public abstract class AmethystMixin extends AmethystBlock {
+public abstract class BuddingAmethystMixin extends AmethystBlock {
 
-    public AmethystMixin(Settings settings) {
+    public BuddingAmethystMixin(Settings settings) {
         super(settings);
     }
 

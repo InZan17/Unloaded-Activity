@@ -1,57 +1,45 @@
 package com.github.inzan123.mixin.blocks;
 
-
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
-import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
-import net.minecraft.block.PlantBlock;
+import net.minecraft.block.CocoaBlock;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import static java.lang.Math.pow;
+@Mixin(CocoaBlock.class)
+public abstract class CocoaMixin extends HorizontalFacingBlock {
 
-@Mixin(CropBlock.class)
-public abstract class CropSimulateTimeMixin extends PlantBlock {
+    @Shadow @Final
+    public static int MAX_AGE;
+    @Shadow @Final
+    public static IntProperty AGE;
 
-    public CropSimulateTimeMixin(Settings settings) {
+    protected CocoaMixin(Settings settings) {
         super(settings);
     }
 
-    @Shadow
-    protected abstract int getAge(BlockState state);
-
-    @Shadow
-    public abstract int getMaxAge();
-
-    @Shadow
-    public abstract BlockState withAge(int age);
-
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
-        return 1.0/(double)((int)(25.0F / f) + 1);
+        return 0.2; //1/5
     }
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.growCrops) return false;
-        if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
-        return true;
+        if (state == null) return false;
+        if (!UnloadedActivity.instance.config.growCocoa) return false;
+        return getCurrentAgeUA(state) < getMaxAgeUA();
     }
-
     @Override public int getCurrentAgeUA(BlockState state) {
-        return this.getAge(state);
+        return state.get(AGE);
     }
 
     @Override public int getMaxAgeUA() {
-        return this.getMaxAge();
+        return MAX_AGE;
     }
 
     @Override
@@ -69,7 +57,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
         if (growthAmount == 0)
             return;
 
-        state = this.withAge(currentAge + growthAmount);
-        world.setBlockState(pos, state, 2);
+        state = state.with(AGE, currentAge + growthAmount);
+        world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
     }
 }

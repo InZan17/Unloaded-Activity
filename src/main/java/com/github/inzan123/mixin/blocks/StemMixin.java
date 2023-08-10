@@ -1,7 +1,6 @@
 package com.github.inzan123.mixin.blocks;
 
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.*;
@@ -11,20 +10,17 @@ import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
 import static java.lang.Math.min;
-import static java.lang.Math.pow;
 
 @Mixin(StemBlock.class)
-public abstract class StemSimulateTimeMixin extends PlantBlock {
+public abstract class StemMixin extends PlantBlock {
 
-    public StemSimulateTimeMixin(Settings settings, GourdBlock gourdBlock) {
+    public StemMixin(Settings settings, GourdBlock gourdBlock) {
         super(settings);
         this.gourdBlock = gourdBlock;
     }

@@ -1,54 +1,58 @@
 package com.github.inzan123.mixin.blocks;
 
-import com.github.inzan123.SimulateRandomTicks;
+
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CropBlock;
 import net.minecraft.block.PlantBlock;
-import net.minecraft.block.SweetBerryBushBlock;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.event.GameEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import static java.lang.Math.pow;
+@Mixin(CropBlock.class)
+public abstract class CropMixin extends PlantBlock {
 
-@Mixin(SweetBerryBushBlock.class)
-public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
-    public BerryBushSimulateTimeMixin(Settings settings) {
+    public CropMixin(Settings settings) {
         super(settings);
     }
 
-    @Shadow @Final public static IntProperty AGE;
-    @Shadow @Final public static int MAX_AGE;
+    @Shadow
+    protected abstract int getAge(BlockState state);
+
+    @Shadow
+    public abstract int getMaxAge();
+
+    @Shadow
+    public abstract BlockState withAge(int age);
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        return 0.2;
+        float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
+        return 1.0/(double)((int)(25.0F / f) + 1);
     }
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        if (state == null) return false;
-        if (!UnloadedActivity.instance.config.growSweetBerries) return false;
-        if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
+        if (!UnloadedActivity.instance.config.growCrops) return false;
+        if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
         return true;
     }
 
     @Override public int getCurrentAgeUA(BlockState state) {
-        return state.get(AGE);
+        return this.getAge(state);
     }
 
     @Override public int getMaxAgeUA() {
-        return MAX_AGE;
+        return this.getMaxAge();
     }
 
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        int age = getCurrentAgeUA(state);
-        int ageDifference = getMaxAgeUA() - age;
+        int currentAge = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
         double randomPickChance = getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
@@ -58,8 +62,7 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
         if (growthAmount == 0)
             return;
 
-        state = state.with(AGE, age + growthAmount);
+        state = this.withAge(currentAge + growthAmount);
         world.setBlockState(pos, state, 2);
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
     }
 }
