@@ -27,7 +27,8 @@
     "AbstractBlockMixin",
     "BlockEntityMixin",
     "ServerWorldMixin",
-    "DirectBlockEntityTickInvokerMixin"
+    "DirectBlockEntityTickInvokerMixin",
+    "CropBlockInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

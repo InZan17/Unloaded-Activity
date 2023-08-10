@@ -3,6 +3,7 @@ package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
@@ -13,6 +14,8 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import static java.lang.Math.pow;
 
@@ -21,11 +24,6 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
 
     public CropSimulateTimeMixin(Settings settings) {
         super(settings);
-    }
-
-    @Shadow
-    protected static float getAvailableMoisture(Block block, BlockView world, BlockPos pos) {
-        return 0;
     }
 
     @Shadow
@@ -39,7 +37,7 @@ public abstract class CropSimulateTimeMixin extends PlantBlock {
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        float f = getAvailableMoisture(this, world, pos);
+        float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {

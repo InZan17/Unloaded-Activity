@@ -3,6 +3,7 @@ package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
@@ -42,50 +43,9 @@ public abstract class StemSimulateTimeMixin extends PlantBlock {
         return 7;
     }
 
-    public float getAvailableMoisture(Block block, BlockView world, BlockPos pos) {
-        float f = 1.0F;
-        BlockPos blockPos = pos.down();
-
-        for(int i = -1; i <= 1; ++i) {
-            for(int j = -1; j <= 1; ++j) {
-                float g = 0.0F;
-                BlockState blockState = world.getBlockState(blockPos.add(i, 0, j));
-                if (blockState.isOf(Blocks.FARMLAND)) {
-                    g = 1.0F;
-                    if (blockState.get(FarmlandBlock.MOISTURE) > 0) {
-                        g = 3.0F;
-                    }
-                }
-
-                if (i != 0 || j != 0) {
-                    g /= 4.0F;
-                }
-
-                f += g;
-            }
-        }
-
-        BlockPos blockPos2 = pos.north();
-        BlockPos blockPos3 = pos.south();
-        BlockPos blockPos4 = pos.west();
-        BlockPos blockPos5 = pos.east();
-        boolean bl = world.getBlockState(blockPos4).isOf(block) || world.getBlockState(blockPos5).isOf(block);
-        boolean bl2 = world.getBlockState(blockPos2).isOf(block) || world.getBlockState(blockPos3).isOf(block);
-        if (bl && bl2) {
-            f /= 2.0F;
-        } else {
-            boolean bl3 = world.getBlockState(blockPos4.north()).isOf(block) || world.getBlockState(blockPos5.north()).isOf(block) || world.getBlockState(blockPos5.south()).isOf(block) || world.getBlockState(blockPos4.south()).isOf(block);
-            if (bl3) {
-                f /= 2.0F;
-            }
-        }
-
-        return f;
-    }
-
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        float f = getAvailableMoisture(this, world, pos);
+        float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
