@@ -5,8 +5,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 
-import static java.lang.Math.max;
-import static java.lang.Math.pow;
+import static java.lang.Math.*;
+import static java.lang.Math.floorMod;
 
 public interface SimulateRandomTicks {
     default double getChoose(long successes, long draws) {
@@ -71,5 +71,31 @@ public interface SimulateRandomTicks {
             }
         }
         return maxOccurrences;
+    }
+
+    default long getTicksSinceTime(long currentTime, long timePassed, int startTime, int stopTime) {
+
+        long dayLength = 24000;
+
+        long window = floorMod(stopTime-startTime-1, dayLength)+1; //we + and - 1 because we want dayLength to still be dayLength and not 0
+
+        //the amount of ticks we calculated from the amount of days passed.
+        long usefulTicks = window * (timePassed / dayLength);
+
+        long previousTime = currentTime-timePassed;
+
+        long currentIncompleteTime = floorMod(currentTime-startTime, dayLength);
+        long previousIncompleteTime = floorMod(previousTime-startTime, dayLength);
+
+        //the amount of ticks we calculated from the incomplete day.
+        long restOfDayTicks = min(currentIncompleteTime, window) - min(previousIncompleteTime, window);
+
+        if (currentIncompleteTime < previousIncompleteTime)
+            restOfDayTicks+=window;
+
+        if (restOfDayTicks < 0)
+            restOfDayTicks = floorMod(restOfDayTicks, window);
+
+        return restOfDayTicks + usefulTicks;
     }
 }

@@ -54,25 +54,10 @@ public abstract class SaplingMixin extends PlantBlock {
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
-            long dayLength = 24000;
-            long stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
-            long startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
-            long offset = dayLength - startGrowTime; // we use this offset to pretend crops start growing at 0 ticks
+            int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
+            int startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
 
-            long growTimeWindow = stopGrowTime + offset;
-
-            long currentTime = floorMod(min(floorMod(world.getTimeOfDay() + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
-
-            long previousTime = floorMod(min(floorMod(world.getTimeOfDay() - timePassed + offset, dayLength) - offset, stopGrowTime), growTimeWindow);
-
-            long usefulTicks = growTimeWindow * (timePassed / dayLength);
-            long restOfDayTicks = (currentTime - previousTime) % growTimeWindow;
-
-            if (floorMod(timePassed, dayLength) > growTimeWindow)
-                if (restOfDayTicks == 0)
-                    restOfDayTicks = growTimeWindow;
-
-            timePassed = restOfDayTicks + usefulTicks;
+            timePassed = getTicksSinceTime(world.getTimeOfDay(),timePassed,startGrowTime,stopGrowTime);
         }
 
 
