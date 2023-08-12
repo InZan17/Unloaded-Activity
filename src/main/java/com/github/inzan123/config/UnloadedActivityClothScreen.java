@@ -181,6 +181,15 @@ public class UnloadedActivityClothScreen {
 
         randomTicks.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.hatchTurtleEggs"), config.hatchTurtleEggs)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.hatchTurtleEggs = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.hatchTurtleEggs.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.growBamboo = newValue)

@@ -22,6 +22,7 @@
     "blocks.BambooMixin",
     "blocks.BambooSaplingMixin",
     "blocks.TorchFlowerMixin",
+    "blocks.TurtleEggMixin",
     "entities.PassiveEntityMixin",
     "EntityMixin",
     "AbstractBlockMixin",
