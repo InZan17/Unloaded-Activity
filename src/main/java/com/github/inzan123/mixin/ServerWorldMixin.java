@@ -42,6 +42,9 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	@Inject(at = @At("HEAD"), method = "tickChunk")
 	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
 
+		if (this.isClient())
+			return;
+
 		LongComponent lastTick = chunk.getComponent(LASTCHUNKTICK);
 
 		long currentTime = this.getTimeOfDay();
