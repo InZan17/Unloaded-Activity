@@ -35,6 +35,8 @@ public abstract class SaplingMixin extends PlantBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.14285714285; // 1/7
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;

@@ -33,6 +33,8 @@ public abstract class CropMixin extends PlantBlock {
         float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growCrops) return false;
         if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;

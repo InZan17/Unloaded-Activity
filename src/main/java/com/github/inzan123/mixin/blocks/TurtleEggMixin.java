@@ -49,6 +49,8 @@ public abstract class TurtleEggMixin extends Block {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.002; //1/500
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
 
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!isSandBelow(world, pos)) return false;

@@ -23,6 +23,8 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
     @Shadow @Final private static Direction[] DIRECTIONS;
 
     @Shadow @Final public static boolean canGrowIn(BlockState state) {return true;}
+    @Override
+    public boolean implementsSimulate() {return true;}
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {

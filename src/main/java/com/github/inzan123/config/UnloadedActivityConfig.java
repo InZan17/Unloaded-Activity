@@ -4,6 +4,7 @@ public class UnloadedActivityConfig {
 
     public boolean debugLogs = false;
     public boolean randomizeBlockUpdates = false;
+    public boolean rememberBlockPositions = false;
 
 
 

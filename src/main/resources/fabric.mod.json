@@ -6,8 +6,10 @@
   "custom": {
     "cardinal-components": [
       "unloadedactivity:last-chunk-tick",
-      "unloadedactivity:last-blockentity-tick",
+      "unloadedactivity:chunk-sim-blocks",
+      "unloadedactivity:chunk-sim-ver",
       "unloadedactivity:last-entity-tick",
+      "unloadedactivity:last-blockentity-tick",
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {

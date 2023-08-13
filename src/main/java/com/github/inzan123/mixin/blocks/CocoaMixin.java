@@ -29,6 +29,8 @@ public abstract class CocoaMixin extends HorizontalFacingBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2; //1/5
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growCocoa) return false;

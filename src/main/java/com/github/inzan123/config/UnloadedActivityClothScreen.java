@@ -43,6 +43,15 @@ public class UnloadedActivityClothScreen {
 
         general.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions"), config.rememberBlockPositions)
+                        .setDefaultValue(false)
+                        .setSaveConsumer(newValue -> config.rememberBlockPositions = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions.tooltip"))
+                        .build()
+        );
+
+        general.addEntry(
+                configEntryBuilder
                         .startIntField(Text.translatable("text.config.unloaded-activity.option.tickDifferenceThreshold"), config.tickDifferenceThreshold)
                         .setDefaultValue(100)
                         .setMin(1)

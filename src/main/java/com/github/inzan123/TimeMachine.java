@@ -14,9 +14,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static com.github.inzan123.MyComponents.CHUNKSIMBLOCKS;
+import static com.github.inzan123.MyComponents.CHUNKSIMVER;
+
 public class TimeMachine {
-    public static void simulateRandomTicks(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
-        if (!UnloadedActivity.instance.config.enableRandomTicks) return;
+    public static long simulateRandomTicks(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
+        if (!UnloadedActivity.instance.config.enableRandomTicks) return 0;
         
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
@@ -27,40 +30,93 @@ public class TimeMachine {
 
         ArrayList<BlockPos> blockPosArray = new ArrayList<>();
 
-        for (int z=0; z<16;z++)
-            for (int x=0; x<16;x++)
-                for (int y=minY; y<maxY;y++) {
-                    BlockPos position = new BlockPos(x,y,z);
-                    ChunkPos chunkPos = chunk.getPos();
-                    BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-                    BlockState state = chunk.getBlockState(position);
-                    Block block = state.getBlock();
-                    if (block.canSimulate(state, world, notChunkBlockPos)) blockPosArray.add(position);
+        LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
+
+        ArrayList<Long> newLongArray = new ArrayList<>();
+
+        UnloadedActivity.LOGGER.info(""+chunkSimVer.getValue());
+
+        if (UnloadedActivity.instance.config.rememberBlockPositions && chunkSimVer.getValue() == UnloadedActivity.chunkSimVer) {
+
+
+            LongArrayComponent chunkSimBlocks = chunk.getComponent(CHUNKSIMBLOCKS);
+
+            ArrayList<Long> currentLongArray = chunkSimBlocks.getValue();
+
+            if (UnloadedActivity.instance.config.debugLogs)
+                UnloadedActivity.LOGGER.info("Looping through "+currentLongArray.size()+" known positions.");
+
+            boolean removedSomething = false;
+
+            for (long longPos : currentLongArray) {
+                BlockPos pos = BlockPos.fromLong(longPos);
+                BlockState state = world.getBlockState(pos);
+                Block block = state.getBlock();
+                if (block.implementsSimulate()) {
+                    newLongArray.add(longPos);
+                    blockPosArray.add(pos);
+                } else {
+                    removedSomething = true;
+                }
+            }
+            if (removedSomething) {
+                chunkSimBlocks.setValue(newLongArray);
+                if (UnloadedActivity.instance.config.debugLogs)
+                    UnloadedActivity.LOGGER.info("Removed "+(currentLongArray.size()-newLongArray.size())+" positions.");
+            }
+
+        } else {
+            if (UnloadedActivity.instance.config.debugLogs)
+                UnloadedActivity.LOGGER.info("Looping through entire chunk.");
+            for (int z=0; z<16;z++)
+                for (int x=0; x<16;x++)
+                    for (int y=minY; y<maxY;y++) {
+                        BlockPos chunkBlockPos = new BlockPos(x,y,z);
+                        ChunkPos chunkPos = chunk.getPos();
+                        BlockPos worldBlockPos = chunkBlockPos.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+                        BlockState state = chunk.getBlockState(chunkBlockPos);
+                        Block block = state.getBlock();
+                        if (block.implementsSimulate()) {
+                            blockPosArray.add(worldBlockPos);
+                            if (UnloadedActivity.instance.config.rememberBlockPositions)
+                                newLongArray.add(worldBlockPos.asLong());
+                        }
+            }
+            if (UnloadedActivity.instance.config.rememberBlockPositions) {
+                UnloadedActivity.LOGGER.info("Saved "+newLongArray.size()+" positions.");
+                LongArrayComponent chunkSimBlocks = chunk.getComponent(CHUNKSIMBLOCKS);
+                chunkSimBlocks.setValue(newLongArray);
+                chunkSimVer.setValue(UnloadedActivity.chunkSimVer);
+                chunk.setNeedsSaving(true);
+            }
         }
 
         if (UnloadedActivity.instance.config.randomizeBlockUpdates)
             Collections.shuffle(blockPosArray);
 
         for (BlockPos blockPos : blockPosArray)
-            simulateBlockRandomTicks(blockPos, chunk, world, timeDifference, randomTickSpeed);
+            simulateBlockRandomTicks(blockPos, world, timeDifference, randomTickSpeed);
 
-        if (UnloadedActivity.instance.config.debugLogs) UnloadedActivity.LOGGER.info((Instant.now().toEpochMilli() - now) + "ms to simulate random ticks on chunk after " + timeDifference + " ticks.");
+        long msTime = 0;
+
+        if (UnloadedActivity.instance.config.debugLogs) {
+            msTime = Instant.now().toEpochMilli() - now;
+            UnloadedActivity.LOGGER.info(msTime + "ms to simulate random ticks on chunk after " + timeDifference + " ticks.");
+        };
+        return msTime;
     }
 
-    public static void simulateBlockRandomTicks(BlockPos position, WorldChunk chunk, ServerWorld world, long timeDifference, int randomTickSpeed) {
+    public static void simulateBlockRandomTicks(BlockPos pos, ServerWorld world, long timeDifference, int randomTickSpeed) {
         if (!UnloadedActivity.instance.config.enableRandomTicks)
             return;
 
-        BlockState state = chunk.getBlockState(position);
+        BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
 
-        ChunkPos chunkPos = chunk.getPos();
-        BlockPos notChunkBlockPos = position.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
-
-        if (!block.canSimulate(state, world, notChunkBlockPos))
+        if (!block.canSimulate(state, world, pos))
             return;
 
-        block.simulateTime(state, world, notChunkBlockPos, world.random, timeDifference, randomTickSpeed);
+        block.simulateTime(state, world, pos, world.random, timeDifference, randomTickSpeed);
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {

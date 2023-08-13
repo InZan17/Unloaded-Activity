@@ -16,6 +16,10 @@ import net.minecraft.util.Identifier;
 public final class MyComponents implements ChunkComponentInitializer, BlockComponentInitializer, EntityComponentInitializer {
     public static final ComponentKey<LongComponent> LASTCHUNKTICK =
             ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier("unloadedactivity","last-chunk-tick"), LongComponent.class);
+    public static final ComponentKey<LongArrayComponent> CHUNKSIMBLOCKS =
+            ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier("unloadedactivity","chunk-sim-blocks"), LongArrayComponent.class);
+    public static final ComponentKey<LongComponent> CHUNKSIMVER =
+            ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier("unloadedactivity","chunk-sim-ver"), LongComponent.class);
     public static final ComponentKey<LongComponent> LASTBLOCKENTITYTICK =
             ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier("unloadedactivity","last-blockentity-tick"), LongComponent.class);
     public static final ComponentKey<LongComponent> LASTENTITYTICK =
@@ -25,6 +29,8 @@ public final class MyComponents implements ChunkComponentInitializer, BlockCompo
     @Override
     public void registerChunkComponentFactories(ChunkComponentFactoryRegistry registry) {
         registry.register(LASTCHUNKTICK, it -> new LastTickComponent());
+        registry.register(CHUNKSIMBLOCKS, it -> new ChunkSimBlocksComponent());
+        registry.register(CHUNKSIMVER, it -> new ChunkSimVerComponent());
         registry.register(MAGIK, it -> new EmptyComponent());
     }
 

@@ -34,6 +34,8 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
     public double getOdds(ServerWorld world, BlockPos pos) {
         return growthChance;
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growPlantStems) return false;
         return true;

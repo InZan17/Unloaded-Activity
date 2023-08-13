@@ -28,6 +28,8 @@ public abstract class CactusMixin extends Block {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 1;
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
 
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSugarCane) return false;

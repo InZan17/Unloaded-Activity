@@ -32,6 +32,8 @@ public abstract class BambooSaplingMixin extends Block {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 1d/3d;
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
 
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;

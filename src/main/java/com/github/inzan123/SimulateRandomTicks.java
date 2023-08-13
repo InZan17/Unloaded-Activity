@@ -34,8 +34,11 @@ public interface SimulateRandomTicks {
     default int getMaxHeightUA() {
         return 0;
     }
-    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    default boolean implementsSimulate() {
         return false;
+    }
+    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+        return this.implementsSimulate();
     }
     default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
 

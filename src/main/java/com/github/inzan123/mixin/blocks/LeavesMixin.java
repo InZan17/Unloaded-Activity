@@ -27,6 +27,9 @@ public abstract class LeavesMixin extends Block{
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 1;
     }
+
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.decayLeaves) return false;
         return shouldDecay(state);

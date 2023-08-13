@@ -25,6 +25,8 @@ public abstract class OxidizableStairsBlockMixin extends StairsBlock implements 
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.05688889f;
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Shadow
     public OxidationLevel getDegradationLevel() {
         return null;

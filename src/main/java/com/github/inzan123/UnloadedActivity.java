@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class UnloadedActivity implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("unloaded-activity");
+	public static final long chunkSimVer = 1;
 	public UnloadedActivityConfig config;
 	public static UnloadedActivity instance;
 	@Override

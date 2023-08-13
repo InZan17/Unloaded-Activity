@@ -1,5 +1,6 @@
 package com.github.inzan123.mixin;
 
+import com.github.inzan123.LongArrayComponent;
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.TimeMachine;
 import com.github.inzan123.UnloadedActivity;
@@ -24,7 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import static com.github.inzan123.MyComponents.LASTCHUNKTICK;
+import static com.github.inzan123.MyComponents.*;
+import static java.lang.Integer.min;
 import static java.lang.Long.max;
 import static java.lang.Integer.max;
 
@@ -36,6 +38,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	}
 	public int updateCount = 0;
 	public boolean hasSlept = false;
+	public int msTime = 0;
 
 	@Shadow public ServerWorld toServerWorld() {return null;}
 
@@ -58,7 +61,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			if (timeDifference > differenceThreshold) {
 				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
 					++updateCount;
-					TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
+					msTime += TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
 					return;
 				}
@@ -66,6 +69,10 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		}
 
 		lastTick.setValue(currentTime);
+		if (!UnloadedActivity.instance.config.rememberBlockPositions) {
+			LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
+			chunkSimVer.setValue(0);
+		}
 	}
 
 	private int getMultiplier() {
@@ -74,6 +81,12 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		if (UnloadedActivity.instance.config.debugLogs && updateCount != 0) {
+			int averageMs = (int)((float) msTime / updateCount + 0.5);
+			UnloadedActivity.LOGGER.info("Average chunk update time for "+updateCount+" chunks: "+averageMs+"ms");
+			UnloadedActivity.LOGGER.info("Total chunk update time for "+updateCount+" chunks: "+msTime+"ms");
+		}
+		msTime = 0;
 		updateCount = 0;
 		hasSlept = false;
 	}

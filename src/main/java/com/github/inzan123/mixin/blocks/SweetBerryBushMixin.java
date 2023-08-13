@@ -26,6 +26,8 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
+    @Override
+    public boolean implementsSimulate() {return true;}
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
