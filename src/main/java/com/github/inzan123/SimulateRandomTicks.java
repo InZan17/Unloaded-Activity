@@ -9,10 +9,10 @@ import static java.lang.Math.*;
 import static java.lang.Math.floorMod;
 
 public interface SimulateRandomTicks {
-    default double getChoose(long successes, long draws) {
+    default double getChoose(long x, long y) {
         double choose = 1;
-        for (int j = 0; j < successes; j++) {
-            choose *= (double) (draws - j) /(j+1);
+        for (int i = 0; i < x; i++) {
+            choose *= (double) (y - i) / (i+1);
         }
         return choose;
     }
@@ -43,6 +43,10 @@ public interface SimulateRandomTicks {
     default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
 
     default int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+        return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
+    }
+
+    default int getOccurrencesBinomial(long cycles, double odds, int maxOccurrences,  Random random) {
 
         if (odds <= 0)
             return 0;
@@ -58,7 +62,7 @@ public interface SimulateRandomTicks {
         double randomFloat = random.nextDouble();
 
         for (int i = 0; i<maxOccurrences;i++) {
-            
+
             if (i == cycles) return i;
 
             if (i != 0) {
