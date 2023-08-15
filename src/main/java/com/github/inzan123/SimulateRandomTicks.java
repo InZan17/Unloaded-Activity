@@ -43,6 +43,8 @@ public interface SimulateRandomTicks {
     default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
 
     default int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+        if (UnloadedActivity.instance.config.debugLogs)
+            UnloadedActivity.LOGGER.info("Ran getOccurrences. cycles: "+cycles+" odds: "+odds+" maxOccurrences: "+maxOccurrences);
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
