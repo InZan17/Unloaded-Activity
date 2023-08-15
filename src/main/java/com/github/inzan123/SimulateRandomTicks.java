@@ -46,12 +46,14 @@ public interface SimulateRandomTicks {
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
+    //41ms, 200 chunks
     default int getOccurrencesBinomial(long cycles, double odds, int maxOccurrences,  Random random) {
 
         if (odds <= 0)
             return 0;
 
-        maxOccurrences = max(maxOccurrences, 0);
+        if (maxOccurrences <= 0)
+            return 0;
 
         double choose = 1;
 
@@ -78,6 +80,29 @@ public interface SimulateRandomTicks {
             }
         }
         return maxOccurrences;
+    }
+
+    //595ms, 200 chunks
+    default int getOccurrencesNormal(long cycles, double odds, int maxOccurrences,  Random random) {
+
+        if (odds <= 0)
+            return 0;
+
+        if (maxOccurrences <= 0)
+            return 0;
+
+        int successes = 0;
+
+        for (int i = 0; i<cycles;i++) {
+
+            if (successes >= maxOccurrences)
+                break;
+
+            if (random.nextDouble() < odds) {
+                ++successes;
+            }
+        }
+        return successes;
     }
 
     default long getTicksSinceTime(long currentTime, long timePassed, int startTime, int stopTime) {
