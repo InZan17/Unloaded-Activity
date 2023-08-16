@@ -49,6 +49,7 @@ public abstract class StemMixin extends PlantBlock {
     @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growStems) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
+        if (NumOfValidPositions(pos, world) == 0 && this.getCurrentAgeUA(state) == this.getMaxAgeUA()) return false;
         return true;
     }
 
@@ -59,7 +60,7 @@ public abstract class StemMixin extends PlantBlock {
         int maxAge = this.getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
 
-        //We dont check ageDifference since if difference is 0 then it still needs to calculate pumpkin/melon growth
+        int validPositions = NumOfValidPositions(pos, world);
 
         double randomPickChance = getRandomPickOdds(randomTickSpeed);
 
@@ -67,16 +68,16 @@ public abstract class StemMixin extends PlantBlock {
 
         double totalOdds = randomPickChance * randomGrowChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
+        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
 
         if (growthAmount != 0) {
             state = state.with(AGE, min(currentAge + growthAmount, maxAge));
             world.setBlockState(pos, state, 2);
         }
 
-        if (currentAge + growthAmount > maxAge) { // it surpasses the max age of crop, try to grow fruit
+        if (currentAge + growthAmount > maxAge && validPositions != 0) { // it surpasses the max age of crop and has space, try to grow fruit
 
-            double chanceForFreeSpace = 0.25 * NumOfValidPositions(pos, world);
+            double chanceForFreeSpace = 0.25 * validPositions;
             int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
 
             if (growsFruit == 0)
