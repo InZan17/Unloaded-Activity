@@ -2,6 +2,7 @@ package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.LongComponent;
 import com.github.inzan123.UnloadedActivity;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TurtleEggBlock;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import static com.github.inzan123.MyComponents.LASTENTITYTICK;
+import static java.lang.Math.floorMod;
 import static java.lang.Math.min;
 
 @Mixin(TurtleEggBlock.class)
@@ -73,10 +75,41 @@ public abstract class TurtleEggMixin extends Block {
         int maxAge = getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
 
-        int growthAmount = getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
+        int growthAmount = 0;
+        long leftover = 0;
 
-        if (ageDifference-growthAmount >= 0)
-            growthAmount += getOccurrences(slowTicks, totalOdds, ageDifference-growthAmount+1, random);
+        if (false) { //replace with a "Very Accurate Simulations" options later pls
+            growthAmount = getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
+
+            if (ageDifference-growthAmount >= 0)
+                growthAmount += getOccurrences(slowTicks, totalOdds, ageDifference-growthAmount+1, random);
+        } else {
+            long originTime = world.getTimeOfDay()-timePassed;
+            while(timePassed > 0 && ageDifference-growthAmount >= 0) {
+                UnloadedActivity.LOGGER.info(""+timePassed);
+                long localTime = originTime % 24000;
+                UnloadedActivity.LOGGER.info(""+localTime);
+                if (localTime < 21061 || localTime >= 21905) {
+                    //time until 21061
+                    long remaining = min(floorMod(21061-localTime, 24000), timePassed);
+                    timePassed-=remaining;
+                    originTime+=remaining;
+                    OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, hatchChance, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    growthAmount += oal.occurrences;
+                    leftover = oal.leftover;
+                } else {
+                    //time until 21905
+                    long remaining = min(floorMod(21905-localTime, 24000), timePassed);
+                    timePassed-=remaining;
+                    originTime+=remaining;
+                    OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, 1.0, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    growthAmount += oal.occurrences;
+                    leftover = oal.leftover;
+                }
+            }
+            leftover += timePassed;
+        }
+
 
         if (growthAmount == 0)
             return;
@@ -97,7 +130,7 @@ public abstract class TurtleEggMixin extends Block {
                 LongComponent lastTick = turtle.getComponent(LASTENTITYTICK);
                 lastTick.setValue(world.getTimeOfDay());
 
-                turtle.setBreedingAge(-24000);
+                turtle.setBreedingAge((int) min(-24000+leftover,0));
                 turtle.setHomePos(pos);
                 turtle.refreshPositionAndAngles(pos.getX() + 0.3 + i * 0.2, pos.getY(), pos.getZ() + 0.3, 0, 0);
                 world.spawnEntity(turtle);
