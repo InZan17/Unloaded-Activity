@@ -15,8 +15,8 @@ import static java.lang.Math.floorMod;
 public interface SimulateRandomTicks {
 
     public class OccurrencesAndLeftover {
-        int occurrences;
-        long leftover;
+        public int occurrences;
+        public long leftover;
         public OccurrencesAndLeftover(int occurrences, long leftover) {
             this.occurrences = occurrences;
             this.leftover = leftover;
@@ -110,7 +110,7 @@ public interface SimulateRandomTicks {
         double newCycles = cycles*multiplier;
         long randRoundCycles = randomRound(newCycles, random);
         OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicks(randRoundCycles, normalOdds, maxOccurrences, random);
-        oal.occurrences = (int) (oal.occurrences/multiplier);
+        oal.leftover = (int) (oal.leftover/multiplier);
         return oal;
     }
 
