@@ -1,14 +1,27 @@
 package com.github.inzan123;
 
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.storage.StorageIoWorker;
+
+import java.nio.file.Path;
 
 import static java.lang.Math.*;
 import static java.lang.Math.floorMod;
 
 public interface SimulateRandomTicks {
+
+    public class OccurrencesAndLeftover {
+        int occurrences;
+        long leftover;
+        public OccurrencesAndLeftover(int occurrences, long leftover) {
+            this.occurrences = occurrences;
+            this.leftover = leftover;
+        }
+    }
     default double getChoose(long x, long y) {
         double choose = 1;
         for (int i = 0; i < x; i++) {
@@ -84,27 +97,47 @@ public interface SimulateRandomTicks {
         return maxOccurrences;
     }
 
+    default long randomRound(double number, Random random) {
+        return (long) floor(number+random.nextDouble());
+    }
+
+    default OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFast(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences,  Random random) {
+        if (UnloadedActivity.instance.config.debugLogs)
+            UnloadedActivity.LOGGER.info("Ran getOccurrencesAndLeftoverTicksFast. cycles: "+cycles+" normalOdds: "+normalOdds+" maxOccurrences: "+maxOccurrences);
+
+        double multiplier = randomTickSpeed/4096.0;
+
+        double newCycles = cycles*multiplier;
+        long randRoundCycles = randomRound(newCycles, random);
+        OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicks(randRoundCycles, normalOdds, maxOccurrences, random);
+        oal.occurrences = (int) (oal.occurrences/multiplier);
+        return oal;
+    }
+
     //595ms, 200 chunks
-    default int getOccurrencesNormal(long cycles, double odds, int maxOccurrences,  Random random) {
+    default OccurrencesAndLeftover getOccurrencesAndLeftoverTicks(long cycles, double odds, int maxOccurrences,  Random random) {
 
         if (odds <= 0)
-            return 0;
+            return new OccurrencesAndLeftover(0,0);
 
         if (maxOccurrences <= 0)
-            return 0;
+            return new OccurrencesAndLeftover(0,cycles);
 
         int successes = 0;
+        long leftover = 0;
 
         for (int i = 0; i<cycles;i++) {
 
-            if (successes >= maxOccurrences)
+            if (successes >= maxOccurrences) {
+                leftover = cycles-i;
                 break;
+            }
 
             if (random.nextDouble() < odds) {
                 ++successes;
             }
         }
-        return successes;
+        return new OccurrencesAndLeftover(successes, leftover);
     }
 
     default long getTicksSinceTime(long currentTime, long timePassed, int startTime, int stopTime) {
