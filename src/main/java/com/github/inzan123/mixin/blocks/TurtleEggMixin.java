@@ -81,11 +81,13 @@ public abstract class TurtleEggMixin extends Block {
         int growthAmount = 0;
         long leftover = 0;
 
-        if (!UnloadedActivity.instance.config.ageTurtlesAfterHatch) {
+        if (!UnloadedActivity.instance.config.accurateTurtleAgeAfterHatch) {
             growthAmount = getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
 
             if (ageDifference-growthAmount >= 0)
                 growthAmount += getOccurrences(slowTicks, totalOdds, ageDifference-growthAmount+1, random);
+
+            leftover = (long)(random.nextFloat()*(float)(timePassed/(ageDifference+1)));
         } else {
             long originTime = world.getTimeOfDay()-timePassed;
             while(timePassed > 0 && ageDifference-growthAmount >= 0) {

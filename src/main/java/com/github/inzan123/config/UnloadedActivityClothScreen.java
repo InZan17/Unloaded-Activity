@@ -199,10 +199,10 @@ public class UnloadedActivityClothScreen {
 
         randomTicks.addEntry(
                 configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageTurtlesAfterHatch"), config.ageTurtlesAfterHatch)
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch"), config.accurateTurtleAgeAfterHatch)
                         .setDefaultValue(false)
-                        .setSaveConsumer(newValue -> config.ageTurtlesAfterHatch = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageTurtlesAfterHatch.tooltip"))
+                        .setSaveConsumer(newValue -> config.accurateTurtleAgeAfterHatch = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch.tooltip"))
                         .build()
         );
 
