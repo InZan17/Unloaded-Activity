@@ -108,9 +108,15 @@ public interface SimulateRandomTicks {
         double multiplier = randomTickSpeed/4096.0;
 
         double newCycles = cycles*multiplier;
+
         long randRoundCycles = randomRound(newCycles, random);
+
         OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicks(randRoundCycles, normalOdds, maxOccurrences, random);
-        oal.leftover = (int) (oal.leftover/multiplier);
+        if (oal.occurrences == maxOccurrences) {
+            long cycleDifference = (long) (cycles - (randRoundCycles/multiplier));
+
+            oal.leftover = (long) (oal.leftover/multiplier + cycleDifference*random.nextFloat());
+        }
         return oal;
     }
 
