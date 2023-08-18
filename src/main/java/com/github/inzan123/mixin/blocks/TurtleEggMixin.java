@@ -64,7 +64,10 @@ public abstract class TurtleEggMixin extends Block {
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         //at a certain point in the day the odds of hatching become 100% instead of 1/500
-        long quickTicks = getTicksSinceTime(world.getTimeOfDay(), timePassed, 21061, 21905);
+        int quickHatchStart = 21061;
+        int quickHatchEnd = 21905;
+        int dayLength = 24000;
+        long quickTicks = getTicksSinceTime(world.getTimeOfDay(), timePassed, quickHatchStart, quickHatchEnd);
         long slowTicks = timePassed-quickTicks;
 
         double randomPickChance = getRandomPickOdds(randomTickSpeed);
@@ -87,19 +90,17 @@ public abstract class TurtleEggMixin extends Block {
             long originTime = world.getTimeOfDay()-timePassed;
             while(timePassed > 0 && ageDifference-growthAmount >= 0) {
                 UnloadedActivity.LOGGER.info(""+timePassed);
-                long localTime = originTime % 24000;
+                long localTime = originTime % dayLength;
                 UnloadedActivity.LOGGER.info(""+localTime);
-                if (localTime < 21061 || localTime >= 21905) {
-                    //time until 21061
-                    long remaining = min(floorMod(21061-localTime, 24000), timePassed);
+                if (localTime < quickHatchStart || localTime >= quickHatchEnd) {
+                    long remaining = min(floorMod(quickHatchStart-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
                     OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, hatchChance, randomTickSpeed, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 } else {
-                    //time until 21905
-                    long remaining = min(floorMod(21905-localTime, 24000), timePassed);
+                    long remaining = min(floorMod(quickHatchEnd-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
                     OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, 1.0, randomTickSpeed, ageDifference-growthAmount+1, random);
