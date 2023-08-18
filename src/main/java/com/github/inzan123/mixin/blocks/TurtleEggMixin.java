@@ -89,9 +89,7 @@ public abstract class TurtleEggMixin extends Block {
         } else {
             long originTime = world.getTimeOfDay()-timePassed;
             while(timePassed > 0 && ageDifference-growthAmount >= 0) {
-                UnloadedActivity.LOGGER.info(""+timePassed);
                 long localTime = originTime % dayLength;
-                UnloadedActivity.LOGGER.info(""+localTime);
                 if (localTime < quickHatchStart || localTime >= quickHatchEnd) {
                     long remaining = min(floorMod(quickHatchStart-localTime, dayLength), timePassed);
                     timePassed-=remaining;
