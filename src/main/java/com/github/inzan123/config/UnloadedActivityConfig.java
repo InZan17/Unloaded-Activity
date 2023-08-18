@@ -20,6 +20,7 @@ public class UnloadedActivityConfig {
     public boolean growPlantStems = true;
     public boolean growBamboo = true;
     public boolean hatchTurtleEggs = true;
+    public boolean ageTurtlesAfterHatch = false;
 
 
 

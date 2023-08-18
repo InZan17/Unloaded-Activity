@@ -81,7 +81,7 @@ public abstract class TurtleEggMixin extends Block {
         int growthAmount = 0;
         long leftover = 0;
 
-        if (false) { //replace with a "Very Accurate Simulations" options later pls
+        if (!UnloadedActivity.instance.config.ageTurtlesAfterHatch) {
             growthAmount = getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
 
             if (ageDifference-growthAmount >= 0)

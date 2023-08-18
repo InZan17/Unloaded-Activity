@@ -199,6 +199,15 @@ public class UnloadedActivityClothScreen {
 
         randomTicks.addEntry(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageTurtlesAfterHatch"), config.ageTurtlesAfterHatch)
+                        .setDefaultValue(false)
+                        .setSaveConsumer(newValue -> config.ageTurtlesAfterHatch = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.ageTurtlesAfterHatch.tooltip"))
+                        .build()
+        );
+
+        randomTicks.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.growBamboo = newValue)
