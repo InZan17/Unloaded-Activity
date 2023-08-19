@@ -105,7 +105,7 @@ public interface SimulateRandomTicks {
         if (UnloadedActivity.instance.config.debugLogs)
             UnloadedActivity.LOGGER.info("Ran getOccurrencesAndLeftoverTicksFast. cycles: "+cycles+" normalOdds: "+normalOdds+" maxOccurrences: "+maxOccurrences);
 
-        double multiplier = randomTickSpeed/4096.0;
+        double multiplier = getRandomPickOdds(randomTickSpeed);
 
         double newCycles = cycles*multiplier;
 
@@ -113,9 +113,10 @@ public interface SimulateRandomTicks {
 
         OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicks(randRoundCycles, normalOdds, maxOccurrences, random);
         if (oal.occurrences == maxOccurrences) {
-            long cycleDifference = (long) (cycles - (randRoundCycles/multiplier));
 
-            oal.leftover = (long) (oal.leftover/multiplier + cycleDifference*random.nextFloat());
+            double differenceRatio = newCycles/randRoundCycles;
+
+            oal.leftover = (long) ((oal.leftover-random.nextFloat())/multiplier*differenceRatio);
         }
         return oal;
     }
