@@ -131,7 +131,7 @@ public abstract class TurtleEggMixin extends Block {
                 LongComponent lastTick = turtle.getComponent(LASTENTITYTICK);
                 lastTick.setValue(world.getTimeOfDay());
 
-                turtle.setBreedingAge((int) min(-24000+leftover,0));
+                turtle.setBreedingAge((int) min(-24000+leftover,0)-1); //we do -1 so that it can grow up by itself and drop a scute
                 turtle.setHomePos(pos);
                 turtle.refreshPositionAndAngles(pos.getX() + 0.3 + i * 0.2, pos.getY(), pos.getZ() + 0.3, 0, 0);
                 world.spawnEntity(turtle);
