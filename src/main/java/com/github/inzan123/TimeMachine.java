@@ -34,8 +34,6 @@ public class TimeMachine {
 
         ArrayList<Long> newLongArray = new ArrayList<>();
 
-        UnloadedActivity.LOGGER.info(""+chunkSimVer.getValue());
-
         if (UnloadedActivity.instance.config.rememberBlockPositions && chunkSimVer.getValue() == UnloadedActivity.chunkSimVer) {
 
 
@@ -83,7 +81,6 @@ public class TimeMachine {
                         }
             }
             if (UnloadedActivity.instance.config.rememberBlockPositions) {
-                UnloadedActivity.LOGGER.info("Saved "+newLongArray.size()+" positions.");
                 LongArrayComponent chunkSimBlocks = chunk.getComponent(CHUNKSIMBLOCKS);
                 chunkSimBlocks.setValue(newLongArray);
                 chunkSimVer.setValue(UnloadedActivity.chunkSimVer);
