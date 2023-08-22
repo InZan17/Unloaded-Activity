@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.server.world.ServerWorld;
@@ -37,7 +38,7 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
         for(int i=0;i<DIRECTIONS.length;i++) {
@@ -62,7 +63,7 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
 
             int ageDifference = 4 - currentAge;
 
-            currentAge += getOccurrences(timePassed, totalOdds, ageDifference, random);
+            currentAge += Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
             Block block;
 

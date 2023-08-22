@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SaplingBlock;
@@ -59,11 +60,11 @@ public abstract class SaplingMixin extends PlantBlock {
             int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
             int startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
 
-            timePassed = getTicksSinceTime(world.getTimeOfDay(),timePassed,startGrowTime,stopGrowTime);
+            timePassed = Utils.getTicksSinceTime(world.getTimeOfDay(),timePassed,startGrowTime,stopGrowTime);
         }
 
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double randomGrowChance = getOdds(world, pos);
         double totalOdds = randomPickChance * randomGrowChance;
 
@@ -73,7 +74,7 @@ public abstract class SaplingMixin extends PlantBlock {
 
         int ageDifference = maxAge - currentAge;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
 
         if (growthAmount == 0)
             return;

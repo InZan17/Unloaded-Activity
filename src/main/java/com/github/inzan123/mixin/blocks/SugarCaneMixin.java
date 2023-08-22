@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SugarCaneBlock;
@@ -67,10 +68,10 @@ public abstract class SugarCaneMixin extends Block {
         int maxGrowth = countAirAbove(world, pos, heightDifference);
         int remainingAge = maxAge - age + maxGrowth*maxAge;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, remainingAge, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, remainingAge, random);
 
 
         if (growthAmount == 0)

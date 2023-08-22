@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SweetBerryBushBlock;
@@ -49,10 +50,10 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
         int age = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - age;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
             return;

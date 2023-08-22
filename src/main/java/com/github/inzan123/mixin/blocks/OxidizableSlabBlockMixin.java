@@ -2,6 +2,7 @@ package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -49,7 +50,7 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
         double tryDegradeOdds = getOdds(world, pos);
 
@@ -68,7 +69,7 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
         int currentAge = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - currentAge;
 
-        int ageAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (ageAmount == 0)
             return;

@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.LongComponent;
+import com.github.inzan123.OccurrencesAndLeftover;
 import com.github.inzan123.UnloadedActivity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.block.Block;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import static com.github.inzan123.MyComponents.LASTENTITYTICK;
+import com.github.inzan123.Utils;
 import static java.lang.Math.floorMod;
 import static java.lang.Math.min;
 
@@ -67,10 +69,10 @@ public abstract class TurtleEggMixin extends Block {
         int quickHatchStart = 21061;
         int quickHatchEnd = 21905;
         int dayLength = 24000;
-        long quickTicks = getTicksSinceTime(world.getTimeOfDay(), timePassed, quickHatchStart, quickHatchEnd);
+        long quickTicks = Utils.getTicksSinceTime(world.getTimeOfDay(), timePassed, quickHatchStart, quickHatchEnd);
         long slowTicks = timePassed-quickTicks;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double hatchChance = getOdds(world, pos);
         double totalOdds = randomPickChance * hatchChance;
 
@@ -82,10 +84,10 @@ public abstract class TurtleEggMixin extends Block {
         long leftover = 0;
 
         if (!UnloadedActivity.instance.config.accurateTurtleAgeAfterHatch) {
-            growthAmount = getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
+            growthAmount = Utils.getOccurrences(quickTicks, randomPickChance, ageDifference+1, random);
 
             if (ageDifference-growthAmount >= 0)
-                growthAmount += getOccurrences(slowTicks, totalOdds, ageDifference-growthAmount+1, random);
+                growthAmount += Utils.getOccurrences(slowTicks, totalOdds, ageDifference-growthAmount+1, random);
 
             leftover = (long)(random.nextFloat()*(float)(timePassed/(ageDifference+1)));
         } else {
@@ -96,14 +98,14 @@ public abstract class TurtleEggMixin extends Block {
                     long remaining = min(floorMod(quickHatchStart-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, hatchChance, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicksFast(remaining, hatchChance, randomTickSpeed, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 } else {
                     long remaining = min(floorMod(quickHatchEnd-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksFast(remaining, 1.0, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicksFast(remaining, 1.0, randomTickSpeed, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 }

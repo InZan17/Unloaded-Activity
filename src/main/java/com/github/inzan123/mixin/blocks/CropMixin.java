@@ -2,6 +2,7 @@ package com.github.inzan123.mixin.blocks;
 
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
@@ -56,10 +57,10 @@ public abstract class CropMixin extends PlantBlock {
         int maxAge = getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
             return;

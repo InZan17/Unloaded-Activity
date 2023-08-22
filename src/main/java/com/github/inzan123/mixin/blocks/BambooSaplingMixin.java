@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BambooLeaves;
@@ -54,12 +55,12 @@ public abstract class BambooSaplingMixin extends Block {
     @Override
     public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
         int maxGrowth = countAirAbove(world,pos, getMaxHeightUA());
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
         for(int i=1;i<growthAmount+1;i++) {
 

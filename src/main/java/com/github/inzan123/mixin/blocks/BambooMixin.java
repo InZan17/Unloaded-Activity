@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BambooLeaves;
 import net.minecraft.server.world.ServerWorld;
@@ -56,10 +57,10 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         int heightDifference = getMaxHeightUA() - height;
         int maxGrowth = countAirAbove(world,pos, heightDifference);
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
         for(int i=1+height;i<growthAmount+1+height;i++) {
 

@@ -2,6 +2,7 @@ package com.github.inzan123.mixin.blocks;
 
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import com.github.inzan123.mixin.CropBlockInvoker;
 import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
@@ -62,13 +63,13 @@ public abstract class StemMixin extends PlantBlock {
 
         int validPositions = NumOfValidPositions(pos, world);
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
         double randomGrowChance = getOdds(world, pos); //chance to grow for every pick
 
         double totalOdds = randomPickChance * randomGrowChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
 
         if (growthAmount != 0) {
             state = state.with(AGE, min(currentAge + growthAmount, maxAge));
@@ -78,7 +79,7 @@ public abstract class StemMixin extends PlantBlock {
         if (currentAge + growthAmount > maxAge && validPositions != 0) { // it surpasses the max age of crop and has space, try to grow fruit
 
             double chanceForFreeSpace = 0.25 * validPositions;
-            int growsFruit = getOccurrences(timePassed, chanceForFreeSpace, 1, random);
+            int growsFruit = Utils.getOccurrences(timePassed, chanceForFreeSpace, 1, random);
 
             if (growsFruit == 0)
                 return;

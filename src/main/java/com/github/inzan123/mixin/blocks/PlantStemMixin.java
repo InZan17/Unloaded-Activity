@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.blocks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
@@ -67,10 +68,10 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
         int ageDifference = maxAge - currentAge;
         ageDifference = min(ageDifference, min(ageDifference, countValidSteps(world, pos, this.growthDirection, ageDifference)));
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
             return;
