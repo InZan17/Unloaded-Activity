@@ -1,19 +1,14 @@
 package com.github.inzan123;
 
-import com.mojang.datafixers.DataFixer;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.storage.StorageIoWorker;
 
-import java.nio.file.Path;
-
-import static java.lang.Math.*;
 import static java.lang.Math.floorMod;
 
-public interface SimulateRandomTicks {
+public interface SimulateChunkBlocks {
     default double getOdds(ServerWorld world, BlockPos pos) {
         return 0;
     }

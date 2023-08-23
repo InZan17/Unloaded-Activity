@@ -1,6 +1,5 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
 import net.minecraft.block.*;
@@ -13,13 +12,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static java.lang.Math.pow;
+@Mixin(OxidizableBlock.class)
+public abstract class OxidizableBlockMixin extends Block implements Oxidizable {
 
-@Mixin(OxidizableStairsBlock.class)
-public abstract class OxidizableStairsBlockMixin extends StairsBlock implements Oxidizable {
-
-    public OxidizableStairsBlockMixin(BlockState baseBlockState, Settings settings) {
-        super(baseBlockState, settings);
+    public OxidizableBlockMixin(Settings settings) {
+        super(settings);
     }
 
     @Override

@@ -1,41 +1,42 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.PlantBlock;
-import net.minecraft.block.SweetBerryBushBlock;
+import net.minecraft.block.CocoaBlock;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(SweetBerryBushBlock.class)
-public abstract class SweetBerryBushMixin extends PlantBlock {
-    public SweetBerryBushMixin(Settings settings) {
+@Mixin(CocoaBlock.class)
+public abstract class CocoaMixin extends HorizontalFacingBlock {
+
+    @Shadow @Final
+    public static int MAX_AGE;
+    @Shadow @Final
+    public static IntProperty AGE;
+
+    protected CocoaMixin(Settings settings) {
         super(settings);
     }
 
-    @Shadow @Final public static IntProperty AGE;
-    @Shadow @Final public static int MAX_AGE;
-
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        return 0.2;
+        return 0.2; //1/5
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
     @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
-        if (!UnloadedActivity.instance.config.growSweetBerries) return false;
-        if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
-        return true;
+        if (!UnloadedActivity.instance.config.growCocoa) return false;
+        return getCurrentAgeUA(state) < getMaxAgeUA();
     }
-
     @Override public int getCurrentAgeUA(BlockState state) {
         return state.get(AGE);
     }
@@ -47,8 +48,9 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
     @Override
     public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        int age = getCurrentAgeUA(state);
-        int ageDifference = getMaxAgeUA() - age;
+        int currentAge = getCurrentAgeUA(state);
+        int maxAge = getMaxAgeUA();
+        int ageDifference = maxAge - currentAge;
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
@@ -58,8 +60,7 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
         if (growthAmount == 0)
             return;
 
-        state = state.with(AGE, age + growthAmount);
-        world.setBlockState(pos, state, 2);
-        world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
+        state = state.with(AGE, currentAge + growthAmount);
+        world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
     }
 }

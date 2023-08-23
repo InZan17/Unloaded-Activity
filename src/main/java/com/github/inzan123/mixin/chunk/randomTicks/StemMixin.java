@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
 
 import com.github.inzan123.UnloadedActivity;

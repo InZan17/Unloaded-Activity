@@ -13,7 +13,7 @@
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateChunkBlocks"],
       "net/minecraft/block/entity/BlockEntity": ["com/github/inzan123/SimulateBlockEntity"],
       "net/minecraft/entity/Entity": ["com/github/inzan123/SimulateEntity"]
     },

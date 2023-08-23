@@ -1,14 +1,14 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
+import net.minecraft.block.BeetrootsBlock;
 import net.minecraft.block.CropBlock;
-import net.minecraft.block.TorchflowerBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(TorchflowerBlock.class)
-public class TorchFlowerMixin extends CropBlock {
-    public TorchFlowerMixin(Settings settings) {
+@Mixin(BeetrootsBlock.class)
+public abstract class BeetrootsMixin extends CropBlock{
+    public BeetrootsMixin(Settings settings) {
         super(settings);
     }
 

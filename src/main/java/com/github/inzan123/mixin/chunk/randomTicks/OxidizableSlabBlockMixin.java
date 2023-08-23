@@ -1,6 +1,5 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
 import net.minecraft.block.*;
@@ -12,8 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Iterator;
 import java.util.Optional;
-
-import static java.lang.Math.pow;
 
 @Mixin(OxidizableSlabBlock.class)
 public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxidizable {
