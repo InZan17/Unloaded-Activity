@@ -8,6 +8,7 @@
       "unloadedactivity:last-chunk-tick",
       "unloadedactivity:chunk-sim-blocks",
       "unloadedactivity:chunk-sim-ver",
+      "unloadedactivity:world-weather-info",
       "unloadedactivity:last-entity-tick",
       "unloadedactivity:last-blockentity-tick",
       "unloadedactivity:magik"

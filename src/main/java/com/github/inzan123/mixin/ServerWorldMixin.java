@@ -91,6 +91,13 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		hasSlept = false;
 	}
 
+	@Inject(method = "tick", at = @At(value = "TAIL", target = "net/minecraft/server/world/ServerWorld.tickTime ()V"))
+	private void finishTickTime(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		// get WeatherInfoComponent
+		// update it
+		// done
+	}
+
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.wakeSleepingPlayers ()V"))
 	private void wakeyWakey(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		if (UnloadedActivity.instance.config.updateAllChunksWhenSleep)
