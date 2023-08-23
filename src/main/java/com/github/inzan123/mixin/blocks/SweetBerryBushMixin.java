@@ -28,8 +28,8 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
         return 0.2;
     }
     @Override
-    public boolean implementsSimulate() {return true;}
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
         if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -45,7 +45,7 @@ public abstract class SweetBerryBushMixin extends PlantBlock {
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int age = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - age;

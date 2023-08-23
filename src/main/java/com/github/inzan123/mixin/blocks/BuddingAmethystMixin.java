@@ -25,18 +25,18 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
 
     @Shadow @Final public static boolean canGrowIn(BlockState state) {return true;}
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 1.0/(GROW_CHANCE*DIRECTIONS.length);
     }
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growAmethyst) return false;
         return true;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;

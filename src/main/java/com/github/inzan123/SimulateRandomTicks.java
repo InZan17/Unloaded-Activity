@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.StorageIoWorker;
 
 import java.nio.file.Path;
@@ -28,11 +29,19 @@ public interface SimulateRandomTicks {
     default int getMaxHeightUA() {
         return 0;
     }
-    default boolean implementsSimulate() {
+    default boolean implementsSimulateRandTicks() {
         return false;
     }
-    default boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
-        return this.implementsSimulate();
+    default boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+        return this.implementsSimulateRandTicks();
     }
-    default void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
+    default void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
+
+    default boolean implementsSimulatePrecTicks() {
+        return false;
+    }
+    default boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, Biome.Precipitation precipitation) {
+        return this.implementsSimulateRandTicks();
+    }
+    default void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long[] weatherTimes, long timePassed, Biome.Precipitation precipitation) {}
 }

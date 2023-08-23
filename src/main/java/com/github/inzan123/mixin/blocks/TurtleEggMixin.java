@@ -54,16 +54,16 @@ public abstract class TurtleEggMixin extends Block {
         return 0.002; //1/500
     }
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
 
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!isSandBelow(world, pos)) return false;
         if (!UnloadedActivity.instance.config.hatchTurtleEggs) return false;
         return true;
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         //at a certain point in the day the odds of hatching become 100% instead of 1/500
         int quickHatchStart = 21061;

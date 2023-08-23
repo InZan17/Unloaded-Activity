@@ -28,9 +28,9 @@ public abstract class SugarCaneMixin extends Block {
         return 1;
     }
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
 
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSugarCane) return false;
         if (!world.isAir(pos.up())) return false;
         return true;
@@ -50,7 +50,7 @@ public abstract class SugarCaneMixin extends Block {
         return i;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int height = 0;
         while (world.getBlockState(pos.down(height+1)).isOf(this)) {

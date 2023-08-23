@@ -37,8 +37,8 @@ public abstract class SaplingMixin extends PlantBlock {
         return 0.14285714285; // 1/7
     }
     @Override
-    public boolean implementsSimulate() {return true;}
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growSaplings) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         if (!state.isOf(this)) return false;
@@ -54,7 +54,7 @@ public abstract class SaplingMixin extends PlantBlock {
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain

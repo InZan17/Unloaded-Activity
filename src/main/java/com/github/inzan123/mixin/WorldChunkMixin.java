@@ -52,7 +52,7 @@ public abstract class WorldChunkMixin extends Chunk {
         if (UnloadedActivity.instance.config.debugLogs)
             UnloadedActivity.LOGGER.info("Placed "+state.getBlock().toString()+" at "+pos);
 
-        boolean implementsSimulate = state.getBlock().implementsSimulate();
+        boolean implementsSimulate = state.getBlock().implementsSimulateRandTicks();
         if (!implementsSimulate)
             return;
 

@@ -39,8 +39,8 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
         return growthChance;
     }
     @Override
-    public boolean implementsSimulate() {return true;}
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growPlantStems) return false;
         if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA()) return false;
         if (!chooseStemState(world.getBlockState(pos.offset(this.growthDirection)))) return false;
@@ -61,7 +61,7 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
         return MAX_AGE;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int currentAge = getCurrentAgeUA(state);
         int maxAge = getMaxAgeUA();

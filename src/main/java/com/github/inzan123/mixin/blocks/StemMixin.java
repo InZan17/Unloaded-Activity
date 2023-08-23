@@ -46,8 +46,8 @@ public abstract class StemMixin extends PlantBlock {
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
     @Override
-    public boolean implementsSimulate() {return true;}
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growStems) return false;
         if (world.getBaseLightLevel(pos, 0) < 9) return false;
         if (NumOfValidPositions(pos, world) == 0 && this.getCurrentAgeUA(state) == this.getMaxAgeUA()) return false;
@@ -55,7 +55,7 @@ public abstract class StemMixin extends PlantBlock {
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int currentAge = this.getCurrentAgeUA(state);
         int maxAge = this.getMaxAgeUA();

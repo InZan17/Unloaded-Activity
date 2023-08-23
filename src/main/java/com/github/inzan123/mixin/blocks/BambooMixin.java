@@ -22,9 +22,9 @@ public abstract class BambooMixin extends Block implements Fertilizable {
     }
     @Override public double getOdds(ServerWorld world, BlockPos pos) {return 1d/3d;}
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
     @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;
         if (!world.isAir(pos.up())) return false;
         if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -47,7 +47,7 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         return i;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int height = countBambooBelow(world, pos);
 
@@ -67,7 +67,7 @@ public abstract class BambooMixin extends Block implements Fertilizable {
             if (state == null)
                 return;
 
-            if (!canSimulate(state, world, pos))
+            if (!canSimulateRandTicks(state, world, pos))
                 return;
 
             state = updateLeaves(state,world,pos,random,i);

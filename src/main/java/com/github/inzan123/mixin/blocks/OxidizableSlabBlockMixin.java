@@ -27,12 +27,12 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
         return 0.05688889f;
     }
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
     @Shadow
     public OxidationLevel getDegradationLevel() {
         return null;
     }
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -48,7 +48,7 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 

@@ -34,9 +34,9 @@ public abstract class BambooSaplingMixin extends Block {
         return 1d/3d;
     }
     @Override
-    public boolean implementsSimulate() {return true;}
+    public boolean implementsSimulateRandTicks() {return true;}
 
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;
         if (!world.isAir(pos.up())) return false;
         if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -53,7 +53,7 @@ public abstract class BambooSaplingMixin extends Block {
         return i;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
@@ -67,7 +67,7 @@ public abstract class BambooSaplingMixin extends Block {
             if (state == null)
                 return;
 
-            if (!canSimulate(state, world, pos))
+            if (!canSimulateRandTicks(state, world, pos))
                 return;
 
             if (i==1) {

@@ -50,7 +50,7 @@ public class TimeMachine {
                 BlockPos pos = BlockPos.fromLong(longPos);
                 BlockState state = world.getBlockState(pos);
                 Block block = state.getBlock();
-                if (block.implementsSimulate()) {
+                if (block.implementsSimulateRandTicks()) {
                     newLongArray.add(longPos);
                     blockPosArray.add(pos);
                 } else {
@@ -74,7 +74,7 @@ public class TimeMachine {
                         BlockPos worldBlockPos = chunkBlockPos.add(new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
                         BlockState state = chunk.getBlockState(chunkBlockPos);
                         Block block = state.getBlock();
-                        if (block.implementsSimulate()) {
+                        if (block.implementsSimulateRandTicks()) {
                             blockPosArray.add(worldBlockPos);
                             if (UnloadedActivity.instance.config.rememberBlockPositions)
                                 newLongArray.add(worldBlockPos.asLong());
@@ -110,10 +110,10 @@ public class TimeMachine {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
 
-        if (!block.canSimulate(state, world, pos))
+        if (!block.canSimulateRandTicks(state, world, pos))
             return;
 
-        block.simulateTime(state, world, pos, world.random, timeDifference, randomTickSpeed);
+        block.simulateRandTicks(state, world, pos, world.random, timeDifference, randomTickSpeed);
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
