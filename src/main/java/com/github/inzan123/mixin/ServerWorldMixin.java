@@ -1,9 +1,6 @@
 package com.github.inzan123.mixin;
 
-import com.github.inzan123.LongArrayComponent;
-import com.github.inzan123.LongComponent;
-import com.github.inzan123.TimeMachine;
-import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.*;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -93,9 +90,8 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Inject(method = "tick", at = @At(value = "TAIL", target = "net/minecraft/server/world/ServerWorld.tickTime ()V"))
 	private void finishTickTime(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		// get WeatherInfoComponent
-		// update it
-		// done
+		WeatherInfoInterface weatherInfo = this.getComponent(WORLDWEATHERINFO);
+		weatherInfo.updateValues(this);
 	}
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.wakeSleepingPlayers ()V"))
