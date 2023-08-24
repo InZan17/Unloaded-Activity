@@ -36,7 +36,7 @@ public interface SimulateChunkBlocks {
         return false;
     }
     default boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, Biome.Precipitation precipitation) {
-        return this.implementsSimulateRandTicks();
+        return this.implementsSimulatePrecTicks();
     }
     default void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long[] weatherTimes, long timePassed, Biome.Precipitation precipitation) {}
 }
