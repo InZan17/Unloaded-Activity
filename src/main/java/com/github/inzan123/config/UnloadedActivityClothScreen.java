@@ -4,6 +4,8 @@ import com.github.inzan123.UnloadedActivity;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.impl.builders.DropdownMenuBuilder;
+import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -18,7 +20,7 @@ public class UnloadedActivityClothScreen {
         builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dark_oak_planks.png"));
         builder.setSavingRunnable(() -> UnloadedActivity.instance.saveConfig());
         ConfigCategory general = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.general"));
-        ConfigCategory randomTicks = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.randomTicks"));
+        ConfigCategory chunks = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.chunks"));
         ConfigCategory blockEntities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.blockEntities"));
         ConfigCategory Entities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.entities"));
         ConfigEntryBuilder configEntryBuilder = builder.entryBuilder();
@@ -60,16 +62,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
-            configEntryBuilder
-                .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
-                .setDefaultValue(true)
-                .setSaveConsumer(newValue -> config.enableRandomTicks = newValue)
-                .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks.tooltip"))
-                .build()
-        );
-
-        randomTicks.addEntry(
+        chunks.addEntry(
                 configEntryBuilder
                         .startIntField(Text.translatable("text.config.unloaded-activity.option.maxChunkUpdates"), config.maxChunkUpdates)
                         .setDefaultValue(8)
@@ -80,7 +73,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        chunks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer"), config.multiplyMaxChunkUpdatesPerPlayer)
                         .setDefaultValue(false)
@@ -89,7 +82,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        chunks.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep"), config.updateAllChunksWhenSleep)
                         .setDefaultValue(true)
@@ -98,7 +91,18 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        chunks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.enableRandomTicks = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks.tooltip"))
+                        .build()
+        );
+
+        SubCategoryBuilder subRandomTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.randomTicks"));
+
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSaplings"), config.growSaplings)
                         .setDefaultValue(true)
@@ -107,7 +111,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCrops"), config.growCrops)
                         .setDefaultValue(true)
@@ -116,7 +120,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growStems"), config.growStems)
                         .setDefaultValue(true)
@@ -125,7 +129,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSweetBerries"), config.growSweetBerries)
                         .setDefaultValue(true)
@@ -134,7 +138,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCocoa"), config.growCocoa)
                         .setDefaultValue(true)
@@ -143,7 +147,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSugarCane"), config.growSugarCane)
                         .setDefaultValue(true)
@@ -152,7 +156,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageCopper"), config.ageCopper)
                         .setDefaultValue(true)
@@ -161,7 +165,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.decayLeaves"), config.decayLeaves)
                         .setDefaultValue(true)
@@ -170,7 +174,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growAmethyst"), config.growAmethyst)
                         .setDefaultValue(true)
@@ -179,7 +183,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growPlantStems"), config.growPlantStems)
                         .setDefaultValue(true)
@@ -188,7 +192,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.hatchTurtleEggs"), config.hatchTurtleEggs)
                         .setDefaultValue(true)
@@ -197,7 +201,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch"), config.accurateTurtleAgeAfterHatch)
                         .setDefaultValue(false)
@@ -206,7 +210,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
+        subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
                         .setDefaultValue(true)
@@ -214,6 +218,21 @@ public class UnloadedActivityClothScreen {
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.growBamboo.tooltip"))
                         .build()
         );
+
+        chunks.addEntry(subRandomTicks.build());
+
+        chunks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks"), config.enablePrecipitationTicks)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.enablePrecipitationTicks = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks.tooltip"))
+                        .build()
+        );
+
+        SubCategoryBuilder subPrecipitationTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.precipitationTicks"));
+
+        chunks.addEntry(subPrecipitationTicks.build());
 
         blockEntities.addEntry(
                 configEntryBuilder
