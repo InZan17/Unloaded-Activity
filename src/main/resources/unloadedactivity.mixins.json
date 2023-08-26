@@ -23,6 +23,7 @@
     "chunk.randomTicks.BambooSaplingMixin",
     "chunk.randomTicks.TorchFlowerMixin",
     "chunk.randomTicks.TurtleEggMixin",
+    "chunk.precipitationTicks.AirMixin",
     "entities.PassiveEntityMixin",
     "EntityMixin",
     "AbstractBlockMixin",
