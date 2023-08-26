@@ -7,22 +7,82 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static com.github.inzan123.MyComponents.CHUNKSIMBLOCKS;
-import static com.github.inzan123.MyComponents.CHUNKSIMVER;
+import static com.github.inzan123.MyComponents.*;
 
 public class TimeMachine {
-    public static long simulateRandomTicks(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
-        if (!UnloadedActivity.instance.config.enableRandomTicks) return 0;
+    public static long simulateChunk(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
+        if (!UnloadedActivity.instance.config.enableRandomTicks || !UnloadedActivity.instance.config.enablePrecipitationTicks) return 0;
         
         long now = 0;
         if (UnloadedActivity.instance.config.debugLogs) now = Instant.now().toEpochMilli();
+
+        TimeMachine.simulatePrecipitationTicks(timeDifference, world, chunk);
+        TimeMachine.simulateRandomTicks(timeDifference, world, chunk, randomTickSpeed);
+
+        long msTime = 0;
+
+        if (UnloadedActivity.instance.config.debugLogs) {
+            msTime = Instant.now().toEpochMilli() - now;
+            UnloadedActivity.LOGGER.info(msTime + "ms to simulate random ticks on chunk after " + timeDifference + " ticks.");
+        };
+        return msTime;
+    }
+
+    public static void simulatePrecipitationTicks(long timeDifference, ServerWorld world, WorldChunk chunk) {
+
+        if (!UnloadedActivity.instance.config.enablePrecipitationTicks)
+            return;
+
+        double precipitationPickChance = 1.0/4096.0; //1/(16*256). 16 for the chance of the chunk doing the tick and 256 for the chance of a block to be picked.
+
+        WeatherInfoInterface weatherInfo = world.getComponent(WORLDWEATHERINFO);
+
+        long timeInWeather = weatherInfo.getTimeInWeather(timeDifference,world.getTimeOfDay());
+
+        for (int z=0; z<16;z++)
+            for (int x=0; x<16;x++) {
+                ChunkPos chunkPos = chunk.getPos();
+                BlockPos airPos = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+                BlockPos groundPos = airPos.down();
+                BlockState airPosState = chunk.getBlockState(airPos);
+                BlockState groundPosState = chunk.getBlockState(groundPos);
+                Block airPosBlock = airPosState.getBlock();
+                Block groundPosBlock = groundPosState.getBlock();
+                Biome biome = world.getBiome(airPos).value();
+                if (airPosBlock.implementsSimulatePrecTicks())
+                    simulateBlockPrecipitationTick(airPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(airPos));
+
+                if (groundPosBlock.implementsSimulatePrecTicks())
+                    simulateBlockPrecipitationTick(groundPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(groundPos));
+        }
+    }
+
+    public static void simulateBlockPrecipitationTick(BlockPos pos, ServerWorld world, long timeDifference, double precipitationPickChance, long timeInWeather, Biome.Precipitation precipitation) {
+        if (!UnloadedActivity.instance.config.enablePrecipitationTicks)
+            return;
+
+        BlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+
+        if (!block.canSimulatePrecTicks(state, world, pos, precipitation))
+            return;
+
+        block.simulatePrecTicks(state, world, pos, timeInWeather, timeDifference, precipitation, precipitationPickChance);
+    }
+
+    public static void simulateRandomTicks(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
+
+        if (!UnloadedActivity.instance.config.enableRandomTicks)
+            return;
 
         int minY = world.getBottomY();
         int maxY = world.getTopY();
@@ -93,14 +153,6 @@ public class TimeMachine {
 
         for (BlockPos blockPos : blockPosArray)
             simulateBlockRandomTicks(blockPos, world, timeDifference, randomTickSpeed);
-
-        long msTime = 0;
-
-        if (UnloadedActivity.instance.config.debugLogs) {
-            msTime = Instant.now().toEpochMilli() - now;
-            UnloadedActivity.LOGGER.info(msTime + "ms to simulate random ticks on chunk after " + timeDifference + " ticks.");
-        };
-        return msTime;
     }
 
     public static void simulateBlockRandomTicks(BlockPos pos, ServerWorld world, long timeDifference, int randomTickSpeed) {

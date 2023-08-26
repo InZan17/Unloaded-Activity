@@ -5,9 +5,11 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class WeatherInfoComponent implements WeatherInfoInterface {
+    final int maxWeatherHistory = 3;
     private ArrayList<Long> weatherList = new ArrayList<>();
     @Override
     public void readFromNbt(NbtCompound tag) {
@@ -56,10 +58,9 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
             this.weatherList.add(0, currentTime);
         }
 
-        int maxWeatherHistory = 3;
         int weatherListSize = this.weatherList.size();
 
-        if (weatherListSize > min(maxWeatherHistory, 1)*2) {
+        if (weatherListSize > max(maxWeatherHistory, 1)*2) {
             this.weatherList.remove(weatherListSize-1);
             this.weatherList.remove(weatherListSize-2);
         }
@@ -67,6 +68,28 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
 
     @Override
     public long getTimeInWeather(long timePassed, long currentTime) {
-        return 0;
+        int time = 0;
+
+        long lastTicked = currentTime-timePassed;
+
+        for (int i=0;i<min(max(maxWeatherHistory,1), (this.weatherList.size()+1)/2);i++) {
+            int indexOffset = shouldCheckForRain() ? 0 : 1;
+            long weatherStart = this.weatherList.get(i*2-indexOffset+1);
+            long weatherEnd = (i-indexOffset) < 0 ? currentTime : this.weatherList.get(i*2-indexOffset);
+
+            long difference = weatherEnd-weatherStart;
+
+            long newWeatherStart = max(weatherStart,lastTicked);
+            long newWeatherEnd = min(weatherEnd,currentTime);
+
+            long newDifference = newWeatherEnd-newWeatherStart;
+
+            time+=max(newDifference,0);
+
+            if (newDifference != difference) {
+                break;
+            }
+        }
+        return time;
     }
 }

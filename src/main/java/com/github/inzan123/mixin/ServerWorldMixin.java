@@ -58,7 +58,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			if (timeDifference > differenceThreshold) {
 				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
 					++updateCount;
-					msTime += TimeMachine.simulateRandomTicks(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
+					msTime += TimeMachine.simulateChunk(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
 				} else {
 					return;
 				}
