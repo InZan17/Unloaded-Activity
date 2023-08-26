@@ -1,5 +1,6 @@
 package com.github.inzan123;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 
@@ -43,7 +44,7 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
 
         //if player decides to go back in time, this will try to reduce any weird behaviour.
         while (this.weatherList.size() > 0) {
-            if (this.weatherList.get(0) <= currentTime) {
+            if (this.weatherList.get(0) > currentTime) {
                 this.weatherList.remove(0);
                 continue;
             }

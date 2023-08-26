@@ -51,7 +51,7 @@ public class TimeMachine {
         for (int z=0; z<16;z++)
             for (int x=0; x<16;x++) {
                 ChunkPos chunkPos = chunk.getPos();
-                BlockPos airPos = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, new BlockPos(chunkPos.x*16,0,chunkPos.z*16));
+                BlockPos airPos = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, new BlockPos(chunkPos.x*16+x,0,chunkPos.z*16+z));
                 BlockPos groundPos = airPos.down();
                 BlockState airPosState = chunk.getBlockState(airPos);
                 BlockState groundPosState = chunk.getBlockState(groundPos);
@@ -73,7 +73,7 @@ public class TimeMachine {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
 
-        if (!block.canSimulatePrecTicks(state, world, pos, precipitation))
+        if (!block.canSimulatePrecTicks(state, world, pos, timeInWeather, precipitation))
             return;
 
         block.simulatePrecTicks(state, world, pos, timeInWeather, timeDifference, precipitation, precipitationPickChance);
