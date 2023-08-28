@@ -24,6 +24,7 @@
     "chunk.randomTicks.TorchFlowerMixin",
     "chunk.randomTicks.TurtleEggMixin",
     "chunk.precipitationTicks.AirMixin",
+    "chunk.precipitationTicks.SnowMixin",
     "entities.PassiveEntityMixin",
     "EntityMixin",
     "AbstractBlockMixin",

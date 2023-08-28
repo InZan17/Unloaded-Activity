@@ -40,6 +40,8 @@
   "text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch.tooltip": "Will age the turtles more accurately \nafter being hatched from an egg. \n(Will cost roughly double the performance for simulating turtle eggs)",
   "text.config.unloaded-activity.option.growPlantStems": "Grow Plant Stems",
   "text.config.unloaded-activity.option.growPlantStems.tooltip": "If enabled, the mod will grow plant stems \nwhen they get within simulation distance.\n\n(Plant stems = glow berries & kelp)",
+  "text.config.unloaded-activity.option.accumulateSnow": "Accumulate Snow",
+  "text.config.unloaded-activity.option.accumulateSnow.tooltip": "If enabled, the mod will start accumulating \nsnow once within simulation distance.",
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
   "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they start getting ticked again.",
   "text.config.unloaded-activity.option.ageEntities": "Age Entities",

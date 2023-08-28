@@ -25,6 +25,9 @@ public class UnloadedActivityConfig {
 
 
 
+    public boolean accumulateSnow = true;
+
+
 
     public boolean updateFurnace = true;
 

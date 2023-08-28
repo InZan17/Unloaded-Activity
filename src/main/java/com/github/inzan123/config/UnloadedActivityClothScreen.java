@@ -232,6 +232,16 @@ public class UnloadedActivityClothScreen {
 
         SubCategoryBuilder subPrecipitationTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.precipitationTicks"));
 
+        subPrecipitationTicks.add(
+
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accumulateSnow"), config.accumulateSnow)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.accumulateSnow = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.accumulateSnow.tooltip"))
+                        .build()
+        );
+
         chunks.addEntry(subPrecipitationTicks.build());
 
         blockEntities.addEntry(
