@@ -22,6 +22,22 @@ public class Utils {
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
+    public static int newBinomialFunction(long cycles, double odds, int maxOccurrences,  Random random) {
+        double log_q = log(1.0 - odds);
+        int x = 0;
+        double sum = 0;
+        for(;;) {
+            if (x >= maxOccurrences) {
+                return maxOccurrences;
+            }
+            sum += log(random.nextDouble()) / (cycles - x);
+            if(sum < log_q) {
+                return x;
+            }
+            x++;
+        }
+    }
+
     //41ms, 200 chunks
     public static int getOccurrencesBinomial(long cycles, double odds, int maxOccurrences,  Random random) {
 
