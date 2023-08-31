@@ -22,6 +22,7 @@ public class Utils {
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
+    //good for very low odds
     public static int newBinomialFunction(long cycles, double odds, int maxOccurrences,  Random random) {
         double log_q = log(1.0 - odds);
         int x = 0;
@@ -53,7 +54,7 @@ public class Utils {
 
         double totalProbability = 0;
 
-        double randomFloat = random.nextDouble();
+        double randomDouble = random.nextDouble();
 
         for (int i = 0; i<maxOccurrences;i++) {
 
@@ -67,7 +68,7 @@ public class Utils {
 
             totalProbability += finalProbability;
 
-            if (randomFloat < totalProbability) {
+            if (randomDouble < totalProbability) {
                 return i;
             }
         }
