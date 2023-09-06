@@ -22,7 +22,7 @@ public class Utils {
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
-    //good for very low odds
+    //good for very low odds and when maxOccurrences are very high or unrestricted
     public static int newBinomialFunction(long cycles, double odds, int maxOccurrences,  Random random) {
         double log_q = log(1.0 - odds);
         int x = 0;
@@ -73,6 +73,45 @@ public class Utils {
             }
         }
         return maxOccurrences;
+    }
+
+    public static long sampleNegativeBinomial(int successes, double odds, long timePassed,  Random random) {
+        return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), timePassed, random);
+    }
+
+    // From my observations when playing around in desmos, I found that at very low probabilities a binomial distribution is kinda a poisson distribution. I will implement an actual Poisson sampling algorithm later once I find one.
+    public static long samplePoisson(double lambda, long maxValue, Random random) {
+        return newBinomialFunction((long)lambda*10000, 0.0001, (int)max(maxValue, (long)Integer.MAX_VALUE), random);
+    }
+
+
+    // Algorithm from https://dl.acm.org/doi/pdf/10.1145/358407.358414
+    // Since we only accept integers anyway we don't need to have a separate algorithm for 0 < shape < 1
+    public static double sampleGamma(int shape, double scale, Random random) {
+
+        if (shape <= 0)
+            return 0;
+
+        double d = shape-1.0/3.0;
+        double c = 1.0/sqrt(d*9.0);
+
+        while (true) {
+
+            double x = random.nextGaussian();
+            double v = pow(1.0+c*x, 3.0);
+
+            if (v > 0) {
+
+                double u = random.nextDouble();
+
+                if (u < 1.0-0.0331*x*x*x*x)
+                    return d*v*scale;
+
+                if (log(u) < 0.5*x*x+d*(1.0-v+log(v)))
+                    return d*v*scale;
+            }
+        }
+
     }
 
     public static long randomRound(double number, Random random) {
