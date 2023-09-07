@@ -3,6 +3,7 @@ package com.github.inzan123;
 import net.minecraft.util.math.random.Random;
 
 import static java.lang.Math.*;
+import static net.minecraft.util.math.MathHelper.sign;
 
 
 public class Utils {
@@ -76,12 +77,77 @@ public class Utils {
     }
 
     public static long sampleNegativeBinomial(int successes, double odds, long timePassed,  Random random) {
-        return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), timePassed, random);
+        return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), random);
     }
 
-    // From my observations when playing around in desmos, I found that at very low probabilities a binomial distribution is kinda a poisson distribution. I will implement an actual Poisson sampling algorithm later once I find one.
-    public static long samplePoisson(double lambda, long maxValue, Random random) {
-        return newBinomialFunction((long)lambda*10000, 0.0001, (int)max(maxValue, (long)Integer.MAX_VALUE), random);
+    public static final double[] logFactorials = new double[]{
+            0.0,
+            0.0,
+            0.6931471805599453,
+            1.791759469228055,
+            3.1780538303479458,
+            4.787491742782046,
+            6.579251212010101,
+            8.525161361065415,
+            10.60460290274525,
+            12.801827480081469
+    };
+
+    // lambda >= 10 uses algorithm PTRD found here: https://research.wu.ac.at/ws/portalfiles/portal/18953249/document.pdf
+    // lambda < 10 uses the algorithm found here: https://math.stackexchange.com/questions/785188/simple-algorithm-for-generating-poisson-distribution
+    public static long samplePoisson(double lambda, Random random) {
+
+        if (lambda < 10) {
+            long k = 0;
+            double p = random.nextDouble();
+            while (p > exp(-lambda)) {
+                p *= random.nextDouble();
+                k += 1;
+            }
+            return k;
+        }
+
+        double smu = sqrt(lambda);
+        double b = 0.931 + 2.53*smu;
+        double a = 0.059 + 0.02483*b;
+        double vr = 0.9277 - 3.6224/(b-2.0);
+        double oneDivAlpha = 1.1239 + 1.1328/(b-3.4);
+
+        double logSqrtPi2 = 0.9189385332046727; //result from log(sqrt(PI*2))
+
+        while (true) {
+
+            double v = random.nextDouble();
+            double u;
+
+            if (v <= 0.86*vr) {
+                u = v/vr-0.43;
+                return (long)floor((2.0*a/(0.5-abs(u))+b)*u+lambda+0.445);
+            }
+
+            if (v >= vr) {
+                u = random.nextDouble()-0.5;
+            } else {
+                u = v/vr-0.93;
+                u = sign(u)*0.5 - u;
+                v = random.nextDouble()*vr;
+            }
+
+            double us = 0.5-abs(u);
+
+            if (us < 0.013 && v > us)
+                continue;
+
+            int k = (int)((2.0*a/us+b)*u+lambda+0.445);
+            v = v*oneDivAlpha/(a/(us*us)+b);
+
+            if (k >= 10 && log(v*smu) <= (k + 0.5) * log(lambda/k)-lambda-logSqrtPi2+k-(1.0/12.0 - 1.0/(360.0*k*k))/k)
+                return k;
+
+            if (0 <= k && k <= 9 && log(v) <= k*log(lambda) - lambda - logFactorials[k])
+                return k;
+
+        }
     }
 
 
