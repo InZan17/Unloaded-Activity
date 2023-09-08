@@ -1,5 +1,6 @@
 package com.github.inzan123;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.minecraft.util.math.random.Random;
 
 import static java.lang.Math.*;
@@ -76,7 +77,7 @@ public class Utils {
         return maxOccurrences;
     }
 
-    public static long sampleNegativeBinomial(int successes, double odds, long timePassed,  Random random) {
+    public static long sampleNegativeBinomial(int successes, double odds,  Random random) {
         return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), random);
     }
 
@@ -184,7 +185,7 @@ public class Utils {
         return (long) floor(number+random.nextDouble());
     }
 
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFast(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences, Random random) {
+    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFastOld(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences, Random random) {
         if (UnloadedActivity.instance.config.debugLogs)
             UnloadedActivity.LOGGER.info("Ran getOccurrencesAndLeftoverTicksFast. cycles: "+cycles+" normalOdds: "+normalOdds+" maxOccurrences: "+maxOccurrences);
 
@@ -194,7 +195,7 @@ public class Utils {
 
         long randRoundCycles = randomRound(newCycles, random);
 
-        OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicks(randRoundCycles, normalOdds, maxOccurrences, random);
+        OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksBruteForce(randRoundCycles, normalOdds, maxOccurrences, random);
         if (oal.occurrences == maxOccurrences) {
 
             double differenceRatio = newCycles/randRoundCycles;
@@ -204,8 +205,47 @@ public class Utils {
         return oal;
     }
 
-    //595ms, 200 chunks
     public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicks(long cycles, double odds, int maxOccurrences, Random random) {
+
+        if (odds <= 0)
+            return new OccurrencesAndLeftover(0,0);
+
+        if (maxOccurrences <= 0)
+            return new OccurrencesAndLeftover(0,cycles);
+
+        int successes = getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
+
+        long leftover;
+
+        if (successes == maxOccurrences) {
+            long failedTrials = Long.MAX_VALUE;
+            long attempts = 0;
+            while (failedTrials > cycles && attempts < 100) {
+
+                failedTrials = sampleNegativeBinomial(successes, odds, random);
+                attempts++;
+            }
+
+            if (failedTrials > cycles) {
+                //we have attempted this 100 times and the probability of this happening is probably very low.
+                //So we'll just pretend this was the output even though its not accurate at all
+                failedTrials = (long)(random.nextDouble()*cycles);
+                if (UnloadedActivity.instance.config.debugLogs)
+                    UnloadedActivity.LOGGER.info("Failed to get accurate negative binomial result.");
+            } else if (UnloadedActivity.instance.config.debugLogs)
+                UnloadedActivity.LOGGER.info("Succeeded to get accurate negative binomial result.");
+
+            leftover = cycles - failedTrials;
+
+        } else {
+            leftover = cycles;
+        }
+
+        return new OccurrencesAndLeftover(successes, leftover);
+    }
+
+    //595ms, 200 chunks
+    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksBruteForce(long cycles, double odds, int maxOccurrences, Random random) {
 
         if (odds <= 0)
             return new OccurrencesAndLeftover(0,0);

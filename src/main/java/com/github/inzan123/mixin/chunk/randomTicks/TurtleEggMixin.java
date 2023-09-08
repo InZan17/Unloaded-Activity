@@ -96,14 +96,14 @@ public abstract class TurtleEggMixin extends Block {
                     long remaining = min(floorMod(quickHatchStart-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicksFast(remaining, hatchChance, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(remaining, totalOdds, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 } else {
                     long remaining = min(floorMod(quickHatchEnd-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicksFast(remaining, 1.0, randomTickSpeed, ageDifference-growthAmount+1, random);
+                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(remaining, randomPickChance, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 }

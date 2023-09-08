@@ -1,6 +1,7 @@
 package com.github.inzan123.mixin.chunk.randomTicks;
 
 
+import com.github.inzan123.OccurrencesAndLeftover;
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
 import com.github.inzan123.mixin.CropBlockInvoker;
@@ -69,7 +70,10 @@ public abstract class StemMixin extends PlantBlock {
 
         double totalOdds = randomPickChance * randomGrowChance;
 
-        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
+        OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
+
+        int growthAmount = oal.occurrences;
+        long leftover = oal.leftover;
 
         if (growthAmount != 0) {
             state = state.with(AGE, min(currentAge + growthAmount, maxAge));
@@ -79,7 +83,7 @@ public abstract class StemMixin extends PlantBlock {
         if (currentAge + growthAmount > maxAge && validPositions != 0) { // it surpasses the max age of crop and has space, try to grow fruit
 
             double chanceForFreeSpace = 0.25 * validPositions;
-            int growsFruit = Utils.getOccurrences(timePassed, chanceForFreeSpace, 1, random);
+            int growsFruit = Utils.getOccurrences(leftover, chanceForFreeSpace, 1, random);
 
             if (growsFruit == 0)
                 return;
