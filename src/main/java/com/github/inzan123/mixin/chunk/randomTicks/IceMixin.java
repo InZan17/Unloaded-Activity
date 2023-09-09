@@ -30,7 +30,7 @@ public abstract class IceMixin extends TransparentBlock {
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
     @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.waterFreezing) return false;
+        if (!UnloadedActivity.instance.config.meltIce) return false;
         if (world.getLightLevel(LightType.BLOCK, pos) <= 11 - state.getOpacity(world, pos)) return false;
         return true;
     }

@@ -21,6 +21,8 @@ public class UnloadedActivityConfig {
     public boolean growBamboo = true;
     public boolean hatchTurtleEggs = true;
     public boolean accurateTurtleAgeAfterHatch = false;
+    public boolean meltSnow = true;
+    public boolean meltIce = true;
 
 
 

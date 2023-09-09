@@ -219,6 +219,24 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.meltIce"), config.meltIce)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.meltIce = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.meltIce.tooltip"))
+                        .build()
+        );
+
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.meltSnow"), config.meltSnow)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.meltSnow = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.meltSnow.tooltip"))
+                        .build()
+        );
+
         chunks.addEntry(subRandomTicks.build());
 
         chunks.addEntry(

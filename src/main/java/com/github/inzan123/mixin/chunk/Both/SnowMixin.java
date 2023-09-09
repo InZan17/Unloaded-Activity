@@ -38,7 +38,7 @@ public abstract class SnowMixin extends Block {
 
     @Override
     public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.accumulateSnow) return false;
+        if (!UnloadedActivity.instance.config.meltSnow) return false;
         if (world.getLightLevel(LightType.BLOCK, pos) <= 11) return false;
         return true;
     }
