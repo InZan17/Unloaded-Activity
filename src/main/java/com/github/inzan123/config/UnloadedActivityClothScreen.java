@@ -268,6 +268,15 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        subPrecipitationTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.weatherFillCauldron"), config.weatherFillCauldron)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.weatherFillCauldron = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.weatherFillCauldron.tooltip"))
+                        .build()
+        );
+
         chunks.addEntry(subPrecipitationTicks.build());
 
         blockEntities.addEntry(

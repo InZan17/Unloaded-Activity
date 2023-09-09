@@ -48,6 +48,8 @@
   "text.config.unloaded-activity.option.accumulateSnow.tooltip": "If enabled, the mod will start accumulating \nsnow once within simulation distance.",
   "text.config.unloaded-activity.option.waterFreezing": "Water Freezing",
   "text.config.unloaded-activity.option.waterFreezing.tooltip": "If enabled, the mod will start freezing \nwater once within simulation distance.",
+  "text.config.unloaded-activity.option.weatherFillCauldron": "Weather Fills Cauldron",
+  "text.config.unloaded-activity.option.weatherFillCauldron.tooltip": "If enabled, the mod will start filling cauldrons \nwith water/snow once within simulation distance.",
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
   "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they start getting ticked again.",
   "text.config.unloaded-activity.option.ageEntities": "Age Entities",
