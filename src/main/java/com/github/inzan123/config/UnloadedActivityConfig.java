@@ -23,6 +23,8 @@ public class UnloadedActivityConfig {
     public boolean accurateTurtleAgeAfterHatch = false;
     public boolean meltSnow = true;
     public boolean meltIce = true;
+    public boolean growDripstone = true;
+    public boolean dripstoneFillCauldrons = true;
 
 
 
