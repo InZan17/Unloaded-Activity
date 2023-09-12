@@ -81,6 +81,23 @@ public class Utils {
         return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), random);
     }
 
+    public static long sampleNegativeBinomialWithMax(long cycles, int successes, double odds, Random random) {
+        long failedTrials = Long.MAX_VALUE;
+        long attempts = 0;
+        while (failedTrials > cycles && attempts < 100) {
+
+            failedTrials = sampleNegativeBinomial(successes, odds, random);
+            attempts++;
+        }
+
+        if (failedTrials > cycles) {
+            //we have attempted this 100 times and the probability of this happening is probably very low.
+            //So we'll just pretend this was the output even though its not accurate at all
+            failedTrials = (long) (random.nextDouble() * cycles);
+        }
+        return failedTrials;
+    }
+
     public static final double[] logFactorials = new double[]{
             0.0,
             0.0,
