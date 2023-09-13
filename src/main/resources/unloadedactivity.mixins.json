@@ -24,6 +24,7 @@
     "chunk.randomTicks.TorchFlowerMixin",
     "chunk.randomTicks.TurtleEggMixin",
     "chunk.randomTicks.IceMixin",
+    "chunk.randomTicks.PointedDripstoneMixin",
     "chunk.precipitationTicks.AirMixin",
     "chunk.precipitationTicks.FluidMixin",
     "chunk.precipitationTicks.CauldronMixin",

@@ -3,6 +3,8 @@ package com.github.inzan123.mixin.chunk.randomTicks;
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.Thickness;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -11,13 +13,18 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 @Mixin(PointedDripstoneBlock.class)
 public abstract class PointedDripstoneMixin extends Block implements LandingBlock, Waterloggable {
@@ -31,7 +38,7 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Shadow private static boolean canGrow(BlockState state, ServerWorld world, BlockPos pos) {
         return true;
     }
-
+@Shadow private static void tryGrow(ServerWorld world, BlockPos pos, Direction direction) {}
     @Shadow private static boolean isHeldByPointedDripstone(BlockState state, WorldView world, BlockPos pos) {
         return true;
     }
@@ -50,6 +57,11 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Shadow private static boolean canDripThrough(BlockView world, BlockPos pos, BlockState state) {
         return true;
     }
+
+    @Shadow private static BlockPos getCauldronPos(World world, BlockPos pos, Fluid fluid) {
+        return null;
+    }
+    @Shadow private static void tryGrowStalagmite(ServerWorld world, BlockPos pos) {}
     @Shadow @Final
     private static int MAX_STALACTITE_GROWTH;
     @Shadow @Final
@@ -83,7 +95,7 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             }
 
             if (canPlaceAtWithDirection(world, mutable, Direction.UP) && !world.isWater(mutable.down())) {
-                return i+2;
+                return i+1;
             }
 
             if (!canDripThrough(world, mutable, blockState)) {
@@ -93,33 +105,92 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
         return -1;
     }
 
+    private static int getCauldronDistance(World world, BlockPos pos, Fluid fluid) {
+        BlockPos cauldronPos = getCauldronPos(world, pos, fluid);
+        if (cauldronPos == null) {
+            cauldronPos = getCauldronPos(world, pos.down(11), fluid);
+            if (cauldronPos == null) {
+                return -1;
+            } else {
+                return pos.getY()-cauldronPos.getY()+11;
+            }
+        } else {
+            return pos.getY()-cauldronPos.getY();
+        }
+    }
+
     @Override
     public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
+        BlockPos tipPos = getTipPos(state, world, pos, 12, false);
+        if (tipPos == null)
+            return;
+
+        BlockState tip = world.getBlockState(tipPos);
 
         BlockState dripstoneBlockState = world.getBlockState(pos.up(1));
-        BlockState waterState = world.getBlockState(pos.up(2));
-        if (canGrow(dripstoneBlockState, waterState)) {
-            BlockPos tipPos = getTipPos(state, world, pos, MAX_STALACTITE_GROWTH, false);
-            if (tipPos != null) {
-                BlockState tip = world.getBlockState(tipPos);
+        BlockState liquidState = world.getBlockState(pos.up(2));
+
+        int currentLength = pos.getY()-tipPos.getY();
+        int lengthDifference = max(MAX_STALACTITE_GROWTH - currentLength, 0);
+
+        double totalGrowOdds = this.getOdds(world,pos) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
+
+        int stalagmiteGroundDistance = getStalagmiteGrowthDistance(world, tipPos);
+        //int cauldronGroundDistance = getCauldronDistance(world, tipPos);
+
+        int totalUpperDripGrowth = 0;
+        int totalLowerDripGrowth = 0;
+
+        int successesUntilReachGround = max(stalagmiteGroundDistance-STALACTITE_FLOOR_SEARCH_RANGE, 0);
+
+
+        if (lengthDifference != 0 || stalagmiteGroundDistance != -1) {
+            if (canGrow(dripstoneBlockState, liquidState)) {
                 if (PointedDripstoneBlock.canDrip(tip) && canGrow(tip, world, tipPos)) {
 
-                    double totalGrowOdds = this.getOdds(world,pos) * Utils.getRandomPickOdds(randomTickSpeed);
-
-                    int stalagmiteGroundDistance = getStalagmiteGrowthDistance(world, tipPos);
-                    int cauldronGroundDistance = getStalagmiteGrowthDistance(world, tipPos);
-                    int totalDripGrowth = Utils.getOccurrences(timePassed, totalGrowOdds*0.5, MAX_STALACTITE_GROWTH, random);
+                    totalUpperDripGrowth = Utils.getOccurrences(timePassed, totalGrowOdds, lengthDifference, random);
 
                     if (stalagmiteGroundDistance != -1) {
-                        int successesUntilReachGround = max(stalagmiteGroundDistance-STALACTITE_FLOOR_SEARCH_RANGE, 0);
-                        if (totalDripGrowth >= successesUntilReachGround) {
-                            long leftover = Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachGround, totalGrowOdds*0.5, random);
+                        if (totalUpperDripGrowth >= successesUntilReachGround) {
+                            long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachGround, totalGrowOdds, random);
+                            int maxGroundGrowth = min(stalagmiteGroundDistance, STALACTITE_FLOOR_SEARCH_RANGE);
+                            totalLowerDripGrowth = Utils.getOccurrences(leftover, totalGrowOdds, maxGroundGrowth, random);
                         }
                     }
                 }
             }
         }
+
+        //insert logic for cauldron here
+
+        while (successesUntilReachGround > 0 && totalUpperDripGrowth > 0) {
+            --successesUntilReachGround;
+            --totalUpperDripGrowth;
+            tryGrow(world, tipPos, Direction.DOWN);
+            tipPos = tipPos.down();
+        }
+
+        while (totalUpperDripGrowth+totalLowerDripGrowth > 0) {
+            if (totalUpperDripGrowth == 0) {
+                --totalLowerDripGrowth;
+                tryGrowStalagmite(world, tipPos);
+            } else if (totalLowerDripGrowth == 0) {
+                --totalUpperDripGrowth;
+                tryGrow(world, tipPos, Direction.DOWN);
+                tipPos = tipPos.down();
+
+            } else if (random.nextBoolean()) {
+                --totalLowerDripGrowth;
+                tryGrowStalagmite(world, tipPos);
+            } else {
+                --totalUpperDripGrowth;
+                tryGrow(world, tipPos, Direction.DOWN);
+                tipPos = tipPos.down();
+            }
+        }
+
+
     }
 
 }
