@@ -168,7 +168,8 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             --successesUntilReachGround;
             --totalUpperDripGrowth;
             tryGrow(world, tipPos, Direction.DOWN);
-            tipPos = tipPos.down();
+            tipPos = getTipPos(world.getBlockState(pos), world, pos, 12, false);
+            if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
         }
 
         while (totalUpperDripGrowth+totalLowerDripGrowth > 0) {
@@ -178,7 +179,8 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             } else if (totalLowerDripGrowth == 0) {
                 --totalUpperDripGrowth;
                 tryGrow(world, tipPos, Direction.DOWN);
-                tipPos = tipPos.down();
+                tipPos = getTipPos(world.getBlockState(pos), world, pos, 12, false);
+                if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
 
             } else if (random.nextBoolean()) {
                 --totalLowerDripGrowth;
@@ -186,7 +188,8 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             } else {
                 --totalUpperDripGrowth;
                 tryGrow(world, tipPos, Direction.DOWN);
-                tipPos = tipPos.down();
+                tipPos = getTipPos(world.getBlockState(pos), world, pos, 12, false);
+                if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
             }
         }
 
