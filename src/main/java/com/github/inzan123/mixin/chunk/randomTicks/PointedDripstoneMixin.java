@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -67,6 +68,9 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Shadow @Final
     private static int STALACTITE_FLOOR_SEARCH_RANGE;
 
+
+    private final static int CAULDRON_FLOOR_SEARCH_RANGE = 11;
+
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.01137777;
@@ -108,11 +112,11 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     private static int getCauldronDistance(World world, BlockPos pos, Fluid fluid) {
         BlockPos cauldronPos = getCauldronPos(world, pos, fluid);
         if (cauldronPos == null) {
-            cauldronPos = getCauldronPos(world, pos.down(11), fluid);
+            cauldronPos = getCauldronPos(world, pos.down(CAULDRON_FLOOR_SEARCH_RANGE-1), fluid);
             if (cauldronPos == null) {
                 return -1;
             } else {
-                return pos.getY()-cauldronPos.getY()+11;
+                return pos.getY()-cauldronPos.getY();
             }
         } else {
             return pos.getY()-cauldronPos.getY();
@@ -132,20 +136,21 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
         BlockState liquidState = world.getBlockState(pos.up(2));
 
         int currentLength = pos.getY()-tipPos.getY();
-        int lengthDifference = max(MAX_STALACTITE_GROWTH - currentLength, 0);
+        int lengthDifference = MAX_STALACTITE_GROWTH-currentLength;
 
         double totalGrowOdds = this.getOdds(world,pos) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
 
         int stalagmiteGroundDistance = getStalagmiteGrowthDistance(world, tipPos);
-        //int cauldronGroundDistance = getCauldronDistance(world, tipPos);
+        int cauldronGroundDistance = getCauldronDistance(world, tipPos, liquidState.getFluidState().getFluid());
 
         int totalUpperDripGrowth = 0;
         int totalLowerDripGrowth = 0;
 
         int successesUntilReachGround = max(stalagmiteGroundDistance-STALACTITE_FLOOR_SEARCH_RANGE, 0);
+        int successesUntilReachCauldron = max(cauldronGroundDistance-CAULDRON_FLOOR_SEARCH_RANGE, 0);
 
 
-        if (lengthDifference != 0 || stalagmiteGroundDistance != -1) {
+        if (currentLength < MAX_STALACTITE_GROWTH) {
             if (canGrow(dripstoneBlockState, liquidState)) {
                 if (PointedDripstoneBlock.canDrip(tip) && canGrow(tip, world, tipPos)) {
 
@@ -162,6 +167,10 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             }
         }
 
+        if (currentLength <= CAULDRON_FLOOR_SEARCH_RANGE) {
+
+        }
+
         //insert logic for cauldron here
 
         while (successesUntilReachGround > 0 && totalUpperDripGrowth > 0) {
@@ -174,6 +183,10 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
 
         while (totalUpperDripGrowth+totalLowerDripGrowth > 0) {
             if (totalUpperDripGrowth == 0) {
+
+                if (pos.getY()-tipPos.getY() >= MAX_STALACTITE_GROWTH)
+                    return;
+
                 --totalLowerDripGrowth;
                 tryGrowStalagmite(world, tipPos);
             } else if (totalLowerDripGrowth == 0) {

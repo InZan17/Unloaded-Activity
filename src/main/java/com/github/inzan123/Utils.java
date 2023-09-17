@@ -98,6 +98,23 @@ public class Utils {
         return failedTrials;
     }
 
+    public static long sampleNegativeBinomialWithMinMax(long minCycles, long maxCycles, int successes, double odds, Random random) {
+        long failedTrials = Long.MAX_VALUE;
+        long attempts = 0;
+        while ((failedTrials > maxCycles || failedTrials < minCycles) && attempts < 100) {
+
+            failedTrials = sampleNegativeBinomial(successes, odds, random);
+            attempts++;
+        }
+
+        if (failedTrials > maxCycles || failedTrials < minCycles) {
+            //we have attempted this 100 times and the probability of this happening is probably very low.
+            //So we'll just pretend this was the output even though its not accurate at all
+            failedTrials = ((long) (random.nextDouble() * (maxCycles-minCycles)))+minCycles;
+        }
+        return failedTrials;
+    }
+
     public static final double[] logFactorials = new double[]{
             0.0,
             0.0,
