@@ -196,6 +196,10 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
                     while (dripOccurrences > 0) {
                         --dripOccurrences;
                         abstractCauldronBlockInvoker.fillFromDripstone(cauldronState, world, cauldronPos, dripstoneFluid);
+
+                        //The block has changed and so the state and invoker needs updating.
+                        cauldronState = world.getBlockState(cauldronPos);
+                        abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronState.getBlock();
                     }
                 }
             }
