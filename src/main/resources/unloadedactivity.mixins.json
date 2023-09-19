@@ -38,6 +38,7 @@
     "DirectBlockEntityTickInvokerMixin",
     "CropBlockInvoker",
     "CauldronBlockInvoker",
+    "AbstractCauldronBlockInvoker",
     "WorldChunkMixin"
   ],
   "injectors": {

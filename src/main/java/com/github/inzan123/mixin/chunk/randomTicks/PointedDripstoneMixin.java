@@ -2,9 +2,11 @@ package com.github.inzan123.mixin.chunk.randomTicks;
 
 import com.github.inzan123.UnloadedActivity;
 import com.github.inzan123.Utils;
+import com.github.inzan123.mixin.AbstractCauldronBlockInvoker;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.Thickness;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -39,7 +41,7 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Shadow private static boolean canGrow(BlockState state, ServerWorld world, BlockPos pos) {
         return true;
     }
-@Shadow private static void tryGrow(ServerWorld world, BlockPos pos, Direction direction) {}
+    @Shadow private static void tryGrow(ServerWorld world, BlockPos pos, Direction direction) {}
     @Shadow private static boolean isHeldByPointedDripstone(BlockState state, WorldView world, BlockPos pos) {
         return true;
     }
@@ -68,7 +70,10 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Shadow @Final
     private static int STALACTITE_FLOOR_SEARCH_RANGE;
 
-
+    @Shadow @Final
+    private static float WATER_DRIP_CHANCE;
+    @Shadow @Final
+    private static float LAVA_DRIP_CHANCE;
     private final static int CAULDRON_FLOOR_SEARCH_RANGE = 11;
 
     @Override
@@ -109,18 +114,21 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
         return -1;
     }
 
-    private static int getCauldronDistance(World world, BlockPos pos, Fluid fluid) {
+    private static BlockPos getExtendedCauldronPos(World world, BlockPos pos, Fluid fluid) {
         BlockPos cauldronPos = getCauldronPos(world, pos, fluid);
         if (cauldronPos == null) {
             cauldronPos = getCauldronPos(world, pos.down(CAULDRON_FLOOR_SEARCH_RANGE-1), fluid);
-            if (cauldronPos == null) {
-                return -1;
-            } else {
-                return pos.getY()-cauldronPos.getY();
-            }
-        } else {
-            return pos.getY()-cauldronPos.getY();
         }
+        return cauldronPos;
+    }
+
+    private float getCauldronDripOdds(Fluid fluid) {
+        if (fluid == Fluids.WATER) {
+            return WATER_DRIP_CHANCE;
+        } else if (fluid == Fluids.LAVA) {
+            return LAVA_DRIP_CHANCE;
+        }
+        return 0.0f;
     }
 
     @Override
@@ -141,7 +149,15 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
         double totalGrowOdds = this.getOdds(world,pos) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
 
         int stalagmiteGroundDistance = getStalagmiteGrowthDistance(world, tipPos);
-        int cauldronGroundDistance = getCauldronDistance(world, tipPos, liquidState.getFluidState().getFluid());
+
+        Fluid dripstoneFluid = liquidState.getFluidState().getFluid();
+
+        BlockPos cauldronPos = getExtendedCauldronPos(world, tipPos, dripstoneFluid);
+
+        int cauldronGroundDistance = -1;
+
+        if (cauldronPos != null)
+            cauldronGroundDistance = tipPos.getY() - cauldronPos.getY();
 
         int totalUpperDripGrowth = 0;
         int totalLowerDripGrowth = 0;
@@ -167,11 +183,24 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             }
         }
 
-        if (currentLength <= CAULDRON_FLOOR_SEARCH_RANGE) {
+        if (cauldronPos != null && totalUpperDripGrowth >= successesUntilReachCauldron) {
+            BlockState cauldronState = world.getBlockState(cauldronPos);
+            if (cauldronState.getBlock() instanceof AbstractCauldronBlock cauldronBlock) {
+
+                AbstractCauldronBlockInvoker abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronBlock;
+
+                if (!cauldronBlock.isFull(cauldronState) && abstractCauldronBlockInvoker.canBeFilledByDripstone(dripstoneFluid)) {
+                    double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * Utils.getRandomPickOdds(randomTickSpeed);
+                    long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachCauldron, totalGrowOdds, random);
+                    int dripOccurrences = Utils.getOccurrences(leftover, totalDripOdds, LeveledCauldronBlock.MAX_LEVEL, random);
+                    while (dripOccurrences > 0) {
+                        --dripOccurrences;
+                        abstractCauldronBlockInvoker.fillFromDripstone(cauldronState, world, cauldronPos, dripstoneFluid);
+                    }
+                }
+            }
 
         }
-
-        //insert logic for cauldron here
 
         while (successesUntilReachGround > 0 && totalUpperDripGrowth > 0) {
             --successesUntilReachGround;
