@@ -183,6 +183,17 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
             }
         }
 
+        if (liquidState.isOf(Blocks.MUD) && !world.getDimension().ultrawarm()) {
+            double totalDripOdds = WATER_DRIP_CHANCE * Utils.getRandomPickOdds(randomTickSpeed);
+            int dripOccurrences = Utils.getOccurrences(timePassed, totalDripOdds, 1, random);
+            if (dripOccurrences != 0) {
+
+                BlockState clay = Blocks.CLAY.getDefaultState();
+                world.setBlockState(pos.up(2), clay);
+                Block.pushEntitiesUpBeforeBlockChange(liquidState, clay, world, pos.up(2));
+            }
+        }
+
         if (cauldronPos != null && totalUpperDripGrowth >= successesUntilReachCauldron) {
             BlockState cauldronState = world.getBlockState(cauldronPos);
             if (cauldronState.getBlock() instanceof AbstractCauldronBlock cauldronBlock) {
