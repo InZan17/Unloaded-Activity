@@ -84,7 +84,7 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
     @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.growDripstone && !UnloadedActivity.instance.config.dripstoneFillCauldrons) return false;
+        if (!UnloadedActivity.instance.config.growDripstone && !UnloadedActivity.instance.config.dripstoneFillCauldrons && !UnloadedActivity.instance.config.dripstoneTurnMudToClay) return false;
         if (!isHeldByPointedDripstone(state, world, pos)) return false;
         return true;
     }
@@ -166,55 +166,61 @@ public abstract class PointedDripstoneMixin extends Block implements LandingBloc
         int successesUntilReachCauldron = max(cauldronGroundDistance-CAULDRON_FLOOR_SEARCH_RANGE, 0);
 
 
-        if (currentLength < MAX_STALACTITE_GROWTH) {
-            if (canGrow(dripstoneBlockState, liquidState)) {
-                if (PointedDripstoneBlock.canDrip(tip) && canGrow(tip, world, tipPos)) {
+        if (UnloadedActivity.instance.config.growDripstone) {
+            if (currentLength < MAX_STALACTITE_GROWTH) {
+                if (canGrow(dripstoneBlockState, liquidState)) {
+                    if (PointedDripstoneBlock.canDrip(tip) && canGrow(tip, world, tipPos)) {
 
-                    totalUpperDripGrowth = Utils.getOccurrences(timePassed, totalGrowOdds, lengthDifference, random);
+                        totalUpperDripGrowth = Utils.getOccurrences(timePassed, totalGrowOdds, lengthDifference, random);
 
-                    if (stalagmiteGroundDistance != -1) {
-                        if (totalUpperDripGrowth >= successesUntilReachGround) {
-                            long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachGround, totalGrowOdds, random);
-                            int maxGroundGrowth = min(stalagmiteGroundDistance, STALACTITE_FLOOR_SEARCH_RANGE);
-                            totalLowerDripGrowth = Utils.getOccurrences(leftover, totalGrowOdds, maxGroundGrowth, random);
+                        if (stalagmiteGroundDistance != -1) {
+                            if (totalUpperDripGrowth >= successesUntilReachGround) {
+                                long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachGround, totalGrowOdds, random);
+                                int maxGroundGrowth = min(stalagmiteGroundDistance, STALACTITE_FLOOR_SEARCH_RANGE);
+                                totalLowerDripGrowth = Utils.getOccurrences(leftover, totalGrowOdds, maxGroundGrowth, random);
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (liquidState.isOf(Blocks.MUD) && !world.getDimension().ultrawarm()) {
-            double totalDripOdds = WATER_DRIP_CHANCE * Utils.getRandomPickOdds(randomTickSpeed);
-            int dripOccurrences = Utils.getOccurrences(timePassed, totalDripOdds, 1, random);
-            if (dripOccurrences != 0) {
+        if (UnloadedActivity.instance.config.dripstoneTurnMudToClay) {
+            if (liquidState.isOf(Blocks.MUD) && !world.getDimension().ultrawarm()) {
+                double totalDripOdds = WATER_DRIP_CHANCE * Utils.getRandomPickOdds(randomTickSpeed);
+                int dripOccurrences = Utils.getOccurrences(timePassed, totalDripOdds, 1, random);
+                if (dripOccurrences != 0) {
 
-                BlockState clay = Blocks.CLAY.getDefaultState();
-                world.setBlockState(pos.up(2), clay);
-                Block.pushEntitiesUpBeforeBlockChange(liquidState, clay, world, pos.up(2));
+                    BlockState clay = Blocks.CLAY.getDefaultState();
+                    world.setBlockState(pos.up(2), clay);
+                    Block.pushEntitiesUpBeforeBlockChange(liquidState, clay, world, pos.up(2));
+                }
             }
         }
 
-        if (cauldronPos != null && totalUpperDripGrowth >= successesUntilReachCauldron) {
-            BlockState cauldronState = world.getBlockState(cauldronPos);
-            if (cauldronState.getBlock() instanceof AbstractCauldronBlock cauldronBlock) {
+        if (UnloadedActivity.instance.config.dripstoneFillCauldrons) {
+            if (cauldronPos != null && totalUpperDripGrowth >= successesUntilReachCauldron) {
+                BlockState cauldronState = world.getBlockState(cauldronPos);
+                if (cauldronState.getBlock() instanceof AbstractCauldronBlock cauldronBlock) {
 
-                AbstractCauldronBlockInvoker abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronBlock;
+                    AbstractCauldronBlockInvoker abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronBlock;
 
-                if (!cauldronBlock.isFull(cauldronState) && abstractCauldronBlockInvoker.canBeFilledByDripstone(dripstoneFluid)) {
-                    double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * Utils.getRandomPickOdds(randomTickSpeed);
-                    long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachCauldron, totalGrowOdds, random);
-                    int dripOccurrences = Utils.getOccurrences(leftover, totalDripOdds, LeveledCauldronBlock.MAX_LEVEL, random);
-                    while (dripOccurrences > 0) {
-                        --dripOccurrences;
-                        abstractCauldronBlockInvoker.fillFromDripstone(cauldronState, world, cauldronPos, dripstoneFluid);
+                    if (!cauldronBlock.isFull(cauldronState) && abstractCauldronBlockInvoker.canBeFilledByDripstone(dripstoneFluid)) {
+                        double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * Utils.getRandomPickOdds(randomTickSpeed);
+                        long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachCauldron, totalGrowOdds, random);
+                        int dripOccurrences = Utils.getOccurrences(leftover, totalDripOdds, LeveledCauldronBlock.MAX_LEVEL, random);
+                        while (dripOccurrences > 0) {
+                            --dripOccurrences;
+                            abstractCauldronBlockInvoker.fillFromDripstone(cauldronState, world, cauldronPos, dripstoneFluid);
 
-                        //The block has changed and so the state and invoker needs updating.
-                        cauldronState = world.getBlockState(cauldronPos);
-                        abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronState.getBlock();
+                            //The block has changed and so the state and invoker needs updating.
+                            cauldronState = world.getBlockState(cauldronPos);
+                            abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronState.getBlock();
+                        }
                     }
                 }
-            }
 
+            }
         }
 
         while (successesUntilReachGround > 0 && totalUpperDripGrowth > 0) {

@@ -237,6 +237,33 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growDripstone"), config.growDripstone)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growDripstone = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growDripstone.tooltip"))
+                        .build()
+        );
+
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.dripstoneFillCauldrons"), config.dripstoneFillCauldrons)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.dripstoneFillCauldrons = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.dripstoneFillCauldrons.tooltip"))
+                        .build()
+        );
+
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.dripstoneTurnMudToClay"), config.dripstoneTurnMudToClay)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.dripstoneTurnMudToClay = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.dripstoneTurnMudToClay.tooltip"))
+                        .build()
+        );
+
         chunks.addEntry(subRandomTicks.build());
 
         chunks.addEntry(

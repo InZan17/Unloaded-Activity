@@ -25,6 +25,7 @@ public class UnloadedActivityConfig {
     public boolean meltIce = true;
     public boolean growDripstone = true;
     public boolean dripstoneFillCauldrons = true;
+    public boolean dripstoneTurnMudToClay = true;
 
 
 

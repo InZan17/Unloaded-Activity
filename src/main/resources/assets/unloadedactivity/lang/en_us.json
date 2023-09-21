@@ -14,6 +14,8 @@
   "text.config.unloaded-activity.option.updateAllChunksWhenSleep.tooltip": "When you skip a night then the Max Chunk Updates \nwill be ignored.",
   "text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer": "Multiply Max Chunk Updates Per Player",
   "text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer.tooltip": "Will multiply Max Chunk Updates with \nthe amount of players online.",
+
+
   "text.config.unloaded-activity.option.growCrops": "Update Crops",
   "text.config.unloaded-activity.option.growCrops.tooltip": "If enabled, the mod will update crops \nwhen they get within simulation distance.",
   "text.config.unloaded-activity.option.growStems": "Update Stems",
@@ -50,6 +52,14 @@
   "text.config.unloaded-activity.option.waterFreezing.tooltip": "If enabled, the mod will start freezing \nwater once within simulation distance.",
   "text.config.unloaded-activity.option.weatherFillCauldron": "Weather Fills Cauldron",
   "text.config.unloaded-activity.option.weatherFillCauldron.tooltip": "If enabled, the mod will start filling cauldrons \nwith water/snow once within simulation distance.",
+  "text.config.unloaded-activity.option.growDripstone": "Grow Dripstone",
+  "text.config.unloaded-activity.option.growDripstone.tooltip": "If enabled, the mod will start growing dripstone \nonce within simulation distance.",
+  "text.config.unloaded-activity.option.dripstoneFillCauldrons": "Dripstone Fills Cauldrons",
+  "text.config.unloaded-activity.option.dripstoneFillCauldrons.tooltip": "If enabled, the mod will start filling cauldrons \nwith dripping dripstone once within simulation distance.",
+  "text.config.unloaded-activity.option.dripstoneTurnMudToClay": "Dripstone Turns Mud To Clay",
+  "text.config.unloaded-activity.option.dripstoneTurnMudToClay.tooltip": "If enabled, the mod will start turning mud to clay \nonce within simulation distance.",
+
+
   "text.config.unloaded-activity.option.updateFurnace": "Update Furnaces",
   "text.config.unloaded-activity.option.updateFurnace.tooltip": "If enabled, the mod will update furnaces \nwhen they start getting ticked again.",
   "text.config.unloaded-activity.option.ageEntities": "Age Entities",
