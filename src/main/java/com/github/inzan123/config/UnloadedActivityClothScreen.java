@@ -36,24 +36,6 @@ public class UnloadedActivityClothScreen {
 
         general.addEntry(
                 configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.randomizeBlockUpdates"), config.randomizeBlockUpdates)
-                        .setDefaultValue(false)
-                        .setSaveConsumer(newValue -> config.randomizeBlockUpdates = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip"))
-                        .build()
-        );
-
-        general.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions"), config.rememberBlockPositions)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.rememberBlockPositions = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions.tooltip"))
-                        .build()
-        );
-
-        general.addEntry(
-                configEntryBuilder
                         .startIntField(Text.translatable("text.config.unloaded-activity.option.tickDifferenceThreshold"), config.tickDifferenceThreshold)
                         .setDefaultValue(100)
                         .setMin(1)
@@ -81,6 +63,24 @@ public class UnloadedActivityClothScreen {
                         .setMax(32767)
                         .setSaveConsumer(newValue -> config.maxKnownChunkUpdates = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.maxKnownChunkUpdates.tooltip"))
+                        .build()
+        );
+
+        chunks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.randomizeBlockUpdates"), config.randomizeBlockUpdates)
+                        .setDefaultValue(false)
+                        .setSaveConsumer(newValue -> config.randomizeBlockUpdates = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip"))
+                        .build()
+        );
+
+        chunks.addEntry(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions"), config.rememberBlockPositions)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.rememberBlockPositions = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions.tooltip"))
                         .build()
         );
 
@@ -214,15 +214,6 @@ public class UnloadedActivityClothScreen {
 
         subRandomTicks.add(
                 configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch"), config.accurateTurtleAgeAfterHatch)
-                        .setDefaultValue(false)
-                        .setSaveConsumer(newValue -> config.accurateTurtleAgeAfterHatch = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch.tooltip"))
-                        .build()
-        );
-
-        subRandomTicks.add(
-                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growBamboo"), config.growBamboo)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.growBamboo = newValue)
@@ -316,6 +307,19 @@ public class UnloadedActivityClothScreen {
         );
 
         chunks.addEntry(subPrecipitationTicks.build());
+
+        SubCategoryBuilder subAccuracy = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.accuracy"));
+
+        subAccuracy.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch"), config.accurateTurtleAgeAfterHatch)
+                        .setDefaultValue(false)
+                        .setSaveConsumer(newValue -> config.accurateTurtleAgeAfterHatch = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch.tooltip"))
+                        .build()
+        );
+
+        chunks.addEntry(subAccuracy.build());
 
         blockEntities.addEntry(
                 configEntryBuilder
