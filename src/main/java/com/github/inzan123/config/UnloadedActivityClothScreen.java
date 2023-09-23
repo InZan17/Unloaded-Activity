@@ -75,6 +75,17 @@ public class UnloadedActivityClothScreen {
 
         chunks.addEntry(
                 configEntryBuilder
+                        .startIntField(Text.translatable("text.config.unloaded-activity.option.maxKnownChunkUpdates"), config.maxKnownChunkUpdates)
+                        .setDefaultValue(64)
+                        .setMin(1)
+                        .setMax(32767)
+                        .setSaveConsumer(newValue -> config.maxKnownChunkUpdates = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.maxKnownChunkUpdates.tooltip"))
+                        .build()
+        );
+
+        chunks.addEntry(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer"), config.multiplyMaxChunkUpdatesPerPlayer)
                         .setDefaultValue(false)
                         .setSaveConsumer(newValue -> config.multiplyMaxChunkUpdatesPerPlayer = newValue)

@@ -10,6 +10,8 @@
   "text.config.unloaded-activity.option.tickDifferenceThreshold.tooltip": "How many ticks are needed to be skipped before \nthe mod should start simulating the ticks.",
   "text.config.unloaded-activity.option.maxChunkUpdates": "Max Chunk Updates Per Tick",
   "text.config.unloaded-activity.option.maxChunkUpdates.tooltip": "How many chunks should be allowed to update per tick.",
+  "text.config.unloaded-activity.option.maxKnownChunkUpdates": "Max Known Chunk Updates Per Tick",
+  "text.config.unloaded-activity.option.maxKnownChunkUpdates.tooltip": "How many chunks, in which we know the \nblock positions of, should be allowed to update per tick.",
   "text.config.unloaded-activity.option.updateAllChunksWhenSleep": "Update All Chunks When Sleeping",
   "text.config.unloaded-activity.option.updateAllChunksWhenSleep.tooltip": "When you skip a night then the Max Chunk Updates \nwill be ignored.",
   "text.config.unloaded-activity.option.multiplyMaxChunkUpdatesPerPlayer": "Multiply Max Chunk Updates Per Player",

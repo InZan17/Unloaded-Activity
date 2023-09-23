@@ -34,6 +34,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
 	}
 	public int updateCount = 0;
+	public int knownUpdateCount = 0;
 	public boolean hasSlept = false;
 	public int msTime = 0;
 
@@ -56,11 +57,20 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
 			if (timeDifference > differenceThreshold) {
-				if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
-					++updateCount;
-					msTime += TimeMachine.simulateChunk(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
+				if (chunkIsKnown(chunk)) {
+					if (knownUpdateCount < UnloadedActivity.instance.config.maxKnownChunkUpdates*getMultiplier() || hasSlept) {
+						++knownUpdateCount;
+						msTime += TimeMachine.simulateChunk(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
+					} else {
+						return;
+					}
 				} else {
-					return;
+					if (updateCount < UnloadedActivity.instance.config.maxChunkUpdates*getMultiplier() || hasSlept) {
+						++updateCount;
+						msTime += TimeMachine.simulateChunk(timeDifference, this.toServerWorld(), chunk, randomTickSpeed);
+					} else {
+						return;
+					}
 				}
 			}
 		}
@@ -72,19 +82,25 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		}
 	}
 
+	private boolean chunkIsKnown(WorldChunk chunk) {
+		LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
+		return chunkSimVer.getValue() == UnloadedActivity.chunkSimVer;
+	}
+
 	private int getMultiplier() {
 		return UnloadedActivity.instance.config.multiplyMaxChunkUpdatesPerPlayer ? max(1, this.getPlayers().size()) : 1;
 	}
 
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		if (UnloadedActivity.instance.config.debugLogs && updateCount != 0) {
-			int averageMs = (int)((float) msTime / updateCount + 0.5);
-			UnloadedActivity.LOGGER.info("Average chunk update time for "+updateCount+" chunks: "+averageMs+"ms");
-			UnloadedActivity.LOGGER.info("Total chunk update time for "+updateCount+" chunks: "+msTime+"ms");
+		if (UnloadedActivity.instance.config.debugLogs && (updateCount+knownUpdateCount) != 0) {
+			int averageMs = (int)((float) msTime / (updateCount+knownUpdateCount) + 0.5);
+			UnloadedActivity.LOGGER.info("Average chunk update time for "+updateCount+" chunks and  "+knownUpdateCount+" known chunks: "+averageMs+"ms");
+			UnloadedActivity.LOGGER.info("Total chunk update time for "+updateCount+" chunks and  "+knownUpdateCount+" known chunks: "+msTime+"ms");
 		}
 		msTime = 0;
 		updateCount = 0;
+		knownUpdateCount = 0;
 		hasSlept = false;
 	}
 
