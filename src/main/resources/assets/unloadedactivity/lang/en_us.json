@@ -5,7 +5,7 @@
   "text.config.unloaded-activity.option.randomizeBlockUpdates": "Randomize Block Updates",
   "text.config.unloaded-activity.option.randomizeBlockUpdates.tooltip": "If enabled, the mod will update blocks in \na random order to make updating slightly more realistic. \nThis is only noticeable on things that gets affected by \nother things when they grow, like trees/saplings.",
   "text.config.unloaded-activity.option.rememberBlockPositions": "Remember Block Positions",
-  "text.config.unloaded-activity.option.rememberBlockPositions.tooltip": "If enabled, instead of looping through \nthe entire chunk, it will remember the positions of \nsupported blocks and loop through that. \nThis can improve performance but it's experimental might break slightly.",
+  "text.config.unloaded-activity.option.rememberBlockPositions.tooltip": "If enabled, instead of always looping \nthrough the entire chunk, it will remember the positions \nof supported blocks and loop through that. \nThis can improve performance by a lot.",
   "text.config.unloaded-activity.option.tickDifferenceThreshold": "Tick Difference Threshold",
   "text.config.unloaded-activity.option.tickDifferenceThreshold.tooltip": "How many ticks are needed to be skipped before \nthe mod should start simulating the ticks.",
   "text.config.unloaded-activity.option.maxChunkUpdates": "Max Chunk Updates Per Tick",

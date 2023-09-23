@@ -46,7 +46,7 @@ public class UnloadedActivityClothScreen {
         general.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions"), config.rememberBlockPositions)
-                        .setDefaultValue(false)
+                        .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.rememberBlockPositions = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.rememberBlockPositions.tooltip"))
                         .build()
