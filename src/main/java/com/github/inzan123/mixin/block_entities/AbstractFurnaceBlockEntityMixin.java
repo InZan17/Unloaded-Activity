@@ -54,9 +54,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
-    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
+    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable RecipeEntry<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
         ItemStack input = slots.get(0);
-        ItemStack recipeOutput = recipe.getOutput(registryManager);
+        ItemStack recipeOutput = recipe.value().getResult(registryManager);
         ItemStack finalOutput = slots.get(2);
         if (finalOutput.isEmpty()) {
             ItemStack recipeClone = recipeOutput.copy();
@@ -72,11 +72,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         input.decrement(quantity);
         return true;
     }
-
-    public void setLastRecipe(@Nullable Recipe<?> recipe, int quantity) {
+    public void setLastRecipe(@Nullable RecipeEntry<?> recipe, int quantity) {
         if (recipe != null) {
-            Identifier identifier = recipe.getId();
-            this.recipesUsed.addTo(identifier, quantity);
+            Identifier identifier = recipe.id();
+            this.recipesUsed.addTo(identifier, 1);
         }
     }
 
@@ -101,7 +100,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             ItemStack finishedStack = this.inventory.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
-            Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+            RecipeEntry recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
             int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
             int fuelTime = this.getFuelTime(fuelStack);
