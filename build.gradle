@@ -37,11 +37,13 @@ dependencies {
 	// Adds a dependency on the base cardinal components module (required by every other module)
 	// Replace modImplementation with modApi if you expose components in your own API
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.2"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:5.2.2"
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.2.2"
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.2.2"
 	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.2"
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional)
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.2"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-world:5.2.2"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.2.2"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.2.2"
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.2"

@@ -1,6 +1,7 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
@@ -8,9 +9,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import static java.lang.Math.min;
 
 @Mixin(AbstractPlantStemBlock.class)
 public abstract class PlantStemMixin extends AbstractPlantPartBlock implements Fertilizable {
@@ -34,9 +38,20 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
     public double getOdds(ServerWorld world, BlockPos pos) {
         return growthChance;
     }
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growPlantStems) return false;
+        if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA()) return false;
+        if (!chooseStemState(world.getBlockState(pos.offset(this.growthDirection)))) return false;
         return true;
+    }
+
+    public int countValidSteps(BlockView world, BlockPos pos, Direction direction, int maxCount) {
+        int i;
+        for (i = 0; i < maxCount && chooseStemState(world.getBlockState(pos.offset(direction, i+1))); ++i) {
+        }
+        return i;
     }
     @Override public int getCurrentAgeUA(BlockState state) {
         return state.get(AGE);
@@ -46,16 +61,17 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
         return MAX_AGE;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int currentAge = getCurrentAgeUA(state);
         int maxAge = getMaxAgeUA();
         int ageDifference = maxAge - currentAge;
+        ageDifference = min(ageDifference, min(ageDifference, countValidSteps(world, pos, this.growthDirection, ageDifference)));
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
             return;
