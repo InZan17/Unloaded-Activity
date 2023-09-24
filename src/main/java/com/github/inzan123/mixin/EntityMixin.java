@@ -26,9 +26,12 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
     @Inject(at = @At("HEAD"), method = "tick")
     public void tickMovement(CallbackInfo ci) {
 
-        LongComponent lastTick = this.getComponent(LASTENTITYTICK);
-
         World world = this.world;
+
+        if (world.isClient())
+            return;
+
+        LongComponent lastTick = this.getComponent(LASTENTITYTICK);
 
         long currentTime = world.getTimeOfDay();
 

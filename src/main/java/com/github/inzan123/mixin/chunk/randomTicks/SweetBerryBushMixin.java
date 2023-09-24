@@ -1,7 +1,7 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SweetBerryBushBlock;
@@ -14,11 +14,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import static java.lang.Math.pow;
-
 @Mixin(SweetBerryBushBlock.class)
-public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
-    public BerryBushSimulateTimeMixin(Settings settings) {
+public abstract class SweetBerryBushMixin extends PlantBlock {
+    public SweetBerryBushMixin(Settings settings) {
         super(settings);
     }
 
@@ -29,7 +27,9 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.2;
     }
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (state == null) return false;
         if (!UnloadedActivity.instance.config.growSweetBerries) return false;
         if (getCurrentAgeUA(state) >= getMaxAgeUA() || world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -45,15 +45,15 @@ public abstract class BerryBushSimulateTimeMixin extends PlantBlock {
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int age = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - age;
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
             return;
