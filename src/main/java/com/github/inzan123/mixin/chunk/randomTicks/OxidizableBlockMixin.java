@@ -1,7 +1,7 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
-import com.github.inzan123.SimulateRandomTicks;
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -12,12 +12,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Iterator;
 import java.util.Optional;
 
-import static java.lang.Math.pow;
+@Mixin(OxidizableBlock.class)
+public abstract class OxidizableBlockMixin extends Block implements Oxidizable {
 
-@Mixin(OxidizableSlabBlock.class)
-public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxidizable {
-
-    public OxidizableSlabBlockMixin(Settings settings) {
+    public OxidizableBlockMixin(Settings settings) {
         super(settings);
     }
 
@@ -25,11 +23,13 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
     public double getOdds(ServerWorld world, BlockPos pos) {
         return 0.05688889f;
     }
+    @Override
+    public boolean implementsSimulateRandTicks() {return true;}
     @Shadow
     public OxidationLevel getDegradationLevel() {
         return null;
     }
-    @Override public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -45,9 +45,9 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
     }
 
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
         double tryDegradeOdds = getOdds(world, pos);
 
@@ -66,7 +66,7 @@ public abstract class OxidizableSlabBlockMixin extends SlabBlock implements Oxid
         int currentAge = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - currentAge;
 
-        int ageAmount = getOccurrences(timePassed, totalOdds, ageDifference, random);
+        int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (ageAmount == 0)
             return;

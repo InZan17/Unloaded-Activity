@@ -1,6 +1,7 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
 import com.github.inzan123.UnloadedActivity;
+import com.github.inzan123.Utils;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BambooLeaves;
 import net.minecraft.server.world.ServerWorld;
@@ -21,7 +22,9 @@ public abstract class BambooMixin extends Block implements Fertilizable {
     }
     @Override public double getOdds(ServerWorld world, BlockPos pos) {return 1d/3d;}
     @Override
-    public boolean canSimulate(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Override
+    public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (!UnloadedActivity.instance.config.growBamboo) return false;
         if (!world.isAir(pos.up())) return false;
         if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
@@ -44,7 +47,7 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         return i;
     }
     @Override
-    public void simulateTime(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
 
         int height = countBambooBelow(world, pos);
 
@@ -54,17 +57,17 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         int heightDifference = getMaxHeightUA() - height;
         int maxGrowth = countAirAbove(world,pos, heightDifference);
 
-        double randomPickChance = getRandomPickOdds(randomTickSpeed);
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
-        int growthAmount = getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
         for(int i=1+height;i<growthAmount+1+height;i++) {
 
             if (state == null)
                 return;
 
-            if (!canSimulate(state, world, pos))
+            if (!canSimulateRandTicks(state, world, pos))
                 return;
 
             state = updateLeaves(state,world,pos,random,i);

@@ -1,4 +1,4 @@
-package com.github.inzan123.mixin.blocks;
+package com.github.inzan123.mixin.chunk.randomTicks;
 
 import net.minecraft.block.BeetrootsBlock;
 import net.minecraft.block.CropBlock;
