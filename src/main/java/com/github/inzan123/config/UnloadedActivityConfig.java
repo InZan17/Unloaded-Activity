@@ -8,6 +8,7 @@ public class UnloadedActivityConfig {
 
     //General
     public int tickDifferenceThreshold = 100;
+    public int maxNegativeBinomialAttempts = 20;
     public boolean debugLogs = false;
 
 

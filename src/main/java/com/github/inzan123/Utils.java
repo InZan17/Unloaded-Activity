@@ -84,14 +84,14 @@ public class Utils {
     public static long sampleNegativeBinomialWithMax(long cycles, int successes, double odds, Random random) {
         long failedTrials = Long.MAX_VALUE;
         long attempts = 0;
-        while (failedTrials > cycles && attempts < 100) {
+        while (failedTrials > cycles && attempts < UnloadedActivity.instance.config.maxNegativeBinomialAttempts) {
 
             failedTrials = sampleNegativeBinomial(successes, odds, random);
             attempts++;
         }
 
         if (failedTrials > cycles) {
-            //we have attempted this 100 times and the probability of this happening is probably very low.
+            //we have attempted this many times and the probability of this happening is probably very low.
             //So we'll just pretend this was the output even though its not accurate at all
             failedTrials = (long) (random.nextDouble() * cycles);
         }
@@ -252,27 +252,10 @@ public class Utils {
         long leftover;
 
         if (successes == maxOccurrences) {
-            long failedTrials = Long.MAX_VALUE;
-            long attempts = 0;
-            while (failedTrials > cycles && attempts < 100) {
-
-                failedTrials = sampleNegativeBinomial(successes, odds, random);
-                attempts++;
-            }
-
-            if (failedTrials > cycles) {
-                //we have attempted this 100 times and the probability of this happening is probably very low.
-                //So we'll just pretend this was the output even though its not accurate at all
-                failedTrials = (long)(random.nextDouble()*cycles);
-                if (UnloadedActivity.instance.config.debugLogs)
-                    UnloadedActivity.LOGGER.info("Failed to get accurate negative binomial result.");
-            } else if (UnloadedActivity.instance.config.debugLogs)
-                UnloadedActivity.LOGGER.info("Succeeded to get accurate negative binomial result.");
-
+            long failedTrials = sampleNegativeBinomialWithMax(cycles, successes, odds, random);
             leftover = cycles - failedTrials;
-
         } else {
-            leftover = cycles;
+            leftover = 0;
         }
 
         return new OccurrencesAndLeftover(successes, leftover);
