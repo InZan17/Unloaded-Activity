@@ -1,17 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "unloadedactivity",
-  "version": "0.4.3",
+  "version": "0.5.0",
 
   "custom": {
     "cardinal-components": [
       "unloadedactivity:last-chunk-tick",
-      "unloadedactivity:last-blockentity-tick",
+      "unloadedactivity:chunk-sim-blocks",
+      "unloadedactivity:chunk-sim-ver",
+      "unloadedactivity:world-weather-info",
       "unloadedactivity:last-entity-tick",
+      "unloadedactivity:last-blockentity-tick",
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateRandomTicks"],
+      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateChunkBlocks"],
       "net/minecraft/block/entity/BlockEntity": ["com/github/inzan123/SimulateBlockEntity"],
       "net/minecraft/entity/Entity": ["com/github/inzan123/SimulateEntity"]
     },
@@ -53,7 +56,7 @@
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric-api": "*",
-    "minecraft": "1.19.4",
+    "minecraft": "1.20.x",
     "java": ">=17"
   },
   "suggests": {

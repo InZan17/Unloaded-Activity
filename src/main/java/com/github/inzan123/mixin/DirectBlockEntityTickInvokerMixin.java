@@ -38,6 +38,9 @@ public abstract class DirectBlockEntityTickInvokerMixin<T extends BlockEntity> {
 
         World world = this.blockEntity.getWorld();
 
+        if (world.isClient())
+            return;
+
         LongComponent lastTick = this.blockEntity.getComponent(LASTBLOCKENTITYTICK);
 
         long currentTime = world.getTimeOfDay();

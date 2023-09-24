@@ -55,21 +55,21 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
     private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
-        ItemStack itemStack = slots.get(0);
-        ItemStack itemStack2 = recipe.getOutput(registryManager);
-        ItemStack itemStack3 = slots.get(2);
-        if (itemStack3.isEmpty()) {
-            ItemStack itemStack2Clone = itemStack2.copy();
-            itemStack2Clone.increment(quantity-1);
-            slots.set(2, itemStack2Clone);
-            itemStack3.increment(quantity);
-        } else if (itemStack3.isOf(itemStack2.getItem())) {
-            itemStack3.increment(quantity);
+        ItemStack input = slots.get(0);
+        ItemStack recipeOutput = recipe.getOutput(registryManager);
+        ItemStack finalOutput = slots.get(2);
+        if (finalOutput.isEmpty()) {
+            ItemStack recipeClone = recipeOutput.copy();
+            recipeClone.increment(quantity-1);
+            slots.set(2, recipeClone);
+            finalOutput.increment(quantity);
+        } else if (finalOutput.isOf(recipeOutput.getItem())) {
+            finalOutput.increment(quantity);
         }
-        if (itemStack.isOf(Blocks.WET_SPONGE.asItem()) && !slots.get(1).isEmpty() && slots.get(1).isOf(Items.BUCKET)) {
+        if (input.isOf(Blocks.WET_SPONGE.asItem()) && !slots.get(1).isEmpty() && slots.get(1).isOf(Items.BUCKET)) {
             slots.set(1, new ItemStack(Items.WATER_BUCKET));
         }
-        itemStack.decrement(quantity);
+        input.decrement(quantity);
         return true;
     }
 
