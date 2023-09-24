@@ -313,7 +313,7 @@ public class UnloadedActivityClothScreen {
         subAccuracy.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch"), config.accurateTurtleAgeAfterHatch)
-                        .setDefaultValue(false)
+                        .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.accurateTurtleAgeAfterHatch = newValue)
                         .setTooltip(Text.translatable("text.config.unloaded-activity.option.accurateTurtleAgeAfterHatch.tooltip"))
                         .build()
