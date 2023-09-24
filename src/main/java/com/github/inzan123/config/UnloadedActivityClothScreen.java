@@ -122,24 +122,6 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        randomTicks.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep"), config.updateAllChunksWhenSleep)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.updateAllChunksWhenSleep = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.updateAllChunksWhenSleep.tooltip"))
-                        .build()
-        );
-
-        randomTicks.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growSaplings"), config.growSaplings)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.growSaplings = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growSaplings.tooltip"))
-                        .build()
-        );
-
         subRandomTicks.add(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCrops"), config.growCrops)
