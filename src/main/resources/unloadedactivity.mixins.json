@@ -21,7 +21,6 @@
     "chunk.randomTicks.PlantStemMixin",
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
-    "chunk.randomTicks.TorchFlowerMixin",
     "chunk.randomTicks.TurtleEggMixin",
     "chunk.randomTicks.IceMixin",
     "chunk.randomTicks.PointedDripstoneMixin",

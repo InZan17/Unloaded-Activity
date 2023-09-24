@@ -91,10 +91,6 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		return UnloadedActivity.instance.config.multiplyMaxChunkUpdatesPerPlayer ? max(1, this.getPlayers().size()) : 1;
 	}
 
-	private int getMultiplier() {
-		return UnloadedActivity.instance.config.multiplyMaxChunkUpdatesPerPlayer ? max(1, this.getPlayers().size()) : 1;
-	}
-
 	@Inject(method = "tick", at = @At(value = "TAIL"))
 	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		if (UnloadedActivity.instance.config.debugLogs && (updateCount+knownUpdateCount) != 0) {
