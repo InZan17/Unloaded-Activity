@@ -75,7 +75,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     public void setLastRecipe(@Nullable RecipeEntry<?> recipe, int quantity) {
         if (recipe != null) {
             Identifier identifier = recipe.id();
-            this.recipesUsed.addTo(identifier, 1);
+            this.recipesUsed.addTo(identifier, quantity);
         }
     }
 
