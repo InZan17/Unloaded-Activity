@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(IceBlock.class)
-public abstract class IceMixin extends TransparentBlock {
+public abstract class IceMixin extends TranslucentBlock {
 
     public IceMixin(Settings settings) {
         super(settings);

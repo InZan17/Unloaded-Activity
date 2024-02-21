@@ -5,7 +5,7 @@ import com.github.inzan123.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.sapling.SaplingGenerator;
+import net.minecraft.block.SaplingGenerator;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;

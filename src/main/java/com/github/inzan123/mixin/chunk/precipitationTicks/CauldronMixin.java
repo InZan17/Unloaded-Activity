@@ -21,7 +21,8 @@ import static java.lang.Math.min;
 
 @Mixin(CauldronBlock.class)
 public abstract class CauldronMixin extends AbstractCauldronBlock {
-    public CauldronMixin(Settings settings, Map<Item, CauldronBehavior> behaviorMap) {
+
+    public CauldronMixin(Settings settings, CauldronBehavior.CauldronBehaviorMap behaviorMap) {
         super(settings, behaviorMap);
     }
 
