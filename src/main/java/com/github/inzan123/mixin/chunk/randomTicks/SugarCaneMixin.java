@@ -91,10 +91,16 @@ public abstract class SugarCaneMixin extends Block {
 
         for (int i=0;i<growBlocks;i++) {
 
-            world.setBlockState(pos.up(i+1), this.getDefaultState());
+            BlockPos placementPos = pos.up(i+1);
+
+            if (!world.getBlockState(placementPos).isAir()) {
+                return;
+            }
+
+            world.setBlockState(placementPos, this.getDefaultState());
 
             if (i+1==growBlocks)
-                world.setBlockState(pos.up(i+1), this.getDefaultState().with(AGE, ageRemainder));
+                world.setBlockState(placementPos, this.getDefaultState().with(AGE, ageRemainder));
         }
     }
 }
