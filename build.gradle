@@ -10,6 +10,13 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+minecraft_version_string = project.minecraft_version.replace(".", "_")
+
+fabric_version = project["fabric_version_" + minecraft_version_string]
+cardinal_version = project["cardinal_version_" + minecraft_version_string]
+cloth_version = project["cloth_version_" + minecraft_version_string]
+modmenu_version = project["modmenu_version_" + minecraft_version_string]
+
 repositories {
 	maven {
 		name = 'Ladysnake Mods'
@@ -31,25 +38,32 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	// Uncomment the following line to enable the deprecated Fabric API modules. 
-	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
-
 	// Adds a dependency on the base cardinal components module (required by every other module)
 	// Replace modImplementation with modApi if you expose components in your own API
-	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.2"
-	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:5.2.2"
-	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.2.2"
-	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.2.2"
-	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.2"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_version}"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cardinal_version}"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:${project.cardinal_version}"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-block:${project.cardinal_version}"
+	modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_version}"
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional)
-	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.2"
-	include "dev.onyxstudios.cardinal-components-api:cardinal-components-world:5.2.2"
-	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:5.2.2"
-	include "dev.onyxstudios.cardinal-components-api:cardinal-components-block:5.2.2"
-	include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.2"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_version}"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${project.cardinal_version}"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:${project.cardinal_version}"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-block:${project.cardinal_version}"
+	include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cardinal_version}"
 
-	modImplementation "com.terraformersmc:modmenu:7.0.1"
-	modImplementation "me.shedaniel.cloth:cloth-config-fabric:11.1.106"
+	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}"
+
+	annotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
+	testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
+}
+
+new File(projectDir, "build.properties").text = "MC_" + minecraft_version_string
+
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs += ['-Xplugin:Manifold']
 }
 
 processResources {
