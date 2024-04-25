@@ -19,9 +19,16 @@ import static java.lang.Math.min;
 
 @Mixin(CauldronBlock.class)
 public abstract class CauldronMixin extends AbstractCauldronBlock {
+
+    #if MC_1_20_3 || MC_1_20_4
+    public CauldronMixin(Settings settings, CauldronBehavior.CauldronBehaviorMap behaviorMap) {
+        super(settings, behaviorMap);
+    }
+    #else
     public CauldronMixin(Settings settings, Map<Item, CauldronBehavior> behaviorMap) {
         super(settings, behaviorMap);
     }
+    #endif
 
     @Shadow @Final private static float FILL_WITH_RAIN_CHANCE;
     @Shadow @Final private static float FILL_WITH_SNOW_CHANCE;
