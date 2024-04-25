@@ -14,9 +14,9 @@
       "unloadedactivity:magik"
     ],
     "loom:injected_interfaces": {
-      "net/minecraft/block/AbstractBlock": ["com/github/inzan123/SimulateChunkBlocks"],
-      "net/minecraft/block/entity/BlockEntity": ["com/github/inzan123/SimulateBlockEntity"],
-      "net/minecraft/entity/Entity": ["com/github/inzan123/SimulateEntity"]
+      "net/minecraft/block/AbstractBlock": ["com/github/inzan17/SimulateChunkBlocks"],
+      "net/minecraft/block/entity/BlockEntity": ["com/github/inzan17/SimulateBlockEntity"],
+      "net/minecraft/entity/Entity": ["com/github/inzan17/SimulateEntity"]
     },
     "lithium:options": {
       "world.block_entity_ticking.sleeping.furnace": false
@@ -30,8 +30,8 @@
   ],
   "contact": {
     "homepage": "https://zanspace.lol",
-    "sources": "https://github.com/InZan123/Unloaded-Activity-Fabric",
-    "issues": "https://github.com/InZan123/Unloaded-Activity-Fabric/issues"
+    "sources": "https://github.com/InZan17/Unloaded-Activity-Fabric",
+    "issues": "https://github.com/InZan17/Unloaded-Activity-Fabric/issues"
   },
 
   "license": "GNU LGPLv3",
@@ -40,13 +40,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.github.inzan123.UnloadedActivity"
+      "com.github.inzan17.UnloadedActivity"
     ],
     "cardinal-components": [
-      "com.github.inzan123.MyComponents"
+      "com.github.inzan17.MyComponents"
     ],
     "modmenu": [
-      "com.github.inzan123.config.UnloadedActivityModMenu"
+      "com.github.inzan17.config.UnloadedActivityModMenu"
     ]
   },
   "mixins": [
