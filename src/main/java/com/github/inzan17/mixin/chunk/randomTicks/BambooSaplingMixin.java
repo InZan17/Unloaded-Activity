@@ -19,7 +19,11 @@ import static net.minecraft.block.BambooBlock.STAGE;
 import static net.minecraft.util.math.MathHelper.clamp;
 import static net.minecraft.util.math.MathHelper.floor;
 
+#if MC_1_20_3 || MC_1_20_4
+@Mixin(BambooShootBlock.class)
+#else
 @Mixin(BambooSaplingBlock.class)
+#endif
 public abstract class BambooSaplingMixin extends Block {
     public BambooSaplingMixin(Settings settings) {
         super(settings);

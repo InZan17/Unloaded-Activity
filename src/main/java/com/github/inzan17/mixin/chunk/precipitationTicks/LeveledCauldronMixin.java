@@ -21,11 +21,19 @@ import static java.lang.Math.min;
 
 @Mixin(LeveledCauldronBlock.class)
 public abstract class LeveledCauldronMixin extends AbstractCauldronBlock {
+    #if MC_1_20_3 || MC_1_20_4
+    public LeveledCauldronMixin(Settings settings, CauldronBehavior.CauldronBehaviorMap behaviorMap) {
+        super(settings, behaviorMap);
+    }
+
+    @Shadow @Final private Biome.Precipitation precipitation;
+    #else
     public LeveledCauldronMixin(Settings settings, Map<Item, CauldronBehavior> behaviorMap) {
         super(settings, behaviorMap);
     }
 
     @Shadow @Final private Predicate<Biome.Precipitation> precipitationPredicate;
+    #endif
 
     @Override
     public boolean implementsSimulatePrecTicks() {
@@ -48,7 +56,11 @@ public abstract class LeveledCauldronMixin extends AbstractCauldronBlock {
         if (!UnloadedActivity.instance.config.weatherFillCauldron) return false;
         if (timeInWeather == 0) return false;
         if (getFillOdds(precipitation) == 0.0F) return false;
+        #if MC_1_20_3 || MC_1_20_4
+        if (precipitation != this.precipitation) return false;
+        #else
         if (!this.precipitationPredicate.test(precipitation)) return false;
+        #endif
         if (state.get(LeveledCauldronBlock.LEVEL) == LeveledCauldronBlock.MAX_LEVEL) return false;
         return true;
     }
