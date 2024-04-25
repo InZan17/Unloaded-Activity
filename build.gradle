@@ -6,16 +6,18 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
-
 minecraft_version_string = project.minecraft_version.replace(".", "_")
 
+mod_version_suffix = project["mod_version_suffix_" + minecraft_version_string]
 fabric_version = project["fabric_version_" + minecraft_version_string]
 cardinal_version = project["cardinal_version_" + minecraft_version_string]
 cloth_version = project["cloth_version_" + minecraft_version_string]
 modmenu_version = project["modmenu_version_" + minecraft_version_string]
+compatible_versions = project["compatible_versions_" + minecraft_version_string]
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version + "+" + mod_version_suffix
+group = project.maven_group
 
 repositories {
 	maven {
@@ -67,10 +69,11 @@ tasks.withType(JavaCompile) {
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property "version", project.mod_version
+	inputs.property "compatible_versions", project.compatible_versions
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand "version": project.mod_version, "compatible_versions": project.compatible_versions
 	}
 }
 
