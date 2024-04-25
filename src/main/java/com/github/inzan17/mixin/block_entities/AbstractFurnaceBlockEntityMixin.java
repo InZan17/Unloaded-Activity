@@ -54,9 +54,13 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
-    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
+    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable #if MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
         ItemStack input = slots.get(0);
+        #if MC_1_20_2
+        ItemStack recipeOutput = recipe.value().getResult(registryManager);
+        #else
         ItemStack recipeOutput = recipe.getOutput(registryManager);
+        #endif
         ItemStack finalOutput = slots.get(2);
         if (finalOutput.isEmpty()) {
             ItemStack recipeClone = recipeOutput.copy();
@@ -73,9 +77,13 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         return true;
     }
 
-    public void setLastRecipe(@Nullable Recipe<?> recipe, int quantity) {
+    public void setLastRecipe(@Nullable #if MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, int quantity) {
         if (recipe != null) {
+            #if MC_1_20_2
+            Identifier identifier = recipe.id();
+            #else
             Identifier identifier = recipe.getId();
+            #endif
             this.recipesUsed.addTo(identifier, quantity);
         }
     }
@@ -101,7 +109,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             ItemStack finishedStack = this.inventory.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
-            Recipe recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+            #if MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
             int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
             int fuelTime = this.getFuelTime(fuelStack);

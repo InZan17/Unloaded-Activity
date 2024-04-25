@@ -14,6 +14,7 @@ cardinal_version = project["cardinal_version_" + minecraft_version_string]
 cloth_version = project["cloth_version_" + minecraft_version_string]
 modmenu_version = project["modmenu_version_" + minecraft_version_string]
 compatible_versions = project["compatible_versions_" + minecraft_version_string]
+yarn_mappings = project["yarn_mappings_" + minecraft_version_string]
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version + "+" + mod_version_suffix
