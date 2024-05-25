@@ -85,6 +85,11 @@ public abstract class CactusMixin extends Block {
         for (int i=0;i<growBlocks;i++) {
 
             BlockPos newPos = pos.up(1);
+
+            if (!world.getBlockState(newPos).isAir()) {
+                return;
+            }
+            
             BlockState newState = this.getDefaultState();
 
             if (i+1==growBlocks)
