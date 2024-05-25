@@ -54,9 +54,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
-    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable #if MC_1_20_2 || MC_1_20_3 || MC_1_20_4 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
+    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable #if MC_VER >= MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
         ItemStack input = slots.get(0);
-        #if MC_1_20_2 || MC_1_20_3 || MC_1_20_4
+        #if MC_VER >= MC_1_20_2
         ItemStack recipeOutput = recipe.value().getResult(registryManager);
         #else
         ItemStack recipeOutput = recipe.getOutput(registryManager);
@@ -77,9 +77,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         return true;
     }
 
-    public void setLastRecipe(@Nullable #if MC_1_20_2 RecipeEntry<?> #elif MC_1_20_3 || MC_1_20_4 RecipeEntry #else Recipe<?> #endif recipe, int quantity) {
+    public void setLastRecipe(@Nullable #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe, int quantity) {
         if (recipe != null) {
-            #if MC_1_20_2 || MC_1_20_3 || MC_1_20_4
+            #if MC_VER >= MC_1_20_2
             Identifier identifier = recipe.id();
             #else
             Identifier identifier = recipe.getId();
@@ -109,7 +109,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             ItemStack finishedStack = this.inventory.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
-            #if MC_1_20_2 RecipeEntry<?> #elif MC_1_20_3 || MC_1_20_4 RecipeEntry #else Recipe<?> #endif recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+            #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
             int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
             int fuelTime = this.getFuelTime(fuelStack);

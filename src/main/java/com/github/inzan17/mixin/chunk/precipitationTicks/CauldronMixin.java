@@ -20,7 +20,7 @@ import static java.lang.Math.min;
 @Mixin(CauldronBlock.class)
 public abstract class CauldronMixin extends AbstractCauldronBlock {
 
-    #if MC_1_20_3 || MC_1_20_4
+    #if MC_VER >= MC_1_20_4
     public CauldronMixin(Settings settings, CauldronBehavior.CauldronBehaviorMap behaviorMap) {
         super(settings, behaviorMap);
     }

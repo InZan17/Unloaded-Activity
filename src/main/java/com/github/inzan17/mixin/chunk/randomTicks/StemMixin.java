@@ -8,7 +8,7 @@ import com.github.inzan17.mixin.CropBlockInvoker;
 import net.minecraft.block.*;
 import net.minecraft.block.cauldron.CauldronBehavior;
 
-#if MC_1_20_3 || MC_1_20_4
+#if MC_VER >= MC_1_20_4
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -31,7 +31,7 @@ import static java.lang.Math.min;
 @Mixin(StemBlock.class)
 public abstract class StemMixin extends PlantBlock {
 
-    #if MC_1_20_3 || MC_1_20_4
+    #if MC_VER >= MC_1_20_4
     public StemMixin(Settings settings) {
         super(settings);
     }
@@ -45,7 +45,7 @@ public abstract class StemMixin extends PlantBlock {
     @Shadow
     public static IntProperty AGE;
 
-    #if MC_1_20_3 || MC_1_20_4
+    #if MC_VER >= MC_1_20_4
     @Shadow @Final
     private RegistryKey<Block> gourdBlock;
     @Shadow @Final
@@ -119,7 +119,7 @@ public abstract class StemMixin extends PlantBlock {
                 if (!isValidPosition(direction, pos, world)) continue;
 
                 BlockPos blockPos = pos.offset(direction);
-                #if MC_1_20_3 || MC_1_20_4
+                #if MC_VER >= MC_1_20_4
                 Registry<Block> blockRegistry = world.getRegistryManager().get(RegistryKeys.BLOCK);
                 Optional<Block> gourdBlock = blockRegistry.getOrEmpty(this.gourdBlock);
                 Optional<Block> attachedStemBlock = blockRegistry.getOrEmpty(this.attachedStemBlock);

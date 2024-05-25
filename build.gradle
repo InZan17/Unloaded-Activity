@@ -8,6 +8,34 @@ targetCompatibility = JavaVersion.VERSION_17
 
 minecraft_version_string = project.minecraft_version.replace(".", "_")
 
+// Versions must be in order!!
+// Older versions are first in the list and then newer versions are at the end of the list.
+def supported_versions = [
+		"1.20.1",
+		"1.20.2",
+		"1.20.4"
+]
+
+def build_properties_text = new StringBuilder()
+
+def version_index = -1
+
+supported_versions.eachWithIndex { version, index ->
+	def version_string = version.replace(".", "_")
+	build_properties_text.append("MC_$version_string=$index\n")
+	if (version_string == minecraft_version_string) {
+		version_index = index
+	}
+}
+
+if (version_index == -1) {
+	throw new GradleException("Current Minecraft version $minecraft_version_string is not part of the supported versions.")
+}
+
+build_properties_text.append("MC_VER=$version_index")
+
+new File(projectDir, "build.properties").text = build_properties_text
+
 mod_version_suffix = project["mod_version_suffix_" + minecraft_version_string]
 fabric_version = project["fabric_version_" + minecraft_version_string]
 cardinal_version = project["cardinal_version_" + minecraft_version_string]
@@ -61,8 +89,6 @@ dependencies {
 	annotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
 	testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
 }
-
-new File(projectDir, "build.properties").text = "MC_" + minecraft_version_string
 
 
 tasks.withType(JavaCompile) {
