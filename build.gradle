@@ -11,6 +11,7 @@ minecraft_version_string = project.minecraft_version.replace(".", "_")
 // Versions must be in order!!
 // Older versions are first in the list and then newer versions are at the end of the list.
 def supported_versions = [
+		"1.19.2",
 		"1.19.4",
 		"1.20.1",
 		"1.20.2",

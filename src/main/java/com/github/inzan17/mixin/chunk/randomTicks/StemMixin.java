@@ -13,7 +13,11 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 #endif
+#if MC_VER >= MC_1_19_4
 import net.minecraft.registry.tag.BlockTags;
+#else
+import net.minecraft.tag.BlockTags;
+#endif
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;

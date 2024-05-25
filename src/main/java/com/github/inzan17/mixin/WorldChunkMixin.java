@@ -3,7 +3,11 @@ package com.github.inzan17.mixin;
 import com.github.inzan17.LongArrayComponent;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.BlockState;
+#if MC_VER >= MC_1_19_4
 import net.minecraft.registry.Registry;
+#else
+import net.minecraft.util.registry.Registry;
+#endif
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.HeightLimitView;

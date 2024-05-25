@@ -56,7 +56,11 @@ public abstract class SnowMixin extends Block {
     public boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
         if (!UnloadedActivity.instance.config.accumulateSnow) return false;
         if (timeInWeather == 0) return false;
-        int maxSnowHeight = min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS);
+        int maxSnowHeight = #if MC_VER >= MC_1_19_4
+            min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
+        #else
+            1
+        #endif;
         if (maxSnowHeight <= state.get(SnowBlock.LAYERS)) return false;
         Biome biome = world.getBiome(pos).value();
         if (!biome.canSetSnow(world, pos)) return false;
@@ -66,7 +70,11 @@ public abstract class SnowMixin extends Block {
     @Override
     public void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {
 
-        int maxSnowHeight = min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS);
+        int maxSnowHeight = #if MC_VER >= MC_1_19_4
+            min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
+        #else
+            1
+        #endif;
 
         int currentSnowHeight = state.get(SnowBlock.LAYERS);
 

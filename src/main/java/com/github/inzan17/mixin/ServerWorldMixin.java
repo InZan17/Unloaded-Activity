@@ -4,9 +4,14 @@ import com.github.inzan17.LongComponent;
 import com.github.inzan17.TimeMachine;
 import com.github.inzan17.UnloadedActivity;
 import com.github.inzan17.WeatherInfoInterface;
+#if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+#else
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryKey;
+#endif
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.MutableWorldProperties;
@@ -30,13 +35,20 @@ import static java.lang.Integer.max;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World implements StructureWorldAccess {
+	#if MC_VER >= MC_1_19_4
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
 	}
+    #else
+	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, RegistryEntry<DimensionType> dimension, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
+		super(properties, registryRef, dimension, profiler, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+	}
+	#endif
 	public int updateCount = 0;
 	public int knownUpdateCount = 0;
 	public boolean hasSlept = false;
 	public int msTime = 0;
+
 
 	@Shadow public ServerWorld toServerWorld() {return null;}
 

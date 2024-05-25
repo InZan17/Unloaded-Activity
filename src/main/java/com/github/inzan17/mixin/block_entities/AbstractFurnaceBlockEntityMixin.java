@@ -17,7 +17,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.*;
+#if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
+#endif
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -54,12 +56,12 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
 
-    private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable #if MC_VER >= MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
+    private static boolean craftRecipe(#if MC_VER >= MC_1_19_4 DynamicRegistryManager registryManager, #endif @Nullable #if MC_VER >= MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
         ItemStack input = slots.get(0);
         #if MC_VER >= MC_1_20_2
         ItemStack recipeOutput = recipe.value().getResult(registryManager);
         #else
-        ItemStack recipeOutput = recipe.getOutput(registryManager);
+        ItemStack recipeOutput = recipe.getOutput(#if MC_VER >= MC_1_19_4 registryManager #endif);
         #endif
         ItemStack finalOutput = slots.get(2);
         if (finalOutput.isEmpty()) {
@@ -150,7 +152,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
                 if (itemsCrafted > 0) {
                     stateChanged = true;
-                    craftRecipe(world.getRegistryManager(), recipe, this.inventory, maxPerStack, itemsCrafted);
+                    craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, this.inventory, maxPerStack, itemsCrafted);
                     setLastRecipe(recipe, itemsCrafted);
                 }
 

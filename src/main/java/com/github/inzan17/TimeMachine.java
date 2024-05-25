@@ -59,10 +59,10 @@ public class TimeMachine {
                 Block groundPosBlock = groundPosState.getBlock();
                 Biome biome = world.getBiome(airPos).value();
                 if (airPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(airPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(airPos));
+                    simulateBlockPrecipitationTick(airPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(#if MC_VER >= MC_1_19_4 airPos #endif));
 
                 if (groundPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(groundPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(groundPos));
+                    simulateBlockPrecipitationTick(groundPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(#if MC_VER >= MC_1_19_4 groundPos #endif));
         }
     }
 
