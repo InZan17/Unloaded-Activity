@@ -36,6 +36,7 @@ public class UnloadedActivityConfig {
     public boolean growSweetBerries = true;
     public boolean growCocoa = true;
     public boolean growSugarCane = true;
+    public boolean growCactus = true;
     public boolean ageCopper = true;
     public boolean decayLeaves = true;
     public boolean growAmethyst = true;

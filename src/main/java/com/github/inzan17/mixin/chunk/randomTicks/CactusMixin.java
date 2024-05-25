@@ -32,7 +32,7 @@ public abstract class CactusMixin extends Block {
     public boolean implementsSimulateRandTicks() {return true;}
 
     @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.growSugarCane) return false;
+        if (!UnloadedActivity.instance.config.growCactus) return false;
         if (!world.isAir(pos.up())) return false;
         return true;
     }
@@ -89,7 +89,7 @@ public abstract class CactusMixin extends Block {
             if (!world.getBlockState(newPos).isAir()) {
                 return;
             }
-            
+
             BlockState newState = this.getDefaultState();
 
             if (i+1==growBlocks)

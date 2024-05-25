@@ -168,6 +168,15 @@ public class UnloadedActivityClothScreen {
 
         subRandomTicks.add(
                 configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growCactus"), config.growCactus)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growCactus = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growCactus.tooltip"))
+                        .build()
+        );
+
+        subRandomTicks.add(
+                configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageCopper"), config.ageCopper)
                         .setDefaultValue(true)
                         .setSaveConsumer(newValue -> config.ageCopper = newValue)
