@@ -84,14 +84,20 @@ public abstract class CactusMixin extends Block {
 
         for (int i=0;i<growBlocks;i++) {
 
-            BlockPos newPos = pos.up(i+1);
+            BlockPos newPos = pos.up(1);
             BlockState newState = this.getDefaultState();
 
             if (i+1==growBlocks)
                 newState = newState.with(AGE, ageRemainder);
 
             world.setBlockState(newPos, newState);
-            world.updateNeighbor(state, newPos, this, pos, false);
+
+            //For some reason this doesn't work??
+            //world.updateNeighbor(newState, newPos, this, pos, false);
+            //I really want to figure out why tho.
+
+            world.scheduleBlockTick(newPos, newState.getBlock(), 1);
+            pos = newPos;
         }
 
         if (growBlocks != 0) {
