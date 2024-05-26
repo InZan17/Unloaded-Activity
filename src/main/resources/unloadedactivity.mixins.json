@@ -19,6 +19,8 @@
     "chunk.randomTicks.LeavesMixin",
     "chunk.randomTicks.BuddingAmethystMixin",
     "chunk.randomTicks.PlantStemMixin",
+    "chunk.randomTicks.KelpMixin",
+    "chunk.randomTicks.CaveVinesHeadMixin",
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
     "chunk.randomTicks.TorchFlowerMixin",

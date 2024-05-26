@@ -41,7 +41,6 @@ public abstract class PlantStemMixin extends AbstractPlantPartBlock implements F
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
     @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
-        if (!UnloadedActivity.instance.config.growPlantStems) return false;
         if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA()) return false;
         if (!chooseStemState(world.getBlockState(pos.offset(this.growthDirection)))) return false;
         return true;

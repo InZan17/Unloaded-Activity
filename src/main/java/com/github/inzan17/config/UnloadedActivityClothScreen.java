@@ -204,10 +204,19 @@ public class UnloadedActivityClothScreen {
 
         subRandomTicks.add(
                 configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growPlantStems"), config.growPlantStems)
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growKelp"), config.growKelp)
                         .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.growPlantStems = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growPlantStems.tooltip"))
+                        .setSaveConsumer(newValue -> config.growKelp = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growKelp.tooltip"))
+                        .build()
+        );
+
+        subRandomTicks.add(
+                configEntryBuilder
+                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.growGlowBerries"), config.growGlowBerries)
+                        .setDefaultValue(true)
+                        .setSaveConsumer(newValue -> config.growGlowBerries = newValue)
+                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.growGlowBerries.tooltip"))
                         .build()
         );
 

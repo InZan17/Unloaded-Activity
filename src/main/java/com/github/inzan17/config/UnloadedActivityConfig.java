@@ -40,7 +40,8 @@ public class UnloadedActivityConfig {
     public boolean ageCopper = true;
     public boolean decayLeaves = true;
     public boolean growAmethyst = true;
-    public boolean growPlantStems = true;
+    public boolean growGlowBerries = true;
+    public boolean growKelp = true;
     public boolean growBamboo = true;
     public boolean hatchTurtleEggs = true;
     public boolean meltSnow = true;
