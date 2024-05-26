@@ -101,7 +101,11 @@ public abstract class CactusMixin extends Block {
             //world.updateNeighbor(newState, newPos, this, pos, false);
             //I really want to figure out why tho.
 
+            #if MC_VER == MC_1_19_2
+            world.createAndScheduleBlockTick(newPos, newState.getBlock(), 1);
+            #else
             world.scheduleBlockTick(newPos, newState.getBlock(), 1);
+            #endif
             pos = newPos;
         }
 
