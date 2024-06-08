@@ -4,19 +4,12 @@
   "version": "${version}",
 
   "custom": {
-    "cardinal-components": [
-      "unloadedactivity:last-chunk-tick",
-      "unloadedactivity:chunk-sim-blocks",
-      "unloadedactivity:chunk-sim-ver",
-      "unloadedactivity:world-weather-info",
-      "unloadedactivity:last-entity-tick",
-      "unloadedactivity:last-blockentity-tick",
-      "unloadedactivity:magik"
-    ],
     "loom:injected_interfaces": {
       "net/minecraft/block/AbstractBlock": ["com/github/inzan17/SimulateChunkBlocks"],
-      "net/minecraft/block/entity/BlockEntity": ["com/github/inzan17/SimulateBlockEntity"],
-      "net/minecraft/entity/Entity": ["com/github/inzan17/SimulateEntity"]
+      "net/minecraft/block/entity/BlockEntity": ["com/github/inzan17/SimulateBlockEntity", "com/github/inzan17/BlockEntityTimeData"],
+      "net/minecraft/entity/Entity": ["com/github/inzan17/SimulateEntity"],
+      "net/minecraft/world/chunk/Chunk": ["com/github/inzan17/ChunkTimeData"],
+      "net/minecraft/server/world/ServerWorld": ["com/github/inzan17/GetWeatherState"]
     },
     "lithium:options": {
       "world.block_entity_ticking.sleeping.furnace": false
@@ -41,9 +34,6 @@
   "entrypoints": {
     "main": [
       "com.github.inzan17.UnloadedActivity"
-    ],
-    "cardinal-components": [
-      "com.github.inzan17.MyComponents"
     ],
     "modmenu": [
       "com.github.inzan17.config.UnloadedActivityModMenu"

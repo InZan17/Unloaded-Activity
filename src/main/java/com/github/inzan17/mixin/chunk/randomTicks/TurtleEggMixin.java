@@ -1,6 +1,5 @@
 package com.github.inzan17.mixin.chunk.randomTicks;
 
-import com.github.inzan17.LongComponent;
 import com.github.inzan17.OccurrencesAndLeftover;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.Block;
@@ -17,7 +16,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import static com.github.inzan17.MyComponents.LASTENTITYTICK;
 import com.github.inzan17.Utils;
 import static java.lang.Math.floorMod;
 import static java.lang.Math.min;
@@ -127,9 +125,6 @@ public abstract class TurtleEggMixin extends Block {
 
                 if (turtle == null)
                     return;
-
-                LongComponent lastTick = turtle.getComponent(LASTENTITYTICK);
-                lastTick.setValue(world.getTimeOfDay());
 
                 turtle.setBreedingAge((int) min(-24000+leftover,0)-1); //we do -1 so that it can grow up by itself and drop a scute
                 turtle.setHomePos(pos);

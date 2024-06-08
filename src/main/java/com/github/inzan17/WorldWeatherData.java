@@ -1,6 +1,7 @@
 package com.github.inzan17;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -8,28 +9,37 @@ import java.util.ArrayList;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class WeatherInfoComponent implements WeatherInfoInterface {
+public class WorldWeatherData extends PersistentState {
+
     final int maxWeatherHistory = 3;
-    private ArrayList<Long> weatherList = new ArrayList<>();
+    private ArrayList<Long> weatherList;
+
+    public WorldWeatherData(ArrayList<Long> weatherList) {
+        this.weatherList = weatherList;
+    }
+
+    public WorldWeatherData() {
+        this.weatherList = new ArrayList<>();
+    }
+
     @Override
-    public void readFromNbt(NbtCompound tag) {
-        long[] longArray = tag.getLongArray("weather-list");
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        nbt.putLongArray("weather_list", this.weatherList);
+        return nbt;
+    }
+
+    public static WorldWeatherData fromNbt(NbtCompound nbt) {
+        long[] longArray = nbt.getLongArray("weather_list");
         ArrayList<Long> longArrayList = new ArrayList<>();
 
         for (long value : longArray) {
             longArrayList.add(value);
         }
 
-        this.weatherList = longArrayList;
+        return new WorldWeatherData(longArrayList);
     }
 
-    @Override
-    public void writeToNbt(NbtCompound tag) {
-        tag.putLongArray("weather-list", this.weatherList);
-    }
-
-    @Override
-    public ArrayList<Long> getValues() {
+    public ArrayList<Long> getWeatherList() {
         return this.weatherList;
     }
 
@@ -37,7 +47,6 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
         return this.weatherList.size() % 2 == 0;
     }
 
-    @Override
     public void updateValues(World world) {
         long currentTime = world.getTimeOfDay();
 
@@ -54,8 +63,10 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
 
         if (world.isRaining() && checkForRain) {
             this.weatherList.add(0, currentTime);
+            this.markDirty();
         } else if (!world.isRaining() && !checkForRain) {
             this.weatherList.add(0, currentTime);
+            this.markDirty();
         }
 
         int weatherListSize = this.weatherList.size();
@@ -66,7 +77,6 @@ public class WeatherInfoComponent implements WeatherInfoInterface {
         }
     }
 
-    @Override
     public long getTimeInWeather(long timePassed, long currentTime) {
         int time = 0;
 

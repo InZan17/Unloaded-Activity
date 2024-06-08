@@ -4,6 +4,9 @@
   "package": "com.github.inzan17.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "EntityMixin",
+    "AbstractBlockMixin",
+    "ChunkMixin",
     "block_entities.AbstractFurnaceBlockEntityMixin",
     "chunk.randomTicks.BeetrootsMixin",
     "chunk.randomTicks.CropMixin",
@@ -33,14 +36,13 @@
     "chunk.precipitationTicks.LeveledCauldronMixin",
     "chunk.Both.SnowMixin",
     "entities.PassiveEntityMixin",
-    "EntityMixin",
-    "AbstractBlockMixin",
     "BlockEntityMixin",
     "ServerWorldMixin",
     "DirectBlockEntityTickInvokerMixin",
     "CropBlockInvoker",
     "CauldronBlockInvoker",
     "AbstractCauldronBlockInvoker",
+    "ChunkSerializerMixin",
     "WorldChunkMixin"
   ],
   "injectors": {

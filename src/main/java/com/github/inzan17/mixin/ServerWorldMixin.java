@@ -1,9 +1,6 @@
 package com.github.inzan17.mixin;
 
-import com.github.inzan17.LongComponent;
-import com.github.inzan17.TimeMachine;
-import com.github.inzan17.UnloadedActivity;
-import com.github.inzan17.WeatherInfoInterface;
+import com.github.inzan17.*;
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -15,12 +12,14 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.MutableWorldProperties;
+import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -28,13 +27,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import static com.github.inzan17.MyComponents.*;
 import static java.lang.Long.max;
 import static java.lang.Integer.max;
 
 
-@Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin extends World implements StructureWorldAccess {
+@Mixin(value = ServerWorld.class, priority = 1001)
+public abstract class ServerWorldMixin extends World implements StructureWorldAccess, GetWeatherState {
 	#if MC_VER >= MC_1_19_4
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
@@ -49,7 +47,6 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	public boolean hasSlept = false;
 	public int msTime = 0;
 
-
 	@Shadow public ServerWorld toServerWorld() {return null;}
 
 	@Inject(at = @At("HEAD"), method = "tickChunk")
@@ -58,13 +55,13 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 		if (this.isClient())
 			return;
 
-		LongComponent lastTick = chunk.getComponent(LASTCHUNKTICK);
+		long lastTick = chunk.getLastTick();
 
 		long currentTime = this.getTimeOfDay();
 
-		if (lastTick.getValue() != 0) {
+		if (lastTick != 0) {
 
-			long timeDifference = max(currentTime - lastTick.getValue(),0);
+			long timeDifference = max(currentTime - lastTick,0);
 
 			int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
@@ -87,16 +84,15 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			}
 		}
 
-		lastTick.setValue(currentTime);
+		chunk.setLastTick(currentTime);
+
 		if (!UnloadedActivity.instance.config.rememberBlockPositions) {
-			LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
-			chunkSimVer.setValue(0);
+			chunk.setSimulationVersion(0);
 		}
 	}
 
 	private boolean chunkIsKnown(WorldChunk chunk) {
-		LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
-		return chunkSimVer.getValue() == UnloadedActivity.chunkSimVer;
+		return chunk.getSimulationVersion() == UnloadedActivity.chunkSimVer;
 	}
 
 	private int getMultiplier() {
@@ -118,7 +114,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Inject(method = "tick", at = @At(value = "TAIL", target = "net/minecraft/server/world/ServerWorld.tickTime ()V"))
 	private void finishTickTime(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-		WeatherInfoInterface weatherInfo = this.getComponent(WORLDWEATHERINFO);
+		WorldWeatherData weatherInfo = this.getWeatherData();
 		weatherInfo.updateValues(this);
 	}
 
@@ -126,6 +122,22 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	private void wakeyWakey(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
 		if (UnloadedActivity.instance.config.updateAllChunksWhenSleep)
 			hasSlept = true;
+	}
+
+	@Shadow public abstract PersistentStateManager getPersistentStateManager();
+
+	@Override
+	public WorldWeatherData getWeatherData() {
+		return this.getPersistentStateManager().getOrCreate(
+			tag -> WorldWeatherData.fromNbt(tag),
+			() -> new WorldWeatherData(),
+			"unloaded_activity"
+		);
+	}
+
+	@Inject(at = @At("RETURN"), method = "<init>*")
+	private void createState(CallbackInfo ci) {
+		this.getWeatherData();
 	}
 }
 

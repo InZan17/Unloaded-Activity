@@ -16,8 +16,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static com.github.inzan17.MyComponents.*;
-
 public class TimeMachine {
     public static long simulateChunk(long timeDifference, ServerWorld world, WorldChunk chunk, int randomTickSpeed) {
         if (!UnloadedActivity.instance.config.enableRandomTicks || !UnloadedActivity.instance.config.enablePrecipitationTicks) return 0;
@@ -44,9 +42,9 @@ public class TimeMachine {
 
         double precipitationPickChance = 1.0/4096.0; //1/(16*256). 16 for the chance of the chunk doing the tick and 256 for the chance of a block to be picked.
 
-        WeatherInfoInterface weatherInfo = world.getComponent(WORLDWEATHERINFO);
+        WorldWeatherData weatherData = world.getWeatherData();
 
-        long timeInWeather = weatherInfo.getTimeInWeather(timeDifference,world.getTimeOfDay());
+        long timeInWeather = weatherData.getTimeInWeather(timeDifference,world.getTimeOfDay());
 
         for (int z=0; z<16;z++)
             for (int x=0; x<16;x++) {
@@ -87,40 +85,34 @@ public class TimeMachine {
         int minY = world.getBottomY();
         int maxY = world.getTopY();
 
-
         ArrayList<BlockPos> blockPosArray = new ArrayList<>();
 
-        LongComponent chunkSimVer = chunk.getComponent(CHUNKSIMVER);
+        ArrayList<Long> newSimulationBlocks = new ArrayList<>();
 
-        ArrayList<Long> newLongArray = new ArrayList<>();
+        if (UnloadedActivity.instance.config.rememberBlockPositions && chunk.getSimulationVersion() == UnloadedActivity.chunkSimVer) {
 
-        if (UnloadedActivity.instance.config.rememberBlockPositions && chunkSimVer.getValue() == UnloadedActivity.chunkSimVer) {
-
-
-            LongArrayComponent chunkSimBlocks = chunk.getComponent(CHUNKSIMBLOCKS);
-
-            ArrayList<Long> currentLongArray = chunkSimBlocks.getValue();
+            ArrayList<Long> currentSimulationBlocks = chunk.getSimulationBlocks();
 
             if (UnloadedActivity.instance.config.debugLogs)
-                UnloadedActivity.LOGGER.info("Looping through "+currentLongArray.size()+" known positions.");
+                UnloadedActivity.LOGGER.info("Looping through "+currentSimulationBlocks.size()+" known positions.");
 
             boolean removedSomething = false;
 
-            for (long longPos : currentLongArray) {
+            for (long longPos : currentSimulationBlocks) {
                 BlockPos pos = BlockPos.fromLong(longPos);
                 BlockState state = world.getBlockState(pos);
                 Block block = state.getBlock();
                 if (block.implementsSimulateRandTicks()) {
-                    newLongArray.add(longPos);
+                    newSimulationBlocks.add(longPos);
                     blockPosArray.add(pos);
                 } else {
                     removedSomething = true;
                 }
             }
             if (removedSomething) {
-                chunkSimBlocks.setValue(newLongArray);
+                chunk.setSimulationBlocks(newSimulationBlocks);
                 if (UnloadedActivity.instance.config.debugLogs)
-                    UnloadedActivity.LOGGER.info("Removed "+(currentLongArray.size()-newLongArray.size())+" positions.");
+                    UnloadedActivity.LOGGER.info("Removed "+(currentSimulationBlocks.size()-newSimulationBlocks.size())+" positions.");
             }
 
         } else {
@@ -137,13 +129,12 @@ public class TimeMachine {
                         if (block.implementsSimulateRandTicks()) {
                             blockPosArray.add(worldBlockPos);
                             if (UnloadedActivity.instance.config.rememberBlockPositions)
-                                newLongArray.add(worldBlockPos.asLong());
+                                newSimulationBlocks.add(worldBlockPos.asLong());
                         }
             }
             if (UnloadedActivity.instance.config.rememberBlockPositions) {
-                LongArrayComponent chunkSimBlocks = chunk.getComponent(CHUNKSIMBLOCKS);
-                chunkSimBlocks.setValue(newLongArray);
-                chunkSimVer.setValue(UnloadedActivity.chunkSimVer);
+                chunk.setSimulationBlocks(newSimulationBlocks);
+                chunk.setSimulationVersion(UnloadedActivity.chunkSimVer);
                 chunk.setNeedsSaving(true);
             }
         }

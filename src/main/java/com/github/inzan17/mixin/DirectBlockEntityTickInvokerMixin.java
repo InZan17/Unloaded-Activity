@@ -1,6 +1,5 @@
 package com.github.inzan17.mixin;
 
-import com.github.inzan17.LongComponent;
 import com.github.inzan17.TimeMachine;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.BlockState;
@@ -17,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static com.github.inzan17.MyComponents.LASTBLOCKENTITYTICK;
 import static java.lang.Long.max;
 
 
@@ -41,19 +39,19 @@ public abstract class DirectBlockEntityTickInvokerMixin<T extends BlockEntity> {
         if (world.isClient())
             return;
 
-        LongComponent lastTick = this.blockEntity.getComponent(LASTBLOCKENTITYTICK);
+        long lastTick = this.blockEntity.getLastTick();
 
         long currentTime = world.getTimeOfDay();
 
-        if (lastTick.getValue() != 0) {
+        if (lastTick != 0) {
 
-            long timeDifference = max(currentTime - lastTick.getValue(),0);
+            long timeDifference = max(currentTime - lastTick,0);
 
             int differenceThreshold = UnloadedActivity.instance.config.tickDifferenceThreshold;
 
             if (timeDifference > differenceThreshold)
                 TimeMachine.simulateBlockEntity(world, this.blockEntity.getPos(), blockState, this.blockEntity, timeDifference);
         }
-        lastTick.setValue(currentTime);
+        this.blockEntity.setLastTick(currentTime);
     }
 }

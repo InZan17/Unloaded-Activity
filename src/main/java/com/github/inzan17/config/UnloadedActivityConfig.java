@@ -10,6 +10,7 @@ public class UnloadedActivityConfig {
     public int tickDifferenceThreshold = 100;
     public int maxNegativeBinomialAttempts = 20;
     public boolean debugLogs = false;
+    public boolean convertCCAData = true;
 
 
 

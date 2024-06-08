@@ -1,11 +1,11 @@
 package com.github.inzan17.mixin;
 
-import com.github.inzan17.LongArrayComponent;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.BlockState;
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.Registry;
 #else
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.registry.Registry;
 #endif
 import net.minecraft.util.math.BlockPos;
@@ -13,21 +13,18 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.UpgradeData;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.*;
 import net.minecraft.world.gen.chunk.BlendingData;
+import net.minecraft.world.tick.ChunkTickScheduler;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import static com.github.inzan17.MyComponents.CHUNKSIMBLOCKS;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin extends Chunk {
@@ -60,7 +57,17 @@ public abstract class WorldChunkMixin extends Chunk {
         if (UnloadedActivity.instance.config.debugLogs)
             UnloadedActivity.LOGGER.info("Adding position to list "+pos.asLong());
 
-        LongArrayComponent chunkSimBlocks = this.getComponent(CHUNKSIMBLOCKS);
-        chunkSimBlocks.addValue(pos.asLong());
+        this.addSimulationBlock(pos.asLong());
+    }
+
+    @Inject(method = "<init>(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/chunk/ProtoChunk;Lnet/minecraft/world/chunk/WorldChunk$EntityLoader;)V", at = @At("RETURN"))
+    private void initWorldChunk(ServerWorld world, ProtoChunk protoChunk, WorldChunk.EntityLoader entityLoader, CallbackInfo ci) {
+        if (protoChunk.getLastTick() == 0) {
+            this.setLastTick(world.getTimeOfDay());
+        } else {
+            this.setLastTick(protoChunk.getLastTick());
+        }
+        this.setSimulationVersion(protoChunk.getSimulationVersion());
+        this.setSimulationBlocks(protoChunk.getSimulationBlocks());
     }
 }
