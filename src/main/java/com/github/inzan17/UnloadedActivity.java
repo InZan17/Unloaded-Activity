@@ -1,9 +1,12 @@
 package com.github.inzan17;
 
 import com.github.inzan17.config.UnloadedActivityConfig;
+import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
@@ -36,7 +39,6 @@ public class UnloadedActivity implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		loadConfig();
-		registerCommands();
 		instance = this;
 		LOGGER.info("Hello Fabric world!");
 	}
@@ -77,54 +79,52 @@ public class UnloadedActivity implements ModInitializer {
 		}
 	}
 
-	public void registerCommands() {
-		CommandRegistrationCallback.EVENT.register(
-			(dispatcher, registryAccess, environment) -> dispatcher.register(
-				literal("unloadedactivity").requires(source -> source.hasPermissionLevel(4)).then(
-					literal("benchmark").then(
-							argument("method", string()).then(
-							argument("trials", integer()).then(
-								argument("attempts", longArg()).then(
-									argument("maxOccurrences", integer()).then(
-										argument("odds", doubleArg()).executes(context -> {
+	public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandManager.RegistrationEnvironment environment, CommandRegistryAccess registryAccess) {
+		dispatcher.register(
+			literal("unloadedactivity").requires(source -> source.hasPermissionLevel(4)).then(
+				literal("benchmark").then(
+						argument("method", string()).then(
+						argument("trials", integer()).then(
+							argument("attempts", longArg()).then(
+								argument("maxOccurrences", integer()).then(
+									argument("odds", doubleArg()).executes(context -> {
 
-											java.lang.reflect.Method method;
+										java.lang.reflect.Method method;
 
+										try {
+											method = Utils.class.getMethod(getString(context, "method"), long.class, double.class, int.class, Random.class);
+										} catch (NoSuchMethodException e) {
+											context.getSource().sendMessage(Text.literal("No such method."));
+											return 0;
+										}
+
+										int trials = getInteger(context, "trials");
+										long attempts = getLong(context, "attempts");
+										int maxOccurrences = getInteger(context, "maxOccurrences");
+										double odds = getDouble(context, "odds");
+
+										Random random = context.getSource().getWorld().random;
+
+										long now = Instant.now().toEpochMilli();
+
+										for (int i = 0; i<trials; ++i) {
 											try {
-												method = Utils.class.getMethod(getString(context, "method"), long.class, double.class, int.class, Random.class);
-											} catch (NoSuchMethodException e) {
-												context.getSource().sendMessage(Text.literal("No such method."));
-												return 0;
+												long newAttempts = attempts > 0L ? attempts : random.nextBetween(10_000, 100_000_000);
+												int newMaxOccurrences = maxOccurrences > 0 ? maxOccurrences : random.nextBetween(1, 100);
+												double newOdds = odds > 0.0 ? odds : random.nextDouble();
+												method.invoke(Utils.class, newAttempts, newOdds, newMaxOccurrences, random);
+											} catch (IllegalAccessException e) {
+												throw new RuntimeException(e);
+											} catch (InvocationTargetException e) {
+												throw new RuntimeException(e);
 											}
+										}
+										long difference = Instant.now().toEpochMilli() - now;
 
-											int trials = getInteger(context, "trials");
-											long attempts = getLong(context, "attempts");
-											int maxOccurrences = getInteger(context, "maxOccurrences");
-											double odds = getDouble(context, "odds");
-
-											Random random = context.getSource().getWorld().random;
-
-											long now = Instant.now().toEpochMilli();
-
-											for (int i = 0; i<trials; ++i) {
-												try {
-													long newAttempts = attempts > 0L ? attempts : random.nextBetween(10_000, 100_000_000);
-													int newMaxOccurrences = maxOccurrences > 0 ? maxOccurrences : random.nextBetween(1, 100);
-													double newOdds = odds > 0.0 ? odds : random.nextDouble();
-													method.invoke(Utils.class, newAttempts, newOdds, newMaxOccurrences, random);
-												} catch (IllegalAccessException e) {
-													throw new RuntimeException(e);
-												} catch (InvocationTargetException e) {
-													throw new RuntimeException(e);
-												}
-											}
-											long difference = Instant.now().toEpochMilli() - now;
-
-											float avg = (float)difference/(float)trials;
-											context.getSource().sendMessage(Text.literal("Total: "+difference + "ms\nAverage: " + avg + "ms"));
-											return 1;
-										})
-									)
+										float avg = (float)difference/(float)trials;
+										context.getSource().sendMessage(Text.literal("Total: "+difference + "ms\nAverage: " + avg + "ms"));
+										return 1;
+									})
 								)
 							)
 						)
