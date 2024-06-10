@@ -1,6 +1,9 @@
 package com.github.inzan17.mixin;
 
 import com.github.inzan17.*;
+#if MC_VER >= MC_1_20_2
+import net.minecraft.datafixer.DataFixTypes;
+#endif
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -11,15 +14,11 @@ import net.minecraft.util.registry.RegistryKey;
 #endif
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.world.MutableWorldProperties;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -126,11 +125,23 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Shadow public abstract PersistentStateManager getPersistentStateManager();
 
+	#if MC_VER >= MC_1_20_2
+	private static PersistentState.Type<WorldWeatherData> type = new PersistentState.Type<>(
+			WorldWeatherData::new,
+			WorldWeatherData::fromNbt,
+			DataFixTypes.LEVEL
+	);
+	#endif
+
 	@Override
 	public WorldWeatherData getWeatherData() {
 		return this.getPersistentStateManager().getOrCreate(
+			#if MC_VER >= MC_1_20_2
+			type,
+			#else
 			tag -> WorldWeatherData.fromNbt(tag),
 			() -> new WorldWeatherData(),
+			#endif
 			"unloaded_activity"
 		);
 	}
