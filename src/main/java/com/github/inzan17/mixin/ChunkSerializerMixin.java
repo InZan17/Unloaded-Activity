@@ -9,7 +9,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.ChunkSerializer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ProtoChunk;
+#if MC_VER <= MC_1_19_4
 import net.minecraft.world.chunk.ReadOnlyChunk;
+#else
+import net.minecraft.world.chunk.WrapperProtoChunk;
+#endif
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,9 +41,13 @@ public abstract class ChunkSerializerMixin {
 
     @Inject(method = "deserialize", at = @At("RETURN"))
     private static void deserialize(ServerWorld world, PointOfInterestStorage poiStorage, ChunkPos chunkPos, NbtCompound nbtCompound, CallbackInfoReturnable<ProtoChunk> cir) {
-        ProtoChunk protoChunktemp = cir.getReturnValue();
+        ProtoChunk protoChunkTemp = cir.getReturnValue();
 
-        Chunk protoChunk = (protoChunktemp instanceof ReadOnlyChunk readOnlyChunk) ? readOnlyChunk.getWrappedChunk() : protoChunktemp;
+        #if MC_VER <= MC_1_19_4
+        Chunk protoChunk = (protoChunkTemp instanceof ReadOnlyChunk readOnlyChunk) ? readOnlyChunk.getWrappedChunk() : protoChunkTemp;
+        #else
+        Chunk protoChunk = (protoChunkTemp instanceof WrapperProtoChunk wrappedChunk) ? wrappedChunk.getWrappedChunk() : protoChunkTemp;
+        #endif
 
         NbtCompound chunkData = nbtCompound.getCompound("unloaded_activity");
 
