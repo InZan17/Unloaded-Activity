@@ -1,10 +1,15 @@
 pluginManagement {
     repositories {
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
         mavenCentral()
         gradlePluginPortal()
     }
 }
+
+rootProject.name = 'unloaded_activity'
+
+include 'common'
+include 'fabric'
+include 'forge'

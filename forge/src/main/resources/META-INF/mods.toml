@@ -1,0 +1,26 @@
+modLoader = "javafml"
+loaderVersion = "[45,)"
+#issueTrackerURL = ""
+license = "GNU LGPLv3"
+
+[[mods]]
+modId = "unloaded_activity"
+version = "${version}"
+displayName = "Unloaded Activity"
+authors = "Zan"
+description = "Make certain blocks such as crops grow as if they've always grown when put into simulation distance."
+logoFile = "assets/unloadedactivity/icon.png"
+
+[[dependencies.unloaded_activity]]
+modId = "forge"
+mandatory = true
+versionRange = "[45,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.unloaded_activity]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19.4,)"
+ordering = "NONE"
+side = "BOTH"
