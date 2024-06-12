@@ -39,10 +39,10 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.version
-    inputs.property "compatible_versions", project.compatible_versions
+    inputs.property "compatible_versions", rootProject.compatible_versions_forge_format
 
     filesMatching("META-INF/mods.toml") {
-        expand "version": project.version, "compatible_versions": project.compatible_versions
+        expand "version": project.version, "compatible_versions": rootProject.compatible_versions_forge_format
     }
 }
 

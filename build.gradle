@@ -41,12 +41,22 @@ build_properties_text.append("MC_VER=$version_index")
 
 new File(projectDir, "build.properties").text = build_properties_text
 
-mod_version_suffix = project["mod_version_suffix_" + minecraft_version_string]
 cloth_version = project["cloth_version_" + minecraft_version_string]
 modmenu_version = project["modmenu_version_" + minecraft_version_string]
 compatible_versions = project["compatible_versions_" + minecraft_version_string]
 yarn_mappings = project["yarn_mappings_" + minecraft_version_string]
+forge_version = project["forge_version_" + minecraft_version_string]
 
+def version_range = project.compatible_versions.split("-")
+if (version_range.length == 1) {
+	compatible_versions_fabric_format = version_range[0]
+	compatible_versions_forge_format = "["+version_range[0]+"]"
+} else if (version_range.length == 2) {
+	compatible_versions_fabric_format = ">="+version_range[0]+" <="+version_range[1]
+	compatible_versions_forge_format = "["+version_range[0]+","+version_range[1]+"]"
+} else {
+	throw new GradleException("Wrong version format: $project.compatible_versions")
+}
 
 allprojects { p ->
 	group = rootProject.maven_group
@@ -64,7 +74,7 @@ subprojects {
 
 	base {
 		// Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
-		archivesName = "$rootProject.archives_name-$project.name"
+		archivesName = "$rootProject.archives_name-$project.name-v$rootProject.version+$rootProject.compatible_versions"
 	}
 
 	repositories {

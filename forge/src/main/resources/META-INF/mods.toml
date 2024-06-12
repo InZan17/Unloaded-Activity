@@ -1,6 +1,6 @@
 modLoader = "javafml"
-loaderVersion = "[45,)"
-#issueTrackerURL = ""
+loaderVersion = "[43,)"
+issueTrackerURL = "https://github.com/InZan17/Unloaded-Activity-Fabric/issues"
 license = "GNU LGPLv3"
 
 [[mods]]
@@ -14,13 +14,13 @@ logoFile = "assets/unloadedactivity/icon.png"
 [[dependencies.unloaded_activity]]
 modId = "forge"
 mandatory = true
-versionRange = "[45,)"
+versionRange = "[43,)"
 ordering = "NONE"
-side = "BOTH"
+side = "SERVER"
 
 [[dependencies.unloaded_activity]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.4,)"
+versionRange = "${compatible_versions}"
 ordering = "NONE"
-side = "BOTH"
+side = "SERVER"
