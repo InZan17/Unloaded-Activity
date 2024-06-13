@@ -4,10 +4,6 @@ package com.github.inzan17.mixin;
 import net.minecraft.datafixer.DataFixTypes;
 #endif
 #if MC_VER >= MC_1_19_4
-import com.github.inzan17.TimeMachine;
-import com.github.inzan17.UnloadedActivity;
-import com.github.inzan17.WorldWeatherData;
-import com.github.inzan17.interfaces.WorldTimeData;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -15,6 +11,10 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 #endif
+import com.github.inzan17.TimeMachine;
+import com.github.inzan17.UnloadedActivity;
+import com.github.inzan17.WorldWeatherData;
+import com.github.inzan17.interfaces.WorldTimeData;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.*;
