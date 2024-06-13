@@ -1,3 +1,11 @@
+
+def platforms = rootProject.enabled_platforms.split(',')
+
+def filter_platforms = platforms.stream().filter {platform ->
+    (!rootProject.using_neo && platform != "neoforge") ||
+    (rootProject.using_neo && platform != "forge")
+}.collect()
+
 architectury {
     common rootProject.enabled_platforms.split(',')
 }

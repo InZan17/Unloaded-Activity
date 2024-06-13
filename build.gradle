@@ -11,23 +11,22 @@ architectury {
 
 minecraft_version_string = project.minecraft_version.replace(".", "_")
 
-// Versions must be in order!!
-// Older versions are first in the list and then newer versions are at the end of the list.
-def supported_versions = [
-		"1.19.2",
-		"1.19.4",
-		"1.20.1",
-		"1.20.2",
-		"1.20.4"
-]
+def supported_versions = supported_versions.replaceAll(" ", "").split(",")
 
 def build_properties_text = new StringBuilder()
 
 def version_index = -1
 
+using_neo = false
+
 supported_versions.eachWithIndex { version, index ->
 	def version_string = version.replace(".", "_")
 	build_properties_text.append("MC_$version_string=$index\n")
+
+	if (version == neo_switch_version && version_index == -1) {
+		using_neo = true
+	}
+
 	if (version_string == minecraft_version_string) {
 		version_index = index
 	}
@@ -45,18 +44,24 @@ cloth_version = project["cloth_version_" + minecraft_version_string]
 modmenu_version = project["modmenu_version_" + minecraft_version_string]
 compatible_versions = project["compatible_versions_" + minecraft_version_string]
 yarn_mappings = project["yarn_mappings_" + minecraft_version_string]
-forge_version = project["forge_version_" + minecraft_version_string]
+if (using_neo) {
+	neo_or_forge_version = project["neo_version_" + minecraft_version_string]
+} else {
+	neo_or_forge_version = project["forge_version_" + minecraft_version_string]
+}
 
 def version_range = project.compatible_versions.split("-")
 if (version_range.length == 1) {
 	compatible_versions_fabric_format = version_range[0]
-	compatible_versions_forge_format = "["+version_range[0]+"]"
+	compatible_versions_neo_or_forge_format = "["+version_range[0]+"]"
 } else if (version_range.length == 2) {
 	compatible_versions_fabric_format = ">="+version_range[0]+" <="+version_range[1]
-	compatible_versions_forge_format = "["+version_range[0]+","+version_range[1]+"]"
+	compatible_versions_neo_or_forge_format = "["+version_range[0]+","+version_range[1]+"]"
 } else {
 	throw new GradleException("Wrong version format: $project.compatible_versions")
 }
+
+println(compatible_versions_neo_or_forge_format)
 
 allprojects { p ->
 	group = rootProject.maven_group

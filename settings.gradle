@@ -10,6 +10,32 @@ pluginManagement {
 
 rootProject.name = 'unloaded_activity'
 
+def gradleProperties = new Properties()
+
+rootDir.listFiles().each { file ->
+    if (file.name == "gradle.properties") {
+        gradleProperties.load(file.newReader())
+    }
+}
+
+def supported_versions = gradleProperties.supported_versions.replaceAll(" ", "").split(",")
+
+def found_version = false
+def using_neo = false
+
+supported_versions.eachWithIndex { version, index ->
+    if (version == gradleProperties.neo_switch_version && !found_version) {
+        using_neo = true
+    }
+    if (version == gradleProperties.minecraft_version) {
+        found_version = true
+    }
+}
+
 include 'common'
 include 'fabric'
-include 'forge'
+if (using_neo) {
+    include 'neoforge'
+} else {
+    include 'forge'
+}
