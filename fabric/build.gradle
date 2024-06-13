@@ -24,12 +24,24 @@ configurations {
     }
 }
 
+def buildProperties = new Properties()
+
+rootDir.listFiles().each { file ->
+    if (file.name == "build.properties") {
+        buildProperties.load(file.newReader())
+    }
+}
+
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
+    if (buildProperties.MC_VER > buildProperties.MC_1_19_2 && false) {
+        modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_version}") {
+            exclude(group: "net.fabricmc.fabric-api")
+        }
+    } else {
+        modImplementation "me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_version}"
     }
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
