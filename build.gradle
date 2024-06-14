@@ -2,12 +2,12 @@ plugins {
 	id 'dev.architectury.loom' version '1.6-SNAPSHOT' apply false
 	id 'architectury-plugin' version '3.4-SNAPSHOT'
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+	id "io.github.pacifistmc.forgix" version "1.2.9"
 }
 
 architectury {
 	minecraft = project.minecraft_version
 }
-
 
 minecraft_version_string = project.minecraft_version.replace(".", "_")
 
@@ -61,7 +61,10 @@ if (version_range.length == 1) {
 	throw new GradleException("Wrong version format: $project.compatible_versions")
 }
 
-println(compatible_versions_neo_or_forge_format)
+forgix {
+	group = "com.github.inzan17"
+	mergedJarName = "$archives_name-v$mod_version+${compatible_versions}.jar"
+}
 
 allprojects { p ->
 	group = rootProject.maven_group
