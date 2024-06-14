@@ -49,11 +49,11 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", rootProject.mod_version
     inputs.property "compatible_versions", rootProject.compatible_versions_fabric_format
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version, "compatible_versions": rootProject.compatible_versions_fabric_format
+        expand "version": rootProject.mod_version, "compatible_versions": rootProject.compatible_versions_fabric_format
     }
 }
 

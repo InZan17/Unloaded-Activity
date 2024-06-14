@@ -68,7 +68,7 @@ forgix {
 
 allprojects { p ->
 	group = rootProject.maven_group
-	version = rootProject.mod_version
+	version = "v" + rootProject.mod_version + "+" + rootProject.compatible_versions
 }
 
 tasks.withType(JavaCompile) {
@@ -82,7 +82,7 @@ subprojects {
 
 	base {
 		// Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
-		archivesName = "$rootProject.archives_name-$project.name-v$rootProject.version+$rootProject.compatible_versions"
+		archivesName = "$rootProject.archives_name-$project.name"
 	}
 
 	repositories {
