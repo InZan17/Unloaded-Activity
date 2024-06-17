@@ -29,7 +29,7 @@
       "com.github.inzan17.fabric.UnloadedActivityFabric"
     ],
     "modmenu": [
-      "com.github.inzan17.fabric.configscreen.UnloadedActivityModMenu"
+      "com.github.inzan17.fabric.UnloadedActivityModMenu"
     ]
   },
   "mixins": [

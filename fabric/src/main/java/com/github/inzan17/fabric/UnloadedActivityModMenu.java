@@ -1,5 +1,6 @@
-package com.github.inzan17.fabric.configscreen;
+package com.github.inzan17.fabric;
 
+import com.github.inzan17.config.UnloadedActivityClothScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;

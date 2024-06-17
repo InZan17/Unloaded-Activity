@@ -1,7 +1,6 @@
-package com.github.inzan17.fabric.configscreen;
+package com.github.inzan17.config;
 
 import com.github.inzan17.UnloadedActivity;
-import com.github.inzan17.config.UnloadedActivityConfig;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
