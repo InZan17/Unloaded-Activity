@@ -6,6 +6,6 @@ import com.github.inzan17.UnloadedActivity;
 @Mod(UnloadedActivity.MOD_ID)
 public final class UnloadedActivityNeoForge {
     public UnloadedActivityNeoForge() {
-        //UnloadedActivity.init();
+        UnloadedActivity.init();
     }
 }
