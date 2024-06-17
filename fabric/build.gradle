@@ -36,7 +36,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
     modImplementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
-    if (buildProperties.MC_VER > buildProperties.MC_1_19_2 && false) {
+    if (buildProperties.MC_VER > buildProperties.MC_1_19_2) {
         modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_version}") {
             exclude(group: "net.fabricmc.fabric-api")
         }
