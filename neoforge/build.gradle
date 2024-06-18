@@ -46,6 +46,10 @@ processResources {
     filesMatching("META-INF/mods.toml") {
         expand "version": rootProject.mod_version, "compatible_versions": rootProject.compatible_versions_neo_or_forge_format
     }
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": rootProject.mod_version, "compatible_versions": rootProject.compatible_versions_neo_or_forge_format
+    }
 }
 
 tasks.withType(JavaCompile) {

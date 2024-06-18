@@ -5,6 +5,7 @@ import com.github.inzan17.interfaces.SimulateBlockEntity;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,16 +38,25 @@ public abstract class BlockEntityMixin implements SimulateBlockEntity, BlockEnti
     }
 
     @Inject(method = "writeNbt", at = @At("RETURN"))
-    private void writeNbt(NbtCompound nbtCompound, CallbackInfo ci) {
+    #if MC_VER <= MC_1_20_4
+    private void writeNbt(NbtCompound nbtCompound, CallbackInfo ci)
+    #else
+    private void writeNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci)
+    #endif
+    {
         NbtCompound blockData = new NbtCompound();
 
         blockData.putLong("last_tick", this.lastTick);
 
         nbtCompound.put("unloaded_activity", blockData);
     }
-
     @Inject(method = "readNbt", at = @At(value = "RETURN"))
-    private void readNbt(NbtCompound nbtCompound, CallbackInfo ci) {
+    #if MC_VER <= MC_1_20_4
+    private void readNbt(NbtCompound nbtCompound, CallbackInfo ci)
+    #else
+    private void readNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci)
+    #endif
+    {
         NbtCompound blockData = nbtCompound.getCompound("unloaded_activity");
 
         boolean isEmpty = blockData.isEmpty();

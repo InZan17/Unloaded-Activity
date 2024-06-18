@@ -1,8 +1,10 @@
 package com.github.inzan17;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 
@@ -23,12 +25,22 @@ public class WorldWeatherData extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    #if MC_VER <= MC_1_20_4
+    public NbtCompound writeNbt(NbtCompound nbt)
+    #else
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
+    #endif
+    {
         nbt.putLongArray("weather_list", this.weatherList);
         return nbt;
     }
 
-    public static WorldWeatherData fromNbt(NbtCompound nbt) {
+    #if MC_VER <= MC_1_20_4
+    public static WorldWeatherData fromNbt(NbtCompound nbt)
+    #else
+    public static WorldWeatherData fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
+    #endif
+    {
         long[] longArray = nbt.getLongArray("weather_list");
         ArrayList<Long> longArrayList = new ArrayList<>();
 

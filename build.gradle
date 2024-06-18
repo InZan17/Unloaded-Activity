@@ -17,6 +17,9 @@ def build_properties_text = new StringBuilder()
 
 def version_index = -1
 
+def java_version = JavaVersion.VERSION_17
+def java_version_int = 17
+
 using_neo = false
 
 supported_versions.eachWithIndex { version, index ->
@@ -25,6 +28,11 @@ supported_versions.eachWithIndex { version, index ->
 
 	if (version == neo_switch_version && version_index == -1) {
 		using_neo = true
+	}
+
+	if (version == java_21_switch_version && version_index == -1) {
+		java_version = JavaVersion.VERSION_21
+		java_version_int = 21
 	}
 
 	if (version_string == minecraft_version_string) {
@@ -93,7 +101,14 @@ subprojects {
 
 	dependencies {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-		mappings "net.fabricmc:yarn:$rootProject.yarn_mappings:v2"
+		if (project.minecraft_version == "1.20.6") {
+			mappings loom.layered {
+				it.mappings("net.fabricmc:yarn:$rootProject.yarn_mappings:v2")
+				it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.20.5+build.3")
+			}
+		} else {
+			mappings "net.fabricmc:yarn:$rootProject.yarn_mappings:v2"
+		}
 
 		annotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
 		testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
@@ -105,12 +120,12 @@ subprojects {
 		// If you remove this line, sources will not be generated.
 		withSourcesJar()
 
-		sourceCompatibility = JavaVersion.VERSION_17
-		targetCompatibility = JavaVersion.VERSION_17
+		sourceCompatibility = java_version
+		targetCompatibility = java_version
 	}
 
 	tasks.withType(JavaCompile).configureEach {
-		it.options.release = 17
+		it.options.release = java_version_int
 	}
 
 	// Configure Maven publishing.
