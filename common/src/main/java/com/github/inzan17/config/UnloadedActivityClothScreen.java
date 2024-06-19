@@ -4,6 +4,8 @@ import com.github.inzan17.UnloadedActivity;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.api.Requirement;
+import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -25,7 +27,7 @@ public class UnloadedActivityClothScreen {
         ConfigCategory general = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.general"));
         ConfigCategory chunks = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.chunks"));
         ConfigCategory blockEntities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.blockEntities"));
-        ConfigCategory Entities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.entities"));
+        ConfigCategory entities = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.entities"));
         ConfigEntryBuilder configEntryBuilder = builder.entryBuilder();
 
         general.addEntry(
@@ -105,16 +107,16 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        chunks.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.enableRandomTicks = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks.tooltip"))
-                        .build()
-        );
+        BooleanListEntry enableRandomTicks = configEntryBuilder
+                .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks"), config.enableRandomTicks)
+                .setDefaultValue(true)
+                .setSaveConsumer(newValue -> config.enableRandomTicks = newValue)
+                .setTooltip(Text.translatable("text.config.unloaded-activity.option.enableRandomTicks.tooltip"))
+                .build();
 
-        SubCategoryBuilder subRandomTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.randomTicks"));
+        chunks.addEntry(enableRandomTicks);
+
+        SubCategoryBuilder subRandomTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.randomTicks")).setRequirement(Requirement.isTrue(enableRandomTicks));
 
         subRandomTicks.add(
                 configEntryBuilder
@@ -289,16 +291,18 @@ public class UnloadedActivityClothScreen {
 
         chunks.addEntry(subRandomTicks.build());
 
-        chunks.addEntry(
-                configEntryBuilder
-                        .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks"), config.enablePrecipitationTicks)
-                        .setDefaultValue(true)
-                        .setSaveConsumer(newValue -> config.enablePrecipitationTicks = newValue)
-                        .setTooltip(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks.tooltip"))
-                        .build()
-        );
 
-        SubCategoryBuilder subPrecipitationTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.precipitationTicks"));
+
+        BooleanListEntry enablePrecipitationTicks = configEntryBuilder
+            .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks"), config.enablePrecipitationTicks)
+            .setDefaultValue(true)
+            .setSaveConsumer(newValue -> config.enablePrecipitationTicks = newValue)
+            .setTooltip(Text.translatable("text.config.unloaded-activity.option.enablePrecipitationTicks.tooltip"))
+            .build();
+
+        chunks.addEntry(enablePrecipitationTicks);
+
+        SubCategoryBuilder subPrecipitationTicks = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.precipitationTicks")).setRequirement(Requirement.isTrue(enablePrecipitationTicks));;
 
         subPrecipitationTicks.add(
                 configEntryBuilder
@@ -329,7 +333,7 @@ public class UnloadedActivityClothScreen {
 
         chunks.addEntry(subPrecipitationTicks.build());
 
-        SubCategoryBuilder subAccuracy = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.accuracy"));
+        SubCategoryBuilder subAccuracy = configEntryBuilder.startSubCategory(Text.translatable("text.config.unloaded-activity.category.chunks.accuracy")).setRequirement(Requirement.isTrue(enableRandomTicks));
 
         subAccuracy.add(
                 configEntryBuilder
@@ -360,7 +364,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        Entities.addEntry(
+        entities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.enableEntities"), config.enableEntities)
                         .setDefaultValue(true)
@@ -369,7 +373,7 @@ public class UnloadedActivityClothScreen {
                         .build()
         );
 
-        Entities.addEntry(
+        entities.addEntry(
                 configEntryBuilder
                         .startBooleanToggle(Text.translatable("text.config.unloaded-activity.option.ageEntities"), config.ageEntities)
                         .setDefaultValue(true)
