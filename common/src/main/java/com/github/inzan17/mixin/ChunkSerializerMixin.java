@@ -13,7 +13,9 @@ import net.minecraft.world.chunk.ReadOnlyChunk;
 import net.minecraft.world.chunk.WrapperProtoChunk;
 #endif
 import net.minecraft.world.poi.PointOfInterestStorage;
+#if MC_VER >= MC_1_21
 import net.minecraft.world.storage.StorageKey;
+#endif
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

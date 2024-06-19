@@ -5,7 +5,9 @@ import com.github.inzan17.interfaces.SimulateBlockEntity;
 import com.github.inzan17.UnloadedActivity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+#if MC_VER > MC_1_20_4
 import net.minecraft.registry.RegistryWrapper;
+#endif
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

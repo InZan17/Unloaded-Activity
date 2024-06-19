@@ -1,7 +1,10 @@
 package com.github.inzan17;
 
 import net.minecraft.nbt.NbtCompound;
+
+#if MC_VER > MC_1_20_4
 import net.minecraft.registry.RegistryWrapper;
+#endif
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
