@@ -18,6 +18,10 @@ public class UnloadedActivityClothScreen {
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("text.config.unloaded-activity.title"));
 
+        #if MC_VER >= MC_1_20_6
+        isTransparent = true;
+        #endif
+
         #if MC_VER >= MC_1_21
         builder.setDefaultBackgroundTexture(Identifier.of("minecraft:textures/block/dark_oak_planks.png"));
         #else
