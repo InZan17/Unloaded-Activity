@@ -16,7 +16,11 @@ public class UnloadedActivityClothScreen {
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("text.config.unloaded-activity.title"));
 
+        #if MC_VER >= MC_1_21
+        builder.setDefaultBackgroundTexture(Identifier.of("minecraft:textures/block/dark_oak_planks.png"));
+        #else
         builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dark_oak_planks.png"));
+        #endif
         builder.setSavingRunnable(() -> UnloadedActivity.saveConfig());
         ConfigCategory general = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.general"));
         ConfigCategory chunks = builder.getOrCreateCategory(Text.translatable("text.config.unloaded-activity.category.chunks"));

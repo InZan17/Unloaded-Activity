@@ -20,6 +20,9 @@ import net.minecraft.recipe.*;
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
 #endif
+#if MC_VER >= MC_1_21
+import net.minecraft.recipe.input.SingleStackRecipeInput;
+#endif
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +41,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int fuelTime;
     @Shadow int cookTime;
     @Shadow int cookTimeTotal;
+    #if MC_VER >= MC_1_21
+    @Shadow @Final private RecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
+    #else
     @Shadow @Final private RecipeManager.MatchGetter<Inventory, ? extends AbstractCookingRecipe> matchGetter;
+    #endif
 
     @Shadow private static int getCookTime(World world, AbstractFurnaceBlockEntity furnace) {
         return 0;
@@ -111,7 +118,22 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             ItemStack finishedStack = this.inventory.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
-            #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe = inputCount != 0 ? this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null) : null;
+
+            #if MC_VER > MC_1_20_2
+            RecipeEntry
+            #elif MC_VER == MC_1_20_2
+            RecipeEntry<?>
+            #else
+            Recipe<?>
+            #endif
+            recipe = inputCount != 0 ?
+                #if MC_VER >= MC_1_21
+                this.matchGetter.getFirstMatch(new SingleStackRecipeInput(itemStack), world).orElse(null)
+                #else
+                this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null)
+                #endif
+            : null;
+
             int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
             int fuelTime = this.getFuelTime(fuelStack);

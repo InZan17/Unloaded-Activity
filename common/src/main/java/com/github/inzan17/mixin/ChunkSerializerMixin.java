@@ -13,6 +13,7 @@ import net.minecraft.world.chunk.ReadOnlyChunk;
 import net.minecraft.world.chunk.WrapperProtoChunk;
 #endif
 import net.minecraft.world.poi.PointOfInterestStorage;
+import net.minecraft.world.storage.StorageKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,7 +35,12 @@ public abstract class ChunkSerializerMixin {
     }
 
     @Inject(method = "deserialize", at = @At("RETURN"))
-    private static void deserialize(ServerWorld world, PointOfInterestStorage poiStorage, ChunkPos chunkPos, NbtCompound nbtCompound, CallbackInfoReturnable<ProtoChunk> cir) {
+    #if MC_VER >= MC_1_21
+    private static void deserialize(ServerWorld world, PointOfInterestStorage poiStorage, StorageKey key, ChunkPos chunkPos, NbtCompound nbtCompound, CallbackInfoReturnable<ProtoChunk> cir)
+    #else
+    private static void deserialize(ServerWorld world, PointOfInterestStorage poiStorage, ChunkPos chunkPos, NbtCompound nbtCompound, CallbackInfoReturnable<ProtoChunk> cir)
+    #endif
+    {
         ProtoChunk protoChunkTemp = cir.getReturnValue();
 
         #if MC_VER <= MC_1_19_4
