@@ -82,7 +82,7 @@ if (version_range.length == 1) {
 }
 
 forgix {
-	group = "com.github.inzan17"
+	group = "lol.zanspace.unloadedactivity"
 	mergedJarName = "$archives_name-v$mod_version+${compatible_versions}.jar"
 
 	fabric {

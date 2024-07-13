@@ -1,12 +1,12 @@
 {
   "injected_interfaces": {
-    "net/minecraft/block/AbstractBlock": ["com/github/inzan17/interfaces/SimulateChunkBlocks"],
+    "net/minecraft/block/AbstractBlock": ["lol/zanspace/unloadedactivity/interfaces/SimulateChunkBlocks"],
     "net/minecraft/block/entity/BlockEntity": [
-      "com/github/inzan17/interfaces/SimulateBlockEntity",
-      "com/github/inzan17/interfaces/BlockEntityTimeData"
+      "lol/zanspace/unloadedactivity/interfaces/SimulateBlockEntity",
+      "lol/zanspace/unloadedactivity/interfaces/BlockEntityTimeData"
     ],
-    "net/minecraft/entity/Entity": ["com/github/inzan17/interfaces/SimulateEntity"],
-    "net/minecraft/world/chunk/Chunk": ["com/github/inzan17/interfaces/ChunkTimeData"],
-    "net/minecraft/server/world/ServerWorld": ["com/github/inzan17/interfaces/WorldTimeData"]
+    "net/minecraft/entity/Entity": ["lol/zanspace/unloadedactivity/interfaces/SimulateEntity"],
+    "net/minecraft/world/chunk/Chunk": ["lol/zanspace/unloadedactivity/interfaces/ChunkTimeData"],
+    "net/minecraft/server/world/ServerWorld": ["lol/zanspace/unloadedactivity/interfaces/WorldTimeData"]
   }
 }

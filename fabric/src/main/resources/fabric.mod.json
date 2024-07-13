@@ -26,10 +26,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.github.inzan17.fabric.UnloadedActivityFabric"
+      "lol.zanspace.unloadedactivity.fabric.UnloadedActivityFabric"
     ],
     "modmenu": [
-      "com.github.inzan17.fabric.UnloadedActivityModMenu"
+      "lol.zanspace.unloadedactivity.fabric.UnloadedActivityModMenu"
     ]
   },
   "mixins": [
