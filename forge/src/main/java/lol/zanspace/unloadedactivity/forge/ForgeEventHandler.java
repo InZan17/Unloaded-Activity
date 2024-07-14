@@ -7,6 +7,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class ForgeEventHandler {
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
-        UnloadedActivity.registerCommands(event.getDispatcher(), event.getCommandSelection(), event.getBuildContext());
+        UnloadedActivityCommand.register(event.getDispatcher());
     }
 }

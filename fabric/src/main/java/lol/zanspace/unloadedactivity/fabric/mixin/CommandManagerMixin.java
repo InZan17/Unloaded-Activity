@@ -2,6 +2,7 @@ package lol.zanspace.unloadedactivity.fabric.mixin;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import com.mojang.brigadier.CommandDispatcher;
+import lol.zanspace.unloadedactivity.UnloadedActivityCommand;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -20,6 +21,6 @@ public abstract class CommandManagerMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;setConsumer(Lcom/mojang/brigadier/ResultConsumer;)V", remap = false), method = "<init>")
     private void addCommands(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess registryAccess, CallbackInfo ci) {
-        UnloadedActivity.registerCommands(this.dispatcher, environment, registryAccess);
+        UnloadedActivityCommand.register(this.dispatcher);
     }
 }
