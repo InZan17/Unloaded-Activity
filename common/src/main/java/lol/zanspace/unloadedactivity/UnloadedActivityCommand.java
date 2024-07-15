@@ -3,13 +3,11 @@ package lol.zanspace.unloadedactivity;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.GameRuleCommand;
+import lol.zanspace.unloadedactivity.config.UnloadedActivityConfig;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.GameRules;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -44,22 +42,29 @@ public class UnloadedActivityCommand {
     }
 
     public static void addConfigs(LiteralArgumentBuilder commandBuilder) {
-        commandBuilder.then(
-            literal("config").then(
-                    literal("updateCropsOrSomething").executes(
-                            context -> executeConfigGet(context.getSource())
-                    ).then(argument("value", integer()).executes(context -> executeConfigSet(context.getSource())))
-            )
-        );
+        LiteralArgumentBuilder configBuilder = literal("config");
+
+        for (UnloadedActivityConfig.ConfigOption<?> configOption : UnloadedActivity.config.configOptions) {
+            configBuilder.then(literal(configOption.name).executes(context ->
+                executeConfigGet(context.getSource(), configOption)
+            ).then(argument("value", configOption.argumentType).executes(context ->
+                executeConfigSet(context, configOption)
+            )));
+        }
+
+        commandBuilder.then(configBuilder);
     }
 
-    static int executeConfigSet(ServerCommandSource context) {
-        context.sendFeedback(() -> Text.literal("option has been set to bla bla"), true);
+    static <T> int executeConfigSet(CommandContext<ServerCommandSource> context, UnloadedActivityConfig.ConfigOption<T> configOption) {
+        T value = context.getArgument("value", configOption.tClass);
+        configOption.setter.accept(value);
+        UnloadedActivity.saveConfig();
+        context.getSource().sendFeedback(() -> Text.literal(configOption.name + " has been set to: " + value), true);
         return 0;
     }
 
-    static int executeConfigGet(ServerCommandSource context) {
-        context.sendFeedback(() -> Text.literal("option is currently set to bla bla"), false);
+    static <T> int executeConfigGet(ServerCommandSource source, UnloadedActivityConfig.ConfigOption<T> configOption) {
+        source.sendFeedback(() -> Text.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
         return 0;
     }
 

@@ -3,12 +3,6 @@ package lol.zanspace.unloadedactivity;
 import lol.zanspace.unloadedactivity.config.UnloadedActivityConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-
-import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
-import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
-import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
 public class UnloadedActivity {
     public static final String MOD_ID = "unloaded_activity";

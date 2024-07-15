@@ -1,9 +1,283 @@
 package lol.zanspace.unloadedactivity.config;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import lol.zanspace.unloadedactivity.UnloadedActivity;
+import net.minecraft.command.argument.NumberRangeArgumentType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.world.GameRules;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 public class UnloadedActivityConfig {
 
+    public static class ConfigOption<T> {
+        public ArgumentType<T> argumentType;
+        public T defaultValue;
+        public String name;
+        public Function<Void, T> getter;
+        public Consumer<T> setter;
+        public Class<T> tClass;
 
+        public ConfigOption(ArgumentType<T> argumentType, String name, T defaultValue, Function<Void, T> getter, Consumer<T> setter, Class<T> tClass) {
+            this.argumentType = argumentType;
+            this.name = name;
+            this.defaultValue = defaultValue;
+            this.getter = getter;
+            this.setter = setter;
+            this.tClass = tClass;
+        }
+    }
 
+    public transient ArrayList<ConfigOption<?>> configOptions = new ArrayList<>();
+
+    public void registerInt(String name, int defaultValue, int minValue, int maxValue, Function<Void, Integer> getter, Consumer<Integer> setter) {
+        IntegerArgumentType argumentType = IntegerArgumentType.integer(minValue, maxValue);
+        ConfigOption<Integer> configOption = new ConfigOption<>(argumentType, name, defaultValue, getter, setter, int.class);
+        configOptions.add(configOption);
+    }
+
+    public void registerBoolean(String name, boolean defaultValue, Function<Void, Boolean> getter, Consumer<Boolean> setter) {
+        BoolArgumentType argumentType = BoolArgumentType.bool();
+        ConfigOption<Boolean> configOption = new ConfigOption<>(argumentType, name, defaultValue, getter, setter, boolean.class);
+        configOptions.add(configOption);
+    }
+
+    public UnloadedActivityConfig() {
+        registerInt(
+                "tickDifferenceThreshold", tickDifferenceThreshold, 1, Integer.MAX_VALUE,
+                unused -> tickDifferenceThreshold,
+                value -> tickDifferenceThreshold = value
+        );
+
+        registerBoolean(
+                "debugLogs", debugLogs,
+                unused -> debugLogs,
+                value -> debugLogs = value
+        );
+
+        registerBoolean(
+                "convertCCAData", convertCCAData,
+                unused -> convertCCAData,
+                value -> convertCCAData = value
+        );
+
+        registerInt(
+                "maxChunkUpdates", maxChunkUpdates, 1, 32767,
+                unused -> maxChunkUpdates,
+                value -> maxChunkUpdates = value
+        );
+
+        registerInt(
+                "maxKnownChunkUpdates", maxKnownChunkUpdates, 1, 32767,
+                unused -> maxKnownChunkUpdates,
+                value -> maxKnownChunkUpdates = value
+        );
+
+        registerBoolean(
+                "randomizeBlockUpdates", randomizeBlockUpdates,
+                unused -> randomizeBlockUpdates,
+                value -> randomizeBlockUpdates = value
+        );
+
+        registerBoolean(
+                "rememberBlockPositions", rememberBlockPositions,
+                unused -> rememberBlockPositions,
+                value -> rememberBlockPositions = value
+        );
+
+        registerBoolean(
+                "multiplyMaxChunkUpdatesPerPlayer", multiplyMaxChunkUpdatesPerPlayer,
+                unused -> multiplyMaxChunkUpdatesPerPlayer,
+                value -> multiplyMaxChunkUpdatesPerPlayer = value
+        );
+
+        registerBoolean(
+                "updateAllChunksWhenSleep", updateAllChunksWhenSleep,
+                unused -> updateAllChunksWhenSleep,
+                value -> updateAllChunksWhenSleep = value
+        );
+
+        registerBoolean(
+                "enableRandomTicks", enableRandomTicks,
+                unused -> enableRandomTicks,
+                value -> enableRandomTicks = value
+        );
+
+        registerBoolean(
+                "enablePrecipitationTicks", enablePrecipitationTicks,
+                unused -> enablePrecipitationTicks,
+                value -> enablePrecipitationTicks = value
+        );
+
+        registerBoolean(
+                "growSaplings", growSaplings,
+                unused -> growSaplings,
+                value -> growSaplings = value
+        );
+
+        registerBoolean(
+                "growCrops", growCrops,
+                unused -> growCrops,
+                value -> growCrops = value
+        );
+
+        registerBoolean(
+                "growStems", growStems,
+                unused -> growStems,
+                value -> growStems = value
+        );
+
+        registerBoolean(
+                "growSweetBerries", growSweetBerries,
+                unused -> growSweetBerries,
+                value -> growSweetBerries = value
+        );
+
+        registerBoolean(
+                "growCocoa", growCocoa,
+                unused -> growCocoa,
+                value -> growCocoa = value
+        );
+
+        registerBoolean(
+                "growSugarCane", growSugarCane,
+                unused -> growSugarCane,
+                value -> growSugarCane = value
+        );
+
+        registerBoolean(
+                "growCactus", growCactus,
+                unused -> growCactus,
+                value -> growCactus = value
+        );
+
+        registerBoolean(
+                "ageCopper", ageCopper,
+                unused -> ageCopper,
+                value -> ageCopper = value
+        );
+
+        registerBoolean(
+                "decayLeaves", decayLeaves,
+                unused -> decayLeaves,
+                value -> decayLeaves = value
+        );
+
+        registerBoolean(
+                "growAmethyst", growAmethyst,
+                unused -> growAmethyst,
+                value -> growAmethyst = value
+        );
+
+        registerBoolean(
+                "growGlowBerries", growGlowBerries,
+                unused -> growGlowBerries,
+                value -> growGlowBerries = value
+        );
+
+        registerBoolean(
+                "growKelp", growKelp,
+                unused -> growKelp,
+                value -> growKelp = value
+        );
+
+        registerBoolean(
+                "growBamboo", growBamboo,
+                unused -> growBamboo,
+                value -> growBamboo = value
+        );
+
+        registerBoolean(
+                "hatchTurtleEggs", hatchTurtleEggs,
+                unused -> hatchTurtleEggs,
+                value -> hatchTurtleEggs = value
+        );
+
+        registerBoolean(
+                "meltSnow", meltSnow,
+                unused -> meltSnow,
+                value -> meltSnow = value
+        );
+
+        registerBoolean(
+                "meltIce", meltIce,
+                unused -> meltIce,
+                value -> meltIce = value
+        );
+
+        registerBoolean(
+                "growDripstone", growDripstone,
+                unused -> growDripstone,
+                value -> growDripstone = value
+        );
+
+        registerBoolean(
+                "dripstoneFillCauldrons", dripstoneFillCauldrons,
+                unused -> dripstoneFillCauldrons,
+                value -> dripstoneFillCauldrons = value
+        );
+
+        registerBoolean(
+                "dripstoneTurnMudToClay", dripstoneTurnMudToClay,
+                unused -> dripstoneTurnMudToClay,
+                value -> dripstoneTurnMudToClay = value
+        );
+
+        registerBoolean(
+                "accumulateSnow", accumulateSnow,
+                unused -> accumulateSnow,
+                value -> accumulateSnow = value
+        );
+
+        registerBoolean(
+                "waterFreezing", waterFreezing,
+                unused -> waterFreezing,
+                value -> waterFreezing = value
+        );
+
+        registerBoolean(
+                "weatherFillCauldron", weatherFillCauldron,
+                unused -> weatherFillCauldron,
+                value -> weatherFillCauldron = value
+        );
+
+        registerBoolean(
+                "accurateTurtleAgeAfterHatch", accurateTurtleAgeAfterHatch,
+                unused -> accurateTurtleAgeAfterHatch,
+                value -> accurateTurtleAgeAfterHatch = value
+        );
+
+        registerBoolean(
+                "enableBlockEntities", enableBlockEntities,
+                unused -> enableBlockEntities,
+                value -> enableBlockEntities = value
+        );
+
+        registerBoolean(
+                "updateFurnace", updateFurnace,
+                unused -> updateFurnace,
+                value -> updateFurnace = value
+        );
+
+        registerBoolean(
+                "enableEntities", enableEntities,
+                unused -> enableEntities,
+                value -> enableEntities = value
+        );
+
+        registerBoolean(
+                "ageEntities", ageEntities,
+                unused -> ageEntities,
+                value -> ageEntities = value
+        );
+    }
 
 
     //General
@@ -11,10 +285,6 @@ public class UnloadedActivityConfig {
     public int maxNegativeBinomialAttempts = 20;
     public boolean debugLogs = false;
     public boolean convertCCAData = true;
-
-
-
-
 
     //Chunk
     public int maxChunkUpdates = 8;
@@ -25,10 +295,6 @@ public class UnloadedActivityConfig {
     public boolean updateAllChunksWhenSleep = true;
     public boolean enableRandomTicks = true;
     public boolean enablePrecipitationTicks = true;
-
-
-
-
 
     //Random Ticks
     public boolean growSaplings = true;
@@ -51,36 +317,19 @@ public class UnloadedActivityConfig {
     public boolean dripstoneFillCauldrons = true;
     public boolean dripstoneTurnMudToClay = true;
 
-
-
-
-
     //Precipitation Ticks
     public boolean accumulateSnow = true;
     public boolean waterFreezing = true;
     public boolean weatherFillCauldron = true;
 
-
-
-
-
     //Accuracy
     public boolean accurateTurtleAgeAfterHatch = true;
-
-
-
 
     //Block Entities
     public boolean enableBlockEntities = true;
     public boolean updateFurnace = true;
 
-
-
-
-
     //Entities
     public boolean enableEntities = true;
     public boolean ageEntities = true;
-
-
 }
