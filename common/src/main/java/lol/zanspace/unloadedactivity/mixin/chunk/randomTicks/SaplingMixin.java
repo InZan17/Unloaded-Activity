@@ -15,6 +15,7 @@ import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,6 +34,9 @@ public abstract class SaplingMixin extends PlantBlock {
     @Shadow
     public void generate(ServerWorld world, BlockPos pos, BlockState state, Random random) {
     }
+
+    @Shadow
+    public abstract boolean canGrow(World world, Random random, BlockPos pos, BlockState state);
 
     @Shadow @Final public static IntProperty STAGE;
 
@@ -59,6 +63,10 @@ public abstract class SaplingMixin extends PlantBlock {
 
     @Override
     public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+
+        if (!this.canGrow(world, random, pos, state)) {
+            return;
+        }
 
         if (world.getLightLevel(LightType.BLOCK, pos.up()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
