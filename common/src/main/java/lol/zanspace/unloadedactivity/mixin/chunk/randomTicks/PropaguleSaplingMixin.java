@@ -2,19 +2,21 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PropaguleBlock;
+import net.minecraft.block.SaplingBlock;
+import net.minecraft.block.SaplingGenerator;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 
 @Mixin(PropaguleBlock.class)
-public abstract class PropaguleSaplingMixin extends SaplingMixin {
-    protected PropaguleSaplingMixin(Settings settings) {
-        super(settings);
+public abstract class PropaguleSaplingMixin extends SaplingBlock {
+
+    protected PropaguleSaplingMixin(SaplingGenerator generator, Settings settings) {
+        super(generator, settings);
     }
 
     @Shadow @Final public static BooleanProperty HANGING;
@@ -25,10 +27,10 @@ public abstract class PropaguleSaplingMixin extends SaplingMixin {
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
         if (isHanging(state))
-            return;
+            return false;
 
-        super.simulateRandTicks(state, world, pos, random, timePassed, randomTickSpeed);
+        return super.canSimulateRandTicks(state, world, pos);
     }
 }
