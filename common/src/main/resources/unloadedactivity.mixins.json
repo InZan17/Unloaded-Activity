@@ -12,6 +12,7 @@
     "chunk.randomTicks.CropMixin",
     "chunk.randomTicks.StemMixin",
     "chunk.randomTicks.SaplingMixin",
+    "chunk.randomTicks.PropaguleSaplingMixin",
     "chunk.randomTicks.SweetBerryBushMixin",
     "chunk.randomTicks.CocoaMixin",
     "chunk.randomTicks.SugarCaneMixin",
