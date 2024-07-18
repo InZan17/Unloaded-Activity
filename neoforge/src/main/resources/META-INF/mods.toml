@@ -29,3 +29,5 @@ side = "SERVER"
 
 [[mixins]]
 config = "unloadedactivity.mixins.json"
+[[mixins]]
+config = "unloadedactivityneoforge.mixins.json"

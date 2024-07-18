@@ -1,8 +1,8 @@
-package lol.zanspace.unloadedactivity.mixin;
+package lol.zanspace.unloadedactivity.fabric.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VER < MC_1_21
+#if MC_VER >= MC_1_21
 import net.minecraft.block.Block;
 import net.minecraft.block.CropBlock;
 import net.minecraft.util.math.BlockPos;
@@ -17,8 +17,7 @@ public interface CropBlockInvoker {
     }
 }
 #else
-// An empty mixin to the air block for 1.20 and above because we need a different mixin for neoforge.
-// the Block parameter got replaced with a BlockState parameter.
+// An empty mixin to the air block.
 import net.minecraft.block.AirBlock;
 @Mixin(AirBlock.class)
 public class CropBlockInvoker {}
