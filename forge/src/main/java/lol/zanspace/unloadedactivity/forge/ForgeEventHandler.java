@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.forge;
 
-import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.UnloadedActivityCommand;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
