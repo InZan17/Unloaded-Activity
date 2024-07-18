@@ -59,12 +59,20 @@ public class UnloadedActivityCommand {
         T value = context.getArgument("value", configOption.tClass);
         configOption.setter.accept(value);
         UnloadedActivity.saveConfig();
+        #if MC_VER >= MC_1_20_1
         context.getSource().sendFeedback(() -> Text.literal(configOption.name + " has been set to: " + value), true);
+        #else
+        context.getSource().sendFeedback(Text.literal(configOption.name + " has been set to: " + value), true);
+        #endif
         return 0;
     }
 
     static <T> int executeConfigGet(ServerCommandSource source, UnloadedActivityConfig.ConfigOption<T> configOption) {
+        #if MC_VER >= MC_1_20_1
         source.sendFeedback(() -> Text.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
+        #else
+        source.sendFeedback(Text.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
+        #endif
         return 0;
     }
 

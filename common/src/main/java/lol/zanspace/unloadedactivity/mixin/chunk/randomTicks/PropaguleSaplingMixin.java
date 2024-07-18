@@ -3,7 +3,11 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PropaguleBlock;
 import net.minecraft.block.SaplingBlock;
+#if MC_VER >= MC_1_20_4
 import net.minecraft.block.SaplingGenerator;
+#else
+import net.minecraft.block.sapling.SaplingGenerator;
+#endif
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.math.BlockPos;
