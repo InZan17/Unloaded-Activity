@@ -3,12 +3,10 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.BambooLeaves;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -40,6 +38,8 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         return 0;
     }
 
+    @Shadow protected abstract int countBambooAbove(BlockView world, BlockPos pos);
+
     public int countAirAbove(BlockView world, BlockPos pos, int maxCount) {
         int i;
         for (i = 0; i < maxCount && world.getBlockState(pos.up(i + 1)).isAir(); ++i) {
@@ -55,46 +55,32 @@ public abstract class BambooMixin extends Block implements Fertilizable {
             return;
 
         int heightDifference = getMaxHeightUA() - height;
-        int maxGrowth = countAirAbove(world,pos, heightDifference);
+        int maxGrowth = this.countAirAbove(world,pos, heightDifference);
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(world, pos) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
-        for(int i=1+height;i<growthAmount+1+height;i++) {
+        BlockState currentState = state;
+        BlockPos currentPos = pos;
 
-            if (state == null)
+        for(int i=0;i<growthAmount;i++) {
+            this.grow(world, random, currentPos, currentState);
+
+            if (i == growthAmount - 1)
                 return;
 
-            if (!canSimulateRandTicks(state, world, pos))
+            int grew = this.countBambooAbove(world, currentPos);
+
+            if (grew == 0)
                 return;
 
-            state = updateLeaves(state,world,pos,random,i);
-            pos = pos.up();
-        }
-    }
+            currentPos = currentPos.up(grew);
+            currentState = world.getBlockState(currentPos);
 
-    public BlockState updateLeaves(BlockState state, World world, BlockPos pos, Random random, int height) {
-        BlockState blockState = world.getBlockState(pos.down());
-        BlockPos blockPos = pos.down(2);
-        BlockState blockState2 = world.getBlockState(blockPos);
-        BambooLeaves bambooLeaves = BambooLeaves.NONE;
-        if (height >= 1) {
-            if (!blockState.isOf(Blocks.BAMBOO) || blockState.get(LEAVES) == BambooLeaves.NONE) {
-                bambooLeaves = BambooLeaves.SMALL;
-            } else if (blockState.isOf(Blocks.BAMBOO) && blockState.get(LEAVES) != BambooLeaves.NONE) {
-                bambooLeaves = BambooLeaves.LARGE;
-                if (blockState2.isOf(Blocks.BAMBOO)) {
-                    world.setBlockState(pos.down(), blockState.with(LEAVES, BambooLeaves.SMALL), Block.NOTIFY_ALL);
-                    world.setBlockState(blockPos, blockState2.with(LEAVES, BambooLeaves.NONE), Block.NOTIFY_ALL);
-                }
-            }
+            if (!this.canSimulateRandTicks(currentState, world, currentPos))
+                return;
         }
-        int age = state.get(AGE) == 1 || blockState2.isOf(Blocks.BAMBOO) ? 1 : 0;
-        int stage = height >= 11 && random.nextFloat() < 0.25f || height == 15 ? 1 : 0;
-        BlockState newBlockState = Blocks.BAMBOO.getDefaultState().with(AGE, age).with(LEAVES, bambooLeaves).with(STAGE, stage);
-        world.setBlockState(pos.up(), newBlockState, Block.NOTIFY_ALL);
-        return stage == 0 ? newBlockState : null;
     }
 }
