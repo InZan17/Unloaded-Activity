@@ -4,6 +4,7 @@ import lol.zanspace.unloadedactivity.ExpectPlatform;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VER >= MC_1_19_4
+import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
 import net.minecraft.block.CropBlock;
 import net.minecraft.block.TorchflowerBlock;
 import net.minecraft.server.world.ServerWorld;

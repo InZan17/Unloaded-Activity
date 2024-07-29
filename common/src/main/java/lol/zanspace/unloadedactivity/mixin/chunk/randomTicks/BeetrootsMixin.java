@@ -1,11 +1,16 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.ExpectPlatform;
 import net.minecraft.block.BeetrootsBlock;
 import net.minecraft.block.CropBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
+
+#if MC_VER >= MC_1_21
+import lol.zanspace.unloadedactivity.ExpectPlatform;
+#else
+import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
+#endif
 
 @Mixin(BeetrootsBlock.class)
 public abstract class BeetrootsMixin extends CropBlock{
