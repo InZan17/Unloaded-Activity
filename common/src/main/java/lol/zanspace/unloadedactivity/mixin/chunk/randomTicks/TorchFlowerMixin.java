@@ -18,7 +18,7 @@ public class TorchFlowerMixin extends CropBlock {
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        #if MC_VER >= MC_1_21
+        #if MC_VER >= MC_1_21_1
         float f = ExpectPlatform.getAvailableMoisture(world.getBlockState(pos), world, pos);
         #else
         float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);

@@ -2,7 +2,7 @@ package lol.zanspace.unloadedactivity.fabric.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VER >= MC_1_21
+#if MC_VER >= MC_1_21_1
 import net.minecraft.block.Block;
 import net.minecraft.block.CropBlock;
 import net.minecraft.util.math.BlockPos;

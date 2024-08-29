@@ -20,7 +20,7 @@ import net.minecraft.recipe.*;
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
 #endif
-#if MC_VER >= MC_1_21
+#if MC_VER >= MC_1_21_1
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 #endif
 import net.minecraft.util.Identifier;
@@ -41,7 +41,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int fuelTime;
     @Shadow int cookTime;
     @Shadow int cookTimeTotal;
-    #if MC_VER >= MC_1_21
+    #if MC_VER >= MC_1_21_1
     @Shadow @Final private RecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
     #else
     @Shadow @Final private RecipeManager.MatchGetter<Inventory, ? extends AbstractCookingRecipe> matchGetter;
@@ -127,7 +127,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             Recipe<?>
             #endif
             recipe = inputCount != 0 ?
-                #if MC_VER >= MC_1_21
+                #if MC_VER >= MC_1_21_1
                 this.matchGetter.getFirstMatch(new SingleStackRecipeInput(itemStack), world).orElse(null)
                 #else
                 this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null)

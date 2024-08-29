@@ -6,7 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VER >= MC_1_21
+#if MC_VER >= MC_1_21_1
 import lol.zanspace.unloadedactivity.ExpectPlatform;
 #else
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
@@ -20,7 +20,7 @@ public abstract class BeetrootsMixin extends CropBlock{
 
     @Override
     public double getOdds(ServerWorld world, BlockPos pos) {
-        #if MC_VER >= MC_1_21
+        #if MC_VER >= MC_1_21_1
         float f = ExpectPlatform.getAvailableMoisture(world.getBlockState(pos), world, pos);
         #else
         float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);

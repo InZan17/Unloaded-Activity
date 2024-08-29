@@ -22,7 +22,7 @@ public class UnloadedActivityClothScreen {
         isTransparent = true;
         #endif
 
-        #if MC_VER >= MC_1_21
+        #if MC_VER >= MC_1_21_1
         builder.setDefaultBackgroundTexture(Identifier.of("minecraft:textures/block/dark_oak_planks.png"));
         #else
         builder.setDefaultBackgroundTexture(new Identifier("minecraft:textures/block/dark_oak_planks.png"));

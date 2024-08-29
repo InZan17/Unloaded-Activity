@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.neoforge;
 
-#if MC_VER >= MC_1_21
+#if MC_VER >= MC_1_21_1
 import lol.zanspace.unloadedactivity.neoforge.mixin.CropBlockInvoker;
 #endif
 
@@ -15,7 +15,7 @@ public class ExpectPlatformImpl {
     public static Path getConfigDirectory() {
         return FMLPaths.CONFIGDIR.get();
     }
-    #if MC_VER >= MC_1_21
+    #if MC_VER >= MC_1_21_1
     public static float getAvailableMoisture(BlockState blockState, BlockView world, BlockPos pos) {
         return CropBlockInvoker.getAvailableMoisture(blockState, world, pos);
     }

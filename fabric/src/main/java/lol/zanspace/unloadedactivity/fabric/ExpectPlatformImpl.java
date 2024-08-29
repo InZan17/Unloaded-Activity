@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.fabric;
 
-#if MC_VER >= MC_1_21
+#if MC_VER >= MC_1_21_1
 import lol.zanspace.unloadedactivity.fabric.mixin.CropBlockInvoker;
 #endif
 import net.fabricmc.loader.api.FabricLoader;
@@ -14,7 +14,7 @@ public class ExpectPlatformImpl {
     public static Path getConfigDirectory() {
         return FabricLoader.getInstance().getConfigDir();
     }
-    #if MC_VER >= MC_1_21
+    #if MC_VER >= MC_1_21_1
     public static float getAvailableMoisture(BlockState blockState, BlockView world, BlockPos pos) {
         return CropBlockInvoker.getAvailableMoisture(blockState.getBlock(), world, pos);
     }
