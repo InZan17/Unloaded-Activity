@@ -29,7 +29,7 @@ public final class UnloadedActivityNeoForge {
             #else
             ModLoadingContext.get().registerExtensionPoint(
                 IConfigScreenFactory.class,
-                () -> (mc, screen) -> new UnloadedActivityClothScreen().getScreen(screen, mc.world != null)
+                () -> (mc, screen) -> new UnloadedActivityClothScreen().getScreen(screen, true)
             );
             #endif
         }
