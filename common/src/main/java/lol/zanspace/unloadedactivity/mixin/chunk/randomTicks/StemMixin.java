@@ -128,9 +128,16 @@ public abstract class StemMixin extends PlantBlock {
 
                 BlockPos blockPos = pos.offset(direction);
                 #if MC_VER >= MC_1_20_4
+
+                #if MC_VER >= MC_1_21_3
+                Registry<Block> blockRegistry = world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK);
+                Optional<Block> gourdBlock = blockRegistry.getOptionalValue(this.gourdBlock);
+                Optional<Block> attachedStemBlock = blockRegistry.getOptionalValue(this.attachedStemBlock);
+                #else
                 Registry<Block> blockRegistry = world.getRegistryManager().get(RegistryKeys.BLOCK);
                 Optional<Block> gourdBlock = blockRegistry.getOrEmpty(this.gourdBlock);
                 Optional<Block> attachedStemBlock = blockRegistry.getOrEmpty(this.attachedStemBlock);
+                #endif
 
                 if (gourdBlock.isPresent() && attachedStemBlock.isPresent()) {
                     world.setBlockState(blockPos, gourdBlock.get().getDefaultState());

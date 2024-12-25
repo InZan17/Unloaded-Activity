@@ -56,11 +56,32 @@ public class TimeMachine {
                 Block airPosBlock = airPosState.getBlock();
                 Block groundPosBlock = groundPosState.getBlock();
                 Biome biome = world.getBiome(airPos).value();
+
                 if (airPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(airPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(#if MC_VER >= MC_1_19_4 airPos #endif));
+                    simulateBlockPrecipitationTick(
+                        airPos,
+                        world,
+                        timeDifference,
+                        precipitationPickChance,
+                        timeInWeather,
+                        biome.getPrecipitation(
+                        #if MC_VER >= MC_1_19_4 airPos #endif
+                        #if MC_VER >= MC_1_21_3 , world.getSeaLevel()#endif
+                        )
+                    );
 
                 if (groundPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(groundPos, world, timeDifference, precipitationPickChance, timeInWeather, biome.getPrecipitation(#if MC_VER >= MC_1_19_4 groundPos #endif));
+                    simulateBlockPrecipitationTick(
+                        groundPos,
+                        world,
+                        timeDifference,
+                        precipitationPickChance,
+                        timeInWeather,
+                        biome.getPrecipitation(
+                            #if MC_VER >= MC_1_19_4 groundPos #endif
+                            #if MC_VER >= MC_1_21_3, world.getSeaLevel() #endif
+                        )
+                    );
         }
     }
 
@@ -83,7 +104,11 @@ public class TimeMachine {
             return;
 
         int minY = world.getBottomY();
+        #if MC_VER >= MC_1_21_3
+        int maxY = world.getHeight();
+        #else
         int maxY = world.getTopY();
+        #endif
 
         ArrayList<BlockPos> blockPosArray = new ArrayList<>();
 
@@ -135,7 +160,11 @@ public class TimeMachine {
             if (UnloadedActivity.config.rememberBlockPositions) {
                 chunk.setSimulationBlocks(newSimulationBlocks);
                 chunk.setSimulationVersion(UnloadedActivity.chunkSimVer);
+                #if MC_VER >= MC_1_21_3
+                chunk.markNeedsSaving();
+                #else
                 chunk.setNeedsSaving(true);
+                #endif
             }
         }
 
@@ -159,7 +188,7 @@ public class TimeMachine {
         block.simulateRandTicks(state, world, pos, world.random, timeDifference, randomTickSpeed);
     }
 
-    public static <T extends BlockEntity> void simulateBlockEntity(World world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
+    public static <T extends BlockEntity> void simulateBlockEntity(ServerWorld world, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
         if (!UnloadedActivity.config.enableBlockEntities) return;
 
         long now = 0;

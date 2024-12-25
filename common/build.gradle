@@ -7,7 +7,7 @@ def filter_platforms = platforms.stream().filter {platform ->
 }.collect()
 
 architectury {
-    common rootProject.enabled_platforms.split(',')
+    common filter_platforms
 }
 
 java {

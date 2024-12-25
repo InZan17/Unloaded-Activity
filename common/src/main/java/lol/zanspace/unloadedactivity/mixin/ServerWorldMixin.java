@@ -35,7 +35,11 @@ import static java.lang.Integer.max;
 
 @Mixin(value = ServerWorld.class, priority = 1001)
 public abstract class ServerWorldMixin extends World implements StructureWorldAccess, WorldTimeData {
-	#if MC_VER >= MC_1_19_4
+	#if MC_VER >= MC_1_21_3
+	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
+		super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+	}
+	#elif MC_VER >= MC_1_19_4
 	protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
 		super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
 	}

@@ -23,6 +23,10 @@ import net.minecraft.registry.DynamicRegistryManager;
 #if MC_VER >= MC_1_21_1
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 #endif
+#if MC_VER >= MC_1_21_3
+import net.minecraft.item.FuelRegistry;
+#endif
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -41,15 +45,23 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int fuelTime;
     @Shadow int cookTime;
     @Shadow int cookTimeTotal;
-    #if MC_VER >= MC_1_21_1
+    #if MC_VER >= MC_1_21_3
+    @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
+    #elif MC_VER == MC_1_21_1
     @Shadow @Final private RecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
     #else
     @Shadow @Final private RecipeManager.MatchGetter<Inventory, ? extends AbstractCookingRecipe> matchGetter;
     #endif
 
+    #if MC_VER >= MC_1_21_3
+    @Shadow private static int getCookTime(ServerWorld world, AbstractFurnaceBlockEntity furnace) {
+        return 0;
+    }
+    #else
     @Shadow private static int getCookTime(World world, AbstractFurnaceBlockEntity furnace) {
         return 0;
     }
+    #endif
     protected AbstractFurnaceBlockEntityMixin(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
     }
@@ -59,43 +71,34 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     }
     @Shadow protected DefaultedList<ItemStack> inventory;
 
-    @Shadow @Final private Object2IntOpenHashMap<Identifier> recipesUsed = new Object2IntOpenHashMap();
-
+    #if MC_VER >= MC_1_21_3
+    @Shadow protected abstract int getFuelTime(FuelRegistry fuelRegistry, ItemStack fuel);
+    #else
     @Shadow protected abstract int getFuelTime(ItemStack fuel);
+    #endif
 
-    private static boolean craftRecipe(#if MC_VER >= MC_1_19_4 DynamicRegistryManager registryManager, #endif @Nullable #if MC_VER >= MC_1_20_2 RecipeEntry<?> #else Recipe<?> #endif recipe, DefaultedList<ItemStack> slots, int count, int quantity) {
-        ItemStack input = slots.get(0);
-        #if MC_VER >= MC_1_20_2
-        ItemStack recipeOutput = recipe.value().getResult(registryManager);
-        #else
-        ItemStack recipeOutput = recipe.getOutput(#if MC_VER >= MC_1_19_4 registryManager #endif);
+    @Shadow
+    private static boolean craftRecipe(
+        #if MC_VER >= MC_1_19_4
+        DynamicRegistryManager registryManager,
         #endif
-        ItemStack finalOutput = slots.get(2);
-        if (finalOutput.isEmpty()) {
-            ItemStack recipeClone = recipeOutput.copy();
-            recipeClone.increment(quantity-1);
-            slots.set(2, recipeClone);
-            finalOutput.increment(quantity);
-        } else if (finalOutput.isOf(recipeOutput.getItem())) {
-            finalOutput.increment(quantity);
-        }
-        if (input.isOf(Blocks.WET_SPONGE.asItem()) && !slots.get(1).isEmpty() && slots.get(1).isOf(Items.BUCKET)) {
-            slots.set(1, new ItemStack(Items.WATER_BUCKET));
-        }
-        input.decrement(quantity);
-        return true;
-    }
+        #if MC_VER >= MC_1_21_3
+        @Nullable RecipeEntry<? extends AbstractCookingRecipe>
+        #elif MC_VER >= MC_1_20_2
+        @Nullable RecipeEntry<?>
+        #else
+        @Nullable Recipe<?>
+        #endif
+        recipe,
+        #if MC_VER >= MC_1_21_3
+        SingleStackRecipeInput input,
+        #endif
+        DefaultedList<ItemStack> slots,
+        int maxCount
+    ) { return true; }
 
-    public void setLastRecipe(@Nullable #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe, int quantity) {
-        if (recipe != null) {
-            #if MC_VER >= MC_1_20_2
-            Identifier identifier = recipe.id();
-            #else
-            Identifier identifier = recipe.getId();
-            #endif
-            this.recipesUsed.addTo(identifier, quantity);
-        }
-    }
+    @Shadow
+    public void setLastRecipe(@Nullable #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe) {}
 
     @Override
     public boolean canSimulate() {
@@ -107,7 +110,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
         return UnloadedActivity.config.updateFurnace;
     }
 
-    @Override public void simulateTime(World world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {
+    @Override public void simulateTime(ServerWorld world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {
 
         if (shouldSimulate(world, pos, state, blockEntity)) {
             AbstractFurnaceBlockEntity abstractFurnaceBlockEntity = (AbstractFurnaceBlockEntity) blockEntity;
@@ -118,6 +121,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             ItemStack finishedStack = this.inventory.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
+
+            #if MC_VER >= MC_1_21_3
+            SingleStackRecipeInput singleStackRecipeInput = new SingleStackRecipeInput(itemStack);
+            #endif
 
             #if MC_VER > MC_1_20_2
             RecipeEntry
@@ -136,13 +143,17 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
 
             int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
 
+            #if MC_VER >= MC_1_21_3
+            int fuelTime = this.getFuelTime(world.getFuelRegistry(),fuelStack);
+            #else
             int fuelTime = this.getFuelTime(fuelStack);
+            #endif
             if (fuelTime == 0)
                 fuelTime = this.fuelTime;
 
             if (fuelTime != 0) {
                 if (this.cookTimeTotal == 0)
-                    this.cookTimeTotal = getCookTime(this.world, abstractFurnaceBlockEntity);
+                    this.cookTimeTotal = getCookTime(world, abstractFurnaceBlockEntity);
 
                 int spacesLeft = maxPerStack - finishedStack.getCount();
 
@@ -167,15 +178,21 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                     Item fuelItem = fuelStack.getItem();
                     fuelStack.decrement(fuelsConsumed);
                     if (fuelStack.isEmpty()) {
-                        Item item2 = fuelItem.getRecipeRemainder();
-                        this.inventory.set(1, item2 == null ? fuelStack.EMPTY : new ItemStack(item2));
+                        #if MC_VER >= MC_1_21_3
+                        this.inventory.set(1, fuelItem.getRecipeRemainder());
+                        #else
+                        Item remainder = fuelItem.getRecipeRemainder();
+                        this.inventory.set(1, remainder == null ? fuelStack.EMPTY : new ItemStack(remainder));
+                        #endif
                     }
                 }
 
                 if (itemsCrafted > 0) {
                     stateChanged = true;
-                    craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, this.inventory, maxPerStack, itemsCrafted);
-                    setLastRecipe(recipe, itemsCrafted);
+                    for (int i = 0; i < itemsCrafted; i++) {
+                        craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, #if MC_VER >= MC_1_21_3 singleStackRecipeInput, #endif this.inventory, maxPerStack);
+                        setLastRecipe(recipe);
+                    }
                 }
 
                 if (itemStack.getCount() == 0 || maxPerStack - finishedStack.getCount() == 0)

@@ -4,6 +4,7 @@ import lol.zanspace.unloadedactivity.TimeMachine;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
@@ -36,22 +37,21 @@ public abstract class DirectBlockEntityTickInvokerMixin<T extends BlockEntity> {
 
         World world = this.blockEntity.getWorld();
 
-        if (world.isClient())
-            return;
+        if (world instanceof ServerWorld serverWorld) {
+            long lastTick = this.blockEntity.getLastTick();
 
-        long lastTick = this.blockEntity.getLastTick();
+            long currentTime = serverWorld.getTimeOfDay();
 
-        long currentTime = world.getTimeOfDay();
+            if (lastTick != 0) {
 
-        if (lastTick != 0) {
+                long timeDifference = max(currentTime - lastTick,0);
 
-            long timeDifference = max(currentTime - lastTick,0);
+                int differenceThreshold = UnloadedActivity.config.tickDifferenceThreshold;
 
-            int differenceThreshold = UnloadedActivity.config.tickDifferenceThreshold;
-
-            if (timeDifference > differenceThreshold)
-                TimeMachine.simulateBlockEntity(world, this.blockEntity.getPos(), blockState, this.blockEntity, timeDifference);
+                if (timeDifference > differenceThreshold)
+                    TimeMachine.simulateBlockEntity(serverWorld, this.blockEntity.getPos(), blockState, this.blockEntity, timeDifference);
+            }
+            this.blockEntity.setLastTick(currentTime);
         }
-        this.blockEntity.setLastTick(currentTime);
     }
 }

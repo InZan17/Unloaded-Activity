@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TurtleEggBlock;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.IntProperty;
@@ -121,7 +122,11 @@ public abstract class TurtleEggMixin extends Block {
         if (newAge > maxAge) {
             world.removeBlock(pos, false);
             for(int i = 0; i < state.get(EGGS); i++) {
+                #if MC_VER >= MC_1_21_3
+                TurtleEntity turtle = EntityType.TURTLE.create(world, SpawnReason.BREEDING);
+                #else
                 TurtleEntity turtle = EntityType.TURTLE.create(world);
+                #endif
 
                 if (turtle == null)
                     return;
