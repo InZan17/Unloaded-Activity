@@ -41,10 +41,69 @@ import static java.lang.Math.*;
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, SimulateBlockEntity {
 
+    #if MC_VER >= MC_1_21_4
+    @Shadow int litTimeRemaining;
+    @Shadow int litTotalTime;
+    @Shadow int cookingTimeSpent;
+    @Shadow int cookingTotalTime;
+
+    private int getLitTimeRemaining() {
+        return this.litTimeRemaining;
+    }
+    private int getLitTotalTime() {
+        return this.litTotalTime;
+    }
+    private int getCookingTimeSpent() {
+        return this.cookingTimeSpent;
+    }
+    private int getCookingTotalTime() {
+        return this.cookingTotalTime;
+    }
+
+    private void setLitTimeRemaining(int value) {
+        this.litTimeRemaining = value;
+    }
+    private void setLitTotalTime(int value) {
+        this.litTotalTime = value;
+    }
+    private void setCookingTimeSpent(int value) {
+        this.cookingTimeSpent = value;
+    }
+    private void setCookingTotalTime(int value) {
+        this.cookingTotalTime = value;
+    }
+    #else
     @Shadow int burnTime;
     @Shadow int fuelTime;
     @Shadow int cookTime;
     @Shadow int cookTimeTotal;
+
+    private int getLitTimeRemaining() {
+        return this.burnTime;
+    }
+    private int getLitTotalTime() {
+        return this.fuelTime;
+    }
+    private int getCookingTimeSpent() {
+        return this.cookTime;
+    }
+    private int getCookingTotalTime() {
+        return this.cookTimeTotal;
+    }
+
+    private void setLitTimeRemaining(int value) {
+        this.burnTime = value;
+    }
+    private void setLitTotalTime(int value) {
+        this.fuelTime = value;
+    }
+    private void setCookingTimeSpent(int value) {
+        this.cookTime = value;
+    }
+    private void setCookingTotalTime(int value) {
+        this.cookTimeTotal = value;
+    }
+    #endif
     #if MC_VER >= MC_1_21_3
     @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
     #elif MC_VER == MC_1_21_1
@@ -67,7 +126,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     }
 
     @Shadow private boolean isBurning() {
-        return this.burnTime > 0;
+        return true;
     }
     @Shadow protected DefaultedList<ItemStack> inventory;
 
@@ -149,11 +208,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             int fuelTime = this.getFuelTime(fuelStack);
             #endif
             if (fuelTime == 0)
-                fuelTime = this.fuelTime;
+                fuelTime = this.getLitTotalTime();
 
             if (fuelTime != 0) {
-                if (this.cookTimeTotal == 0)
-                    this.cookTimeTotal = getCookTime(world, abstractFurnaceBlockEntity);
+                if (this.getCookingTotalTime() == 0)
+                    this.setCookingTotalTime(getCookTime(world, abstractFurnaceBlockEntity));
 
                 int spacesLeft = maxPerStack - finishedStack.getCount();
 
@@ -161,17 +220,17 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 int availableBurning = 0;
 
                 if (recipe != null) { //if recipe is null then availableBurning will remain 0
-                    availableBurning = (int) min(timeDifference, (long) this.cookTimeTotal * min(inputCount, spacesLeft) - this.cookTime);
-                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.burnTime);
+                    availableBurning = (int) min(timeDifference, (long) this.getCookingTotalTime() * min(inputCount, spacesLeft) - this.getCookingTimeSpent());
+                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.getLitTimeRemaining());
                 }
 
                 long leftoverTime = timeDifference - availableBurning;
 
-                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.burnTime, 0) / (float) fuelTime);
-                this.burnTime = (int) max((this.burnTime - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0);
+                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.getLitTimeRemaining(), 0) / (float) fuelTime);
+                this.setLitTimeRemaining((int) max((this.getLitTimeRemaining() - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0));
 
-                int itemsCrafted = (availableBurning + this.cookTime) / this.cookTimeTotal;
-                this.cookTime = (int) max(((availableBurning + this.cookTime) % this.cookTimeTotal) - leftoverTime * 2, 0);
+                int itemsCrafted = (availableBurning + this.getCookingTimeSpent()) / this.getCookingTotalTime();
+                this.setCookingTimeSpent((int) max(((availableBurning + this.getCookingTimeSpent()) % this.getCookingTotalTime()) - leftoverTime * 2, 0));
 
                 if (fuelsConsumed > 0) {
                     stateChanged = true;
@@ -196,7 +255,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 }
 
                 if (itemStack.getCount() == 0 || maxPerStack - finishedStack.getCount() == 0)
-                    this.cookTime = 0;
+                    this.setCookingTimeSpent(0);
 
                 if (oldIsBurning != this.isBurning()) {
                     stateChanged = true;
@@ -205,7 +264,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 }
 
                 if (!this.isBurning())
-                    this.fuelTime = 0;
+                    this.setLitTotalTime(0);
 
                 if (stateChanged) {
                     AbstractFurnaceBlockEntity.markDirty(world, pos, state);
