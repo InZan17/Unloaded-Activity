@@ -47,29 +47,29 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int cookingTimeSpent;
     @Shadow int cookingTotalTime;
 
-    private int getLitTimeRemaining() {
+    private int getLitTimeRemainingUA() {
         return this.litTimeRemaining;
     }
-    private int getLitTotalTime() {
+    private int getLitTotalTimeUA() {
         return this.litTotalTime;
     }
-    private int getCookingTimeSpent() {
+    private int getCookingTimeSpentUA() {
         return this.cookingTimeSpent;
     }
-    private int getCookingTotalTime() {
+    private int getCookingTotalTimeuA() {
         return this.cookingTotalTime;
     }
 
-    private void setLitTimeRemaining(int value) {
+    private void setLitTimeRemainingUA(int value) {
         this.litTimeRemaining = value;
     }
-    private void setLitTotalTime(int value) {
+    private void setLitTotalTimeUA(int value) {
         this.litTotalTime = value;
     }
-    private void setCookingTimeSpent(int value) {
+    private void setCookingTimeSpentUA(int value) {
         this.cookingTimeSpent = value;
     }
-    private void setCookingTotalTime(int value) {
+    private void setCookingTotalTimeUA(int value) {
         this.cookingTotalTime = value;
     }
     #else
@@ -78,29 +78,27 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     @Shadow int cookTime;
     @Shadow int cookTimeTotal;
 
-    private int getLitTimeRemaining() {
+    private int getLitTimeRemainingUA() {
         return this.burnTime;
     }
-    private int getLitTotalTime() {
+    private int getLitTotalTimeUA() {
         return this.fuelTime;
     }
-    private int getCookingTimeSpent() {
-        return this.cookTime;
-    }
-    private int getCookingTotalTime() {
+    private int getCookingTimeSpentUA() {return this.cookTime;}
+    private int getCookingTotalTimeUA() {
         return this.cookTimeTotal;
     }
 
-    private void setLitTimeRemaining(int value) {
+    private void setLitTimeRemainingUA(int value) {
         this.burnTime = value;
     }
-    private void setLitTotalTime(int value) {
+    private void setLitTotalTimeUA(int value) {
         this.fuelTime = value;
     }
-    private void setCookingTimeSpent(int value) {
+    private void setCookingTimeSpentUA(int value) {
         this.cookTime = value;
     }
-    private void setCookingTotalTime(int value) {
+    private void setCookingTotalTimeUA(int value) {
         this.cookTimeTotal = value;
     }
     #endif
@@ -208,11 +206,11 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
             int fuelTime = this.getFuelTime(fuelStack);
             #endif
             if (fuelTime == 0)
-                fuelTime = this.getLitTotalTime();
+                fuelTime = this.getLitTotalTimeUA();
 
             if (fuelTime != 0) {
-                if (this.getCookingTotalTime() == 0)
-                    this.setCookingTotalTime(getCookTime(world, abstractFurnaceBlockEntity));
+                if (this.getCookingTotalTimeUA() == 0)
+                    this.setCookingTotalTimeUA(getCookTime(world, abstractFurnaceBlockEntity));
 
                 int spacesLeft = maxPerStack - finishedStack.getCount();
 
@@ -220,17 +218,17 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 int availableBurning = 0;
 
                 if (recipe != null) { //if recipe is null then availableBurning will remain 0
-                    availableBurning = (int) min(timeDifference, (long) this.getCookingTotalTime() * min(inputCount, spacesLeft) - this.getCookingTimeSpent());
-                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.getLitTimeRemaining());
+                    availableBurning = (int) min(timeDifference, (long) this.getCookingTotalTimeUA() * min(inputCount, spacesLeft) - this.getCookingTimeSpentUA());
+                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.getLitTimeRemainingUA());
                 }
 
                 long leftoverTime = timeDifference - availableBurning;
 
-                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.getLitTimeRemaining(), 0) / (float) fuelTime);
-                this.setLitTimeRemaining((int) max((this.getLitTimeRemaining() - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0));
+                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.getLitTimeRemainingUA(), 0) / (float) fuelTime);
+                this.setLitTimeRemainingUA((int) max((this.getLitTimeRemainingUA() - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0));
 
-                int itemsCrafted = (availableBurning + this.getCookingTimeSpent()) / this.getCookingTotalTime();
-                this.setCookingTimeSpent((int) max(((availableBurning + this.getCookingTimeSpent()) % this.getCookingTotalTime()) - leftoverTime * 2, 0));
+                int itemsCrafted = (availableBurning + this.getCookingTimeSpentUA()) / this.getCookingTotalTimeUA();
+                this.setCookingTimeSpentUA((int) max(((availableBurning + this.getCookingTimeSpentUA()) % this.getCookingTotalTimeUA()) - leftoverTime * 2, 0));
 
                 if (fuelsConsumed > 0) {
                     stateChanged = true;
@@ -255,7 +253,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 }
 
                 if (itemStack.getCount() == 0 || maxPerStack - finishedStack.getCount() == 0)
-                    this.setCookingTimeSpent(0);
+                    this.setCookingTimeSpentUA(0);
 
                 if (oldIsBurning != this.isBurning()) {
                     stateChanged = true;
@@ -264,7 +262,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 }
 
                 if (!this.isBurning())
-                    this.setLitTotalTime(0);
+                    this.setLitTotalTimeUA(0);
 
                 if (stateChanged) {
                     AbstractFurnaceBlockEntity.markDirty(world, pos, state);
