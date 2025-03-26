@@ -56,7 +56,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     private int getCookingTimeSpentUA() {
         return this.cookingTimeSpent;
     }
-    private int getCookingTotalTimeuA() {
+    private int getCookingTotalTimeUA() {
         return this.cookingTotalTime;
     }
 
