@@ -136,8 +136,8 @@ subprojects {
 			mappings "net.fabricmc:yarn:$rootProject.yarn_mappings:v2"
 		}
 
-		annotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
-		testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.12'
+		annotationProcessor 'systems.manifold:manifold-preprocessor:2025.1.5'
+		testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2025.1.5'
 	}
 
 	java {
