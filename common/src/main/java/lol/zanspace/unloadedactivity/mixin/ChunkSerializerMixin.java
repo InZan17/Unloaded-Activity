@@ -146,6 +146,16 @@ public abstract class ChunkSerializerMixin {
         }
     }
 
+    @Inject(method = "fromChunk", at = @At("RETURN"))
+    private static void fromChunk(ServerWorld world, Chunk chunk, CallbackInfoReturnable<SerializedChunk> cir) {
+        ChunkSerializerMixin serializedChunk = (ChunkSerializerMixin) (Object) cir.getReturnValue();
+        if (serializedChunk != null) {
+            serializedChunk.lastTick = chunk.getLastTick();
+            serializedChunk.ver = chunk.getSimulationVersion();
+            serializedChunk.simBlocks = chunk.getSimulationBlocks().stream().mapToLong(l -> l).toArray();;
+        }
+    }
+
     @Inject(method = "fromNbt", at = @At("RETURN"))
     private static void fromNbt(HeightLimitView world, DynamicRegistryManager registryManager, NbtCompound nbtCompound, CallbackInfoReturnable<SerializedChunk> cir) {
         ChunkSerializerMixin serializedChunk = (ChunkSerializerMixin)(Object)cir.getReturnValue();
