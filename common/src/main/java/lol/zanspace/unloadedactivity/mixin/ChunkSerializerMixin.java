@@ -164,36 +164,36 @@ public abstract class ChunkSerializerMixin {
             return;
         }
 
-        NbtCompound chunkData = nbtCompound.getCompound("unloaded_activity");
+        NbtCompound chunkData = nbtCompound.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
         boolean isEmpty = chunkData.isEmpty();
 
         if (isEmpty) {
             serializedChunk.needsSaving = true;
         } else {
-            serializedChunk.lastTick = chunkData.getLong("last_tick");
-            serializedChunk.ver = chunkData.getLong("ver");
-            serializedChunk.simBlocks = chunkData.getLongArray("sim_blocks");
+            serializedChunk.lastTick = chunkData.getLong("last_tick"#if MC_VER >= MC_1_21_5 , 0#endif);
+            serializedChunk.ver = chunkData.getLong("ver"#if MC_VER >= MC_1_21_5 , 0#endif);
+            serializedChunk.simBlocks = chunkData.getLongArray("sim_blocks")#if MC_VER >= MC_1_21_5 .orElse(new long[]{})#endif;
         }
 
 
         if (UnloadedActivity.config.convertCCAData && isEmpty) {
-            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components");
+            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
             if (!cardinalData.isEmpty()) {
-                NbtCompound lastChunkTick = cardinalData.getCompound("unloadedactivity:last-chunk-tick");
+                NbtCompound lastChunkTick = cardinalData.getCompound("unloadedactivity:last-chunk-tick")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
                 if (!lastChunkTick.isEmpty()) {
-                    serializedChunk.lastTick = lastChunkTick.getLong("last-tick");
+                    serializedChunk.lastTick = lastChunkTick.getLong("last-tick"#if MC_VER >= MC_1_21_5 , 0#endif);
                 }
 
-                NbtCompound chunkSimVer = cardinalData.getCompound("unloadedactivity:chunk-sim-ver");
+                NbtCompound chunkSimVer = cardinalData.getCompound("unloadedactivity:chunk-sim-ver")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
                 if (!chunkSimVer.isEmpty()) {
-                    serializedChunk.ver = chunkSimVer.getLong("sim-ver");
+                    serializedChunk.ver = chunkSimVer.getLong("sim-ver"#if MC_VER >= MC_1_21_5 , 0#endif);
                 }
 
-                NbtCompound chunkSimBlocks = cardinalData.getCompound("unloadedactivity:chunk-sim-blocks");
+                NbtCompound chunkSimBlocks = cardinalData.getCompound("unloadedactivity:chunk-sim-blocks")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
                 if (!chunkSimBlocks.isEmpty()) {
-                    serializedChunk.simBlocks = chunkSimBlocks.getLongArray("sim-blocks");
+                    serializedChunk.simBlocks = chunkSimBlocks.getLongArray("sim-blocks")#if MC_VER >= MC_1_21_5 .orElse(new long[]{})#endif;;
                 }
 
                 // This is so that cardinal components doesn't start sending warnings.

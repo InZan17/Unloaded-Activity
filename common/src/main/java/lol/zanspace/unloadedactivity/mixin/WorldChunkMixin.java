@@ -42,7 +42,11 @@ public abstract class WorldChunkMixin extends Chunk {
             method = "setBlockState",
             locals = LocalCapture.CAPTURE_FAILHARD
     )
+    #if MC_VER >= MC_1_21_5
+    public void blockChanged(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<BlockState> cir, int i, ChunkSection chunkSection, boolean bl, int j, int k, int l) {
+    #else
     public void blockChanged(BlockPos pos, BlockState state, boolean moved, CallbackInfoReturnable<BlockState> cir, int i, ChunkSection chunkSection, boolean bl, int j, int k, int l) {
+    #endif
         if (world.isClient() || !UnloadedActivity.config.rememberBlockPositions)
             return;
 

@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -27,14 +28,20 @@ public class WorldWeatherData extends PersistentState {
         this.weatherList = new ArrayList<>();
     }
 
+    #if MC_VER < MC_1_21_5
     @Override
+    #endif
     #if MC_VER <= MC_1_20_4
     public NbtCompound writeNbt(NbtCompound nbt)
     #else
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
     #endif
     {
+        #if MC_VER >= MC_1_21_5
+        nbt.putLongArray("weather_list", this.weatherList.stream().mapToLong(l -> l).toArray());
+        #else
         nbt.putLongArray("weather_list", this.weatherList);
+        #endif
         return nbt;
     }
 
@@ -44,7 +51,15 @@ public class WorldWeatherData extends PersistentState {
     public static WorldWeatherData fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
     #endif
     {
+        #if MC_VER >= MC_1_21_5
+        long[] longArray = new long[]{};
+        Optional<long[]> optionalLongs = nbt.getLongArray("weather_list");
+        if (optionalLongs.isPresent()) {
+            longArray = optionalLongs.get();
+        }
+        #else
         long[] longArray = nbt.getLongArray("weather_list");
+        #endif
         ArrayList<Long> longArrayList = new ArrayList<>();
 
         for (long value : longArray) {

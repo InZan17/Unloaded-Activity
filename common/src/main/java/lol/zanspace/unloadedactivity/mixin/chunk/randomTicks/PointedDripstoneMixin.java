@@ -22,7 +22,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 @Mixin(PointedDripstoneBlock.class)
-public abstract class PointedDripstoneMixin extends Block implements LandingBlock, Waterloggable {
+public abstract class PointedDripstoneMixin extends Block {
     public PointedDripstoneMixin(Settings settings) {
         super(settings);
     }

@@ -66,21 +66,21 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
 
     @Inject(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", shift = At.Shift.AFTER))
     private void readNbt(NbtCompound nbtCompound, CallbackInfo ci) {
-        NbtCompound entityData = nbtCompound.getCompound("unloaded_activity");
+        NbtCompound entityData = nbtCompound.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
         boolean isEmpty = entityData.isEmpty();
 
         if (!isEmpty) {
-            this.lastTick = entityData.getLong("last_tick");
+            this.lastTick = entityData.getLong("last_tick"#if MC_VER >= MC_1_21_5 , 0#endif);
         }
 
         if (UnloadedActivity.config.convertCCAData && isEmpty) {
-            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components");
+            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
             if (!cardinalData.isEmpty()) {
-                NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-entity-tick");
+                NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-entity-tick")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
                 if (!lastEntityTick.isEmpty()) {
-                    this.lastTick = lastEntityTick.getLong("last-tick");
+                    this.lastTick = lastEntityTick.getLong("last-tick"#if MC_VER >= MC_1_21_5 , 0#endif);
                 }
 
                 // This is so that cardinal components doesn't start sending warnings.

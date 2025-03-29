@@ -1,5 +1,10 @@
 package lol.zanspace.unloadedactivity.mixin;
 
+#if MC_VER >= MC_1_21_5
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.PersistentStateType;
+#endif
+
 #if MC_VER >= MC_1_20_2
 import net.minecraft.datafixer.DataFixTypes;
 #endif
@@ -132,7 +137,20 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 
 	@Shadow public abstract PersistentStateManager getPersistentStateManager();
 
-	#if MC_VER >= MC_1_20_2
+	#if MC_VER >= MC_1_21_5
+	private static PersistentStateType<WorldWeatherData> type = new PersistentStateType<>(
+			"unloaded_activity",
+			(ctx) -> new WorldWeatherData(),
+			(ctx) -> {
+				ServerWorld world = ctx.getWorldOrThrow();
+				return NbtCompound.CODEC.xmap(
+						nbt -> WorldWeatherData.fromNbt(nbt, world.getRegistryManager()),
+						weatherData -> weatherData.writeNbt(new NbtCompound(), world.getRegistryManager())
+				);
+			},
+			DataFixTypes.LEVEL
+	);
+	#else if MC_VER >= MC_1_20_2
 	private static PersistentState.Type<WorldWeatherData> type = new PersistentState.Type<>(
 			WorldWeatherData::new,
 			WorldWeatherData::fromNbt,
@@ -144,12 +162,14 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	public WorldWeatherData getWeatherData() {
 		return this.getPersistentStateManager().getOrCreate(
 			#if MC_VER >= MC_1_20_2
-			type,
+			type
 			#else
 			tag -> WorldWeatherData.fromNbt(tag),
 			() -> new WorldWeatherData(),
 			#endif
+			#if MC_VER < MC_1_21_5
 			"unloaded_activity"
+			#endif
 		);
 	}
 

@@ -59,21 +59,21 @@ public abstract class BlockEntityMixin implements SimulateBlockEntity, BlockEnti
     private void readNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci)
     #endif
     {
-        NbtCompound blockData = nbtCompound.getCompound("unloaded_activity");
+        NbtCompound blockData = nbtCompound.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
         boolean isEmpty = blockData.isEmpty();
 
         if (!isEmpty) {
-            this.lastTick = blockData.getLong("last_tick");
+            this.lastTick = blockData.getLong("last_tick"#if MC_VER >= MC_1_21_5 , 0#endif);
         }
 
         if (UnloadedActivity.config.convertCCAData && isEmpty) {
-            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components");
+            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
 
             if (!cardinalData.isEmpty()) {
-                NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-blockentity-tick");
+                NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-blockentity-tick")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
                 if (!lastEntityTick.isEmpty()) {
-                    this.lastTick = lastEntityTick.getLong("last-tick");
+                    this.lastTick = lastEntityTick.getLong("last-tick"#if MC_VER >= MC_1_21_5 , 0#endif);
                 }
 
                 // This is so that cardinal components doesn't start sending warnings.
