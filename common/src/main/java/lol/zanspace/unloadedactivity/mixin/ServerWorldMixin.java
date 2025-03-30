@@ -165,10 +165,10 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			type
 			#else
 			tag -> WorldWeatherData.fromNbt(tag),
-			() -> new WorldWeatherData(),
+			() -> new WorldWeatherData()
 			#endif
 			#if MC_VER < MC_1_21_5
-			"unloaded_activity"
+			, "unloaded_activity"
 			#endif
 		);
 	}
