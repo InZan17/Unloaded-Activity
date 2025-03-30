@@ -150,7 +150,7 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 			},
 			DataFixTypes.LEVEL
 	);
-	#else if MC_VER >= MC_1_20_2
+	#elif MC_VER >= MC_1_20_2
 	private static PersistentState.Type<WorldWeatherData> type = new PersistentState.Type<>(
 			WorldWeatherData::new,
 			WorldWeatherData::fromNbt,
