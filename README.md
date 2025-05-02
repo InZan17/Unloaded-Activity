@@ -1,4 +1,4 @@
-# Unloaded-Activity-Fabric
+# Unloaded Activity
 
 When things such as crops get out of simulation distance, normally they wouldn't grow. This mod changes that by doing a calculation once they get within simulation distance and update them so it's like they never left the simulation distance. So now you can explore while waiting for crops to grow or furnaces to cook.
 
