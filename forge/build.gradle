@@ -5,6 +5,7 @@ plugins {
 loom {
     forge {
         mixinConfig "unloadedactivity.mixins.json"
+        mixinConfig "unloadedactivityforge.mixins.json"
     }
 }
 

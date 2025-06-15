@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import static java.lang.Math.*;
+import static lol.zanspace.unloadedactivity.ExpectPlatform.craftRecipe;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, SimulateBlockEntity {
@@ -135,26 +136,6 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
     #endif
 
     @Shadow
-    private static boolean craftRecipe(
-        #if MC_VER >= MC_1_19_4
-        DynamicRegistryManager registryManager,
-        #endif
-        #if MC_VER >= MC_1_21_3
-        @Nullable RecipeEntry<? extends AbstractCookingRecipe>
-        #elif MC_VER >= MC_1_20_2
-        @Nullable RecipeEntry<?>
-        #else
-        @Nullable Recipe<?>
-        #endif
-        recipe,
-        #if MC_VER >= MC_1_21_3
-        SingleStackRecipeInput input,
-        #endif
-        DefaultedList<ItemStack> slots,
-        int maxCount
-    ) { return true; }
-
-    @Shadow
     public void setLastRecipe(@Nullable #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe) {}
 
     @Override
@@ -247,7 +228,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 if (itemsCrafted > 0) {
                     stateChanged = true;
                     for (int i = 0; i < itemsCrafted; i++) {
-                        craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, #if MC_VER >= MC_1_21_3 singleStackRecipeInput, #endif this.inventory, maxPerStack);
+                        craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, #if MC_VER >= MC_1_21_3 singleStackRecipeInput, #endif this.inventory, maxPerStack, abstractFurnaceBlockEntity);
                         setLastRecipe(recipe);
                     }
                 }

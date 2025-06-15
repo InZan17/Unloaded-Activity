@@ -1,4 +1,4 @@
-package lol.zanspace.unloadedactivity;
+package lol.zanspace.unloadedactivity.fabric.mixin;
 
 #if MC_VER >= MC_1_19_4
 import net.minecraft.registry.DynamicRegistryManager;
@@ -15,29 +15,17 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.input.SingleStackRecipeInput;
 #endif
 
-import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.nio.file.Path;
-
-public class ExpectPlatform {
-    @dev.architectury.injectables.annotations.ExpectPlatform
-    public static Path getConfigDirectory() {
-        throw new AssertionError();
-    }
-    #if MC_VER >= MC_1_21_1
-    @dev.architectury.injectables.annotations.ExpectPlatform
-    public static float getAvailableMoisture(BlockState blockState, BlockView world, BlockPos pos) {
-        throw new AssertionError();
-    }
-    #endif
-    @dev.architectury.injectables.annotations.ExpectPlatform
-    public static boolean craftRecipe(
+@Mixin(AbstractFurnaceBlockEntity.class)
+public interface AbstractFurnaceBlockEntityInvoker {
+    @Invoker("craftRecipe")
+    public static boolean invokeCraftRecipe(
         #if MC_VER >= MC_1_19_4
         DynamicRegistryManager registryManager,
         #endif
@@ -53,9 +41,8 @@ public class ExpectPlatform {
         SingleStackRecipeInput input,
         #endif
         DefaultedList<ItemStack> slots,
-        int count,
-        AbstractFurnaceBlockEntity furnace
+        int count
     ) {
-        throw new AssertionError("No craftRecipe impl on target platform");
+        throw new AssertionError();
     }
 }

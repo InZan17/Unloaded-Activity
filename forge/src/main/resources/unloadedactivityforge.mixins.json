@@ -1,11 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "lol.zanspace.unloadedactivity.neoforge.mixin",
+  "package": "lol.zanspace.unloadedactivity.forge.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractFurnaceBlockEntityInvoker",
-    "CropBlockInvoker"
+    "AbstractFurnaceBlockEntityInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
