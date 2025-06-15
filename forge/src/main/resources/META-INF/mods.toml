@@ -24,3 +24,6 @@ mandatory = true
 versionRange = "${compatible_versions}"
 ordering = "NONE"
 side = "SERVER"
+
+["lithium:options"]
+"world.block_entity_ticking.sleeping.furnace" = false
