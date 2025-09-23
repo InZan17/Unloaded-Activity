@@ -44,7 +44,10 @@ dependencies {
             if (buildProperties.MC_VER < buildProperties.MC_1_20_6) {
                 // If version is below 1.20.6 then we exclude fabric-api.
                 // This is because modmenu requires fabric-api for 1.20.6 and above.
-                exclude(group: "net.fabricmc.fabric-api")
+                if (buildProperties.MC_VER != buildProperties.MC_1_21_8) {
+                    // For some reason the fabric api does not get included. This is a quick fix.
+                    exclude(group: "net.fabricmc.fabric-api")
+                }
             }
         }
     } else {

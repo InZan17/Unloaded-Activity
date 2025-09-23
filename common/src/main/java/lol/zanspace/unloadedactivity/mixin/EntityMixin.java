@@ -7,6 +7,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandOutput;
+#if MC_VER > MC_1_21_5
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+#endif
 import net.minecraft.util.Nameable;
 import net.minecraft.world.World;
 import net.minecraft.world.entity.EntityLike;
@@ -53,6 +57,7 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
         this.lastTick = world.getTimeOfDay();
     }
 
+    #if MC_VER <= MC_1_21_5
     @Inject( at = @At("RETURN"), method = "writeNbt")
     private void writeNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> cir) {
         NbtCompound returnedNbt = cir.getReturnValue();
@@ -63,10 +68,29 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
 
         returnedNbt.put("unloaded_activity", entityData);
     }
+    #else
+    @Inject(method = "writeData", at = @At("RETURN"))
+    private void writeNbt(WriteView nbt, CallbackInfo ci) {
+        NbtCompound entityData = new NbtCompound();
 
+        entityData.putLong("last_tick", this.lastTick);
+
+        nbt.put("unloaded_activity", NbtCompound.CODEC, entityData);
+    }
+    #endif
+
+    #if MC_VER <= MC_1_21_5
     @Inject(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", shift = At.Shift.AFTER))
     private void readNbt(NbtCompound nbtCompound, CallbackInfo ci) {
+    #else
+    @Inject(method = "readData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomData(Lnet/minecraft/storage/ReadView;)V", shift = At.Shift.AFTER))
+    private void readNbt(ReadView nbtCompound, CallbackInfo ci) {
+    #endif
+        #if MC_VER <= MC_1_21_5
         NbtCompound entityData = nbtCompound.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
+        #else
+        NbtCompound entityData = nbtCompound.read("unloaded_activity", NbtCompound.CODEC).orElse(new NbtCompound());
+        #endif
 
         boolean isEmpty = entityData.isEmpty();
 
@@ -75,7 +99,11 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
         }
 
         if (UnloadedActivity.config.convertCCAData && isEmpty) {
+            #if MC_VER <= MC_1_21_5
             NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
+            #else
+            NbtCompound cardinalData = nbtCompound.read("cardinal_components", NbtCompound.CODEC).orElse(new NbtCompound());
+            #endif
 
             if (!cardinalData.isEmpty()) {
                 NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-entity-tick")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
