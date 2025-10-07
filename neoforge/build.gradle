@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 architectury {
@@ -33,7 +33,11 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neo_or_forge_version"
 
-    modApi ("me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_version}")
+    if (rootProject.include_extra_dependencies == true) {
+        modApi ("me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_version}")
+    } else {
+        modCompileOnlyApi ("me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_version}")
+    }
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')

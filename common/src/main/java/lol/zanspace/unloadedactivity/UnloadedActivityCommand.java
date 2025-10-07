@@ -31,8 +31,11 @@ public class UnloadedActivityCommand {
 
             ServerPlayerEntity player = source.getPlayer();
             if (player == null) return false;
-
+            #if MC_VER >= MC_1_21_10
+            return source.getServer().isHost(player.getPlayerConfigEntry());
+            #else
             return source.getServer().isHost(player.getGameProfile());
+            #endif
         });
 
         addConfigs(commandBuilder);

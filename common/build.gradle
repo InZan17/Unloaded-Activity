@@ -20,10 +20,8 @@ dependencies {
     // which get remapped to the correct annotations on each platform.
     // Do NOT use other classes from Fabric Loader.
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-
-    // This is just so that we have the cloth config classes available in common.
-    // You will still need to get the right cloth config version for each platform.
-    modCompileOnlyApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_version}")
+    
+    modCompileOnlyApi("me.shedaniel.cloth:cloth-config:${rootProject.cloth_version}")
 }
 
 tasks.withType(JavaCompile) {
