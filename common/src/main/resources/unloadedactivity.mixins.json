@@ -20,6 +20,7 @@
     "chunk.randomTicks.OxidizableSlabBlockMixin",
     "chunk.randomTicks.OxidizableStairsBlockMixin",
     "chunk.randomTicks.OxidizableBulbBlockMixin",
+    "chunk.randomTicks.OxidizableGrateBlockMixin",
     "chunk.randomTicks.OxidizableDoorBlockMixin",
     "chunk.randomTicks.OxidizableTrapdoorBlockMixin",
     "chunk.randomTicks.CactusMixin",
