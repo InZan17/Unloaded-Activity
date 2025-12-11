@@ -3,13 +3,6 @@ package lol.zanspace.unloadedactivity.config;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import lol.zanspace.unloadedactivity.UnloadedActivity;
-import net.minecraft.command.argument.NumberRangeArgumentType;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.world.GameRules;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;

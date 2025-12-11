@@ -12,26 +12,54 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.Optional;
 
+#if MC_VER >= MC_1_21_11
+import com.mojang.serialization.Codec;
+import org.apache.commons.lang3.ArrayUtils;
+import java.util.*;
+import java.util.stream.LongStream;
+#endif
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class WorldWeatherData extends PersistentState {
 
+
+    #if MC_VER >= MC_1_21_11
+    public static final Codec<WorldWeatherData> CODEC = Codec.LONG_STREAM.fieldOf("weather_list").codec().xmap(
+            WorldWeatherData::new,
+            WorldWeatherData::getWeatherStream
+    );
+
+    public WorldWeatherData(LongStream weatherList) {
+        long[] longs = weatherList.toArray();
+        Long[] longObjects = ArrayUtils.toObject(longs);
+        this.weatherList = new ArrayList<>(Arrays.asList(longObjects));
+    }
+
+    public LongStream getWeatherStream() {
+        return this.getWeatherList().stream().mapToLong((v) -> v);
+    }
+    #endif
+
     final int maxWeatherHistory = 3;
     private ArrayList<Long> weatherList;
 
-    public WorldWeatherData(ArrayList<Long> weatherList) {
-        this.weatherList = weatherList;
-    }
-
     public WorldWeatherData() {
         this.weatherList = new ArrayList<>();
+    }
+
+    #if MC_VER < MC_1_21_11
+    public WorldWeatherData(ArrayList<Long> weatherList) {
+        this.weatherList = weatherList;
     }
 
     #if MC_VER < MC_1_21_5
     @Override
     #endif
     #if MC_VER <= MC_1_20_4
+    public NbtCompound writeNbt(NbtCompound nbt)
+    #elif MC_VER >= MC_1_21_5
     public NbtCompound writeNbt(NbtCompound nbt)
     #else
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
@@ -46,6 +74,8 @@ public class WorldWeatherData extends PersistentState {
     }
 
     #if MC_VER <= MC_1_20_4
+    public static WorldWeatherData fromNbt(NbtCompound nbt)
+    #elif MC_VER >= MC_1_21_5
     public static WorldWeatherData fromNbt(NbtCompound nbt)
     #else
     public static WorldWeatherData fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
@@ -68,6 +98,7 @@ public class WorldWeatherData extends PersistentState {
 
         return new WorldWeatherData(longArrayList);
     }
+    #endif
 
     public ArrayList<Long> getWeatherList() {
         return this.weatherList;

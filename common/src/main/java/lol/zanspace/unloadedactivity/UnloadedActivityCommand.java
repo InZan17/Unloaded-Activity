@@ -23,11 +23,21 @@ import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
+#if MC_VER >= MC_1_21_11
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
+#endif
+
 public class UnloadedActivityCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralArgumentBuilder commandBuilder = literal("unloadedactivity").requires(source -> {
             // If it's single player then the host should have access to the commands. Otherwise, only people with permission level 4 have access to them.
+
+            #if MC_VER >= MC_1_21_11
+            if (source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.fromLevel(4)))) return true;
+            #else
             if (source.hasPermissionLevel(4)) return true;
+            #endif
 
             ServerPlayerEntity player = source.getPlayer();
             if (player == null) return false;
@@ -81,7 +91,13 @@ public class UnloadedActivityCommand {
 
     public static void addBenchmark(LiteralArgumentBuilder commandBuilder) {
         commandBuilder.then(
-            literal("benchmark").requires(source -> source.hasPermissionLevel(4)).then(
+            literal("benchmark").requires(source ->
+            #if MC_VER >= MC_1_21_11
+                source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.fromLevel(4)))
+            #else
+                source.hasPermissionLevel(4)
+            #endif
+            ).then(
                 argument("method", string()).then(
                     argument("trials", integer()).then(
                         argument("attempts", longArg()).then(

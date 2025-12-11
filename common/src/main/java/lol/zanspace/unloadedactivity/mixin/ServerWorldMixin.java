@@ -138,16 +138,20 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
 	@Shadow public abstract PersistentStateManager getPersistentStateManager();
 
 	#if MC_VER >= MC_1_21_5
-	private static PersistentStateType<WorldWeatherData> type = new PersistentStateType<>(
+	private static PersistentStateType<WorldWeatherData> type = new PersistentStateType<WorldWeatherData>(
 			"unloaded_activity",
+	        #if MC_VER >= MC_1_21_11
+            WorldWeatherData::new,
+            WorldWeatherData.CODEC,
+            #else
 			(ctx) -> new WorldWeatherData(),
 			(ctx) -> {
-				ServerWorld world = ctx.getWorldOrThrow();
 				return NbtCompound.CODEC.xmap(
-						nbt -> WorldWeatherData.fromNbt(nbt, world.getRegistryManager()),
-						weatherData -> weatherData.writeNbt(new NbtCompound(), world.getRegistryManager())
+                        WorldWeatherData::fromNbt,
+						weatherData -> weatherData.writeNbt(new NbtCompound())
 				);
 			},
+            #endif
 			DataFixTypes.LEVEL
 	);
 	#elif MC_VER >= MC_1_20_2

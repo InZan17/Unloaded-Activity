@@ -6,10 +6,15 @@ import net.minecraft.block.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.LightType;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
+
+#if MC_VER >= MC_1_21_11
+import net.minecraft.world.rule.GameRules;
+#else
+import net.minecraft.world.GameRules;
+#endif
 
 import static java.lang.Math.min;
 
@@ -56,7 +61,9 @@ public abstract class SnowMixin extends Block {
     public boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
         if (!UnloadedActivity.config.accumulateSnow) return false;
         if (timeInWeather == 0) return false;
-        int maxSnowHeight = #if MC_VER >= MC_1_19_4
+        int maxSnowHeight = #if MC_VER >= MC_1_21_11
+            min(world.getGameRules().getValue(GameRules.MAX_SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
+        #elif MC_VER >= MC_1_19_4
             min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
         #else
             1
@@ -70,7 +77,9 @@ public abstract class SnowMixin extends Block {
     @Override
     public void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {
 
-        int maxSnowHeight = #if MC_VER >= MC_1_19_4
+        int maxSnowHeight = #if MC_VER >= MC_1_21_11
+                min(world.getGameRules().getValue(GameRules.MAX_SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
+        #elif MC_VER >= MC_1_19_4
             min(world.getGameRules().getInt(GameRules.SNOW_ACCUMULATION_HEIGHT), SnowBlock.MAX_LAYERS)
         #else
             1

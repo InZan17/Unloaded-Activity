@@ -18,6 +18,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+#if MC_VER >= MC_1_21_11
+import net.minecraft.world.attribute.EnvironmentAttributes;
+#endif
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -178,7 +182,13 @@ public abstract class PointedDripstoneMixin extends Block {
         }
 
         if (UnloadedActivity.config.dripstoneTurnMudToClay) {
-            if (liquidState.isOf(Blocks.MUD) && !world.getDimension().ultrawarm()) {
+            boolean ultrawarm = #if MC_VER >= MC_1_21_11
+                world.getEnvironmentAttributes().getAttributeValue(EnvironmentAttributes.WATER_EVAPORATES_GAMEPLAY, pos)
+            #else
+                world.getDimension().ultrawarm()
+            #endif;
+
+            if (liquidState.isOf(Blocks.MUD) && !ultrawarm) {
                 double totalDripOdds = WATER_DRIP_CHANCE * Utils.getRandomPickOdds(randomTickSpeed);
                 int dripOccurrences = Utils.getOccurrences(timePassed, totalDripOdds, 1, random);
                 if (dripOccurrences != 0) {
