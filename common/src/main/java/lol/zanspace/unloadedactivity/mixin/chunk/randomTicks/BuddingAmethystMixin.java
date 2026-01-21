@@ -2,12 +2,13 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
-import net.minecraft.block.*;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,47 +16,48 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(BuddingAmethystBlock.class)
 public abstract class BuddingAmethystMixin extends AmethystBlock {
 
-    public BuddingAmethystMixin(Settings settings) {
-        super(settings);
+    public BuddingAmethystMixin(Properties properties) {
+        super(properties);
     }
 
-    @Shadow @Final static int GROW_CHANCE;
+    @Shadow @Final
+    public static int GROWTH_CHANCE;
 
     @Shadow @Final private static Direction[] DIRECTIONS;
 
-    @Shadow @Final public static boolean canGrowIn(BlockState state) {return true;}
+    @Shadow @Final public static boolean canClusterGrowAtState(BlockState state) {return true;}
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
 
     @Override
-    public double getOdds(ServerWorld world, BlockPos pos) {
-        return 1.0/(GROW_CHANCE*DIRECTIONS.length);
+    public double getOdds(ServerLevel level, BlockPos pos) {
+        return 1.0/(GROWTH_CHANCE*DIRECTIONS.length);
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
         if (!UnloadedActivity.config.growAmethyst) return false;
         return true;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(world, pos) * randomPickChance;
+        double totalOdds = getOdds(level, pos) * randomPickChance;
 
         for(int i=0;i<DIRECTIONS.length;i++) {
 
             Direction direction = DIRECTIONS[i];
-            BlockPos blockPos = pos.offset(direction);
-            BlockState blockState = world.getBlockState(blockPos);
+            BlockPos blockPos = pos.relative(direction);
+            BlockState blockState = level.getBlockState(blockPos);
 
             int currentAge;
 
-            if (canGrowIn(blockState)) {
+            if (canClusterGrowAtState(blockState)) {
                 currentAge = 0;
-            } else if (blockState.isOf(Blocks.SMALL_AMETHYST_BUD) && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(Blocks.SMALL_AMETHYST_BUD) && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 currentAge = 1;
-            } else if (blockState.isOf(Blocks.MEDIUM_AMETHYST_BUD) && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(Blocks.MEDIUM_AMETHYST_BUD) && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 currentAge = 2;
-            } else if (blockState.isOf(Blocks.LARGE_AMETHYST_BUD) && blockState.get(AmethystClusterBlock.FACING) == direction) {
+            } else if (blockState.is(Blocks.LARGE_AMETHYST_BUD) && blockState.getValue(AmethystClusterBlock.FACING) == direction) {
                 currentAge = 3;
             } else {
                 continue;
@@ -83,11 +85,11 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
                 default:
                     continue;
             }
-            BlockState blockState2 = block.getDefaultState()
-                .with(AmethystClusterBlock.FACING, direction)
-                .with(AmethystClusterBlock.WATERLOGGED, blockState.getFluidState().getFluid() == Fluids.WATER);
+            BlockState blockState2 = block.defaultBlockState()
+                .setValue(AmethystClusterBlock.FACING, direction)
+                .setValue(AmethystClusterBlock.WATERLOGGED, blockState.getFluidState().getType() == Fluids.WATER);
 
-            world.setBlockState(blockPos, blockState2);
+            level.setBlockAndUpdate(blockPos, blockState2);
         }
     }
 }

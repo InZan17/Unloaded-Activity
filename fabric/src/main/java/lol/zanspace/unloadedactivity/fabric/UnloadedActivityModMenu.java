@@ -5,7 +5,7 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
 public class UnloadedActivityModMenu implements ModMenuApi  {
@@ -14,7 +14,7 @@ public class UnloadedActivityModMenu implements ModMenuApi  {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> clothScreen.getScreen(parent, MinecraftClient.getInstance().world != null);
+        return parent -> clothScreen.getScreen(parent, Minecraft.getInstance().level != null);
     }
 
 }

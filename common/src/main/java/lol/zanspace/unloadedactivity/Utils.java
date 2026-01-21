@@ -1,9 +1,10 @@
 package lol.zanspace.unloadedactivity;
 
-import net.minecraft.util.math.random.Random;
+
+import net.minecraft.util.RandomSource;
 
 import static java.lang.Math.*;
-import static net.minecraft.util.math.MathHelper.sign;
+import static net.minecraft.util.Mth.sign;
 
 
 public class Utils {
@@ -17,14 +18,14 @@ public class Utils {
     public static double getRandomPickOdds(int randomTickSpeed) {
         return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
     }
-    public static int getOccurrences(long cycles, double odds, int maxOccurrences,  Random random) {
+    public static int getOccurrences(long cycles, double odds, int maxOccurrences, RandomSource random) {
         if (UnloadedActivity.config.debugLogs)
             UnloadedActivity.LOGGER.info("Ran getOccurrences. cycles: "+cycles+" odds: "+odds+" maxOccurrences: "+maxOccurrences);
         return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
     }
 
     //good for very low odds and when maxOccurrences are very high or unrestricted
-    public static int newBinomialFunction(long cycles, double odds, int maxOccurrences,  Random random) {
+    public static int newBinomialFunction(long cycles, double odds, int maxOccurrences, RandomSource random) {
         double log_q = log(1.0 - odds);
         int x = 0;
         double sum = 0;
@@ -41,7 +42,7 @@ public class Utils {
     }
 
     //41ms, 200 chunks
-    public static int getOccurrencesBinomial(long cycles, double odds, int maxOccurrences,  Random random) {
+    public static int getOccurrencesBinomial(long cycles, double odds, int maxOccurrences, RandomSource random) {
 
         if (odds <= 0)
             return 0;
@@ -76,11 +77,11 @@ public class Utils {
         return maxOccurrences;
     }
 
-    public static long sampleNegativeBinomial(int successes, double odds,  Random random) {
+    public static long sampleNegativeBinomial(int successes, double odds,  RandomSource random) {
         return samplePoisson(sampleGamma(successes, (1.0-odds)/odds, random), random);
     }
 
-    public static long sampleNegativeBinomialWithMax(long cycles, int successes, double odds, Random random) {
+    public static long sampleNegativeBinomialWithMax(long cycles, int successes, double odds, RandomSource random) {
         long failedTrials = Long.MAX_VALUE;
         long attempts = 0;
         while (failedTrials > cycles && attempts < UnloadedActivity.config.maxNegativeBinomialAttempts) {
@@ -97,7 +98,7 @@ public class Utils {
         return failedTrials;
     }
 
-    public static long sampleNegativeBinomialWithMinMax(long minCycles, long maxCycles, int successes, double odds, Random random) {
+    public static long sampleNegativeBinomialWithMinMax(long minCycles, long maxCycles, int successes, double odds, RandomSource random) {
         long failedTrials = Long.MAX_VALUE;
         long attempts = 0;
         while ((failedTrials > maxCycles || failedTrials < minCycles) && attempts < 100) {
@@ -129,7 +130,7 @@ public class Utils {
 
     // lambda >= 10 uses algorithm PTRD found here: https://research.wu.ac.at/ws/portalfiles/portal/18953249/document.pdf
     // lambda < 10 uses the algorithm found here: https://math.stackexchange.com/questions/785188/simple-algorithm-for-generating-poisson-distribution
-    public static long samplePoisson(double lambda, Random random) {
+    public static long samplePoisson(double lambda, RandomSource random) {
 
         if (lambda < 10) {
             long k = 0;
@@ -187,7 +188,7 @@ public class Utils {
 
     // Algorithm from https://dl.acm.org/doi/pdf/10.1145/358407.358414
     // Since we only accept integers anyway we don't need to have a separate algorithm for 0 < shape < 1
-    public static double sampleGamma(int shape, double scale, Random random) {
+    public static double sampleGamma(int shape, double scale, RandomSource random) {
 
         if (shape <= 0)
             return 0;
@@ -214,11 +215,11 @@ public class Utils {
 
     }
 
-    public static long randomRound(double number, Random random) {
+    public static long randomRound(double number, RandomSource random) {
         return (long) floor(number+random.nextDouble());
     }
 
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFastOld(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences, Random random) {
+    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFastOld(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences, RandomSource random) {
         if (UnloadedActivity.config.debugLogs)
             UnloadedActivity.LOGGER.info("Ran getOccurrencesAndLeftoverTicksFast. cycles: "+cycles+" normalOdds: "+normalOdds+" maxOccurrences: "+maxOccurrences);
 
@@ -238,7 +239,7 @@ public class Utils {
         return oal;
     }
 
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicks(long cycles, double odds, int maxOccurrences, Random random) {
+    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicks(long cycles, double odds, int maxOccurrences, RandomSource random) {
 
         if (odds <= 0)
             return new OccurrencesAndLeftover(0,0);
@@ -261,7 +262,7 @@ public class Utils {
     }
 
     //595ms, 200 chunks
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksBruteForce(long cycles, double odds, int maxOccurrences, Random random) {
+    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksBruteForce(long cycles, double odds, int maxOccurrences, RandomSource random) {
 
         if (odds <= 0)
             return new OccurrencesAndLeftover(0,0);

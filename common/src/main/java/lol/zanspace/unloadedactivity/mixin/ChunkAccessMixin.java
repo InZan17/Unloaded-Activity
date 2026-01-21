@@ -1,27 +1,28 @@
 package lol.zanspace.unloadedactivity.mixin;
 
 import lol.zanspace.unloadedactivity.interfaces.ChunkTimeData;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.StructureHolder;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.ArrayList;
 
-@Mixin(Chunk.class)
-public abstract class ChunkMixin implements BlockView, BiomeAccess.Storage, StructureHolder, ChunkTimeData {
+@Mixin(ChunkAccess.class)
+public abstract class ChunkAccessMixin implements ChunkTimeData {
 
     // Last time the chunk was ticked.
-    long lastTick = 0;
+    @Unique
+    private long lastTick = 0;
 
     // If the simulationVersion mismatches with the version in the mod then simulationBlocks will be reset.
     // This is so that if one version of the mod doesn't support a specific block but the next one does,
     // the block will get included once simulationBlocks is reset.
-    long simulationVersion = 0;
+    @Unique
+    private long simulationVersion = 0;
 
     // List of block positions that can be simulated.
-    ArrayList<Long> simulationBlocks = new ArrayList<>();
+    @Unique
+    private ArrayList<Long> simulationBlocks = new ArrayList<>();
 
     @Override
     public long getLastTick() {

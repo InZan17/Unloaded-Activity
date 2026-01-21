@@ -20,8 +20,6 @@ def version_index = -1
 def java_version = JavaVersion.VERSION_17
 def java_version_int = 17
 
-def using_yarn_neo_patch = false
-
 using_neo = false
 
 supported_versions.eachWithIndex { version, index ->
@@ -30,10 +28,6 @@ supported_versions.eachWithIndex { version, index ->
 
 	if (version == neo_switch_version && version_index == -1) {
 		using_neo = true
-	}
-
-	if (version == neo_yarn_switch_version && version_index == -1) {
-		using_yarn_neo_patch = true
 	}
 
 	if (version == java_21_switch_version && version_index == -1) {
@@ -57,17 +51,10 @@ new File(projectDir, "build.properties").text = build_properties_text
 cloth_version = project["cloth_version_" + minecraft_version_string]
 modmenu_version = project["modmenu_version_" + minecraft_version_string]
 compatible_versions = project["compatible_versions_" + minecraft_version_string]
-yarn_mappings = project["yarn_mappings_" + minecraft_version_string]
 if (using_neo) {
 	neo_or_forge_version = project["neo_version_" + minecraft_version_string]
 } else {
 	neo_or_forge_version = project["forge_version_" + minecraft_version_string]
-}
-
-if (using_yarn_neo_patch) {
-	neo_yarn_mappings = project["neo_yarn_mappings_" + minecraft_version_string]
-} else {
-	neo_yarn_mappings = yarn_mappings
 }
 
 def version_range = project.compatible_versions.split("-")
@@ -127,14 +114,8 @@ subprojects {
 
 	dependencies {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-		if (using_yarn_neo_patch) {
-			mappings loom.layered {
-				it.mappings("net.fabricmc:yarn:$rootProject.yarn_mappings:v2")
-				it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$rootProject.neo_yarn_mappings")
-			}
-		} else {
-			mappings "net.fabricmc:yarn:$rootProject.yarn_mappings:v2"
-		}
+
+        mappings loom.officialMojangMappings()
 
 		annotationProcessor 'systems.manifold:manifold-preprocessor:2025.1.27'
 		testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2025.1.27'

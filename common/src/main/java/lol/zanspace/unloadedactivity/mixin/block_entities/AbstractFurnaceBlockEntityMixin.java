@@ -2,225 +2,225 @@ package lol.zanspace.unloadedactivity.mixin.block_entities;
 
 import lol.zanspace.unloadedactivity.interfaces.SimulateBlockEntity;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.*;
-#if MC_VER >= MC_1_19_4
-import net.minecraft.registry.DynamicRegistryManager;
-#endif
-#if MC_VER >= MC_1_21_1
-import net.minecraft.recipe.input.SingleStackRecipeInput;
-#endif
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
 #if MC_VER >= MC_1_21_3
-import net.minecraft.item.FuelRegistry;
+import net.minecraft.world.level.block.entity.FuelValues;
 #endif
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+#if MC_VER >= MC_1_20_2
+import net.minecraft.world.item.crafting.*;
+#endif
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import static java.lang.Math.*;
-import static lol.zanspace.unloadedactivity.ExpectPlatform.craftRecipe;
+import static lol.zanspace.unloadedactivity.ExpectPlatform.burn;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, SimulateBlockEntity {
+public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntity implements WorldlyContainer, StackedContentsCompatible, SimulateBlockEntity {
 
-    #if MC_VER >= MC_1_21_4
-    @Shadow int litTimeRemaining;
-    @Shadow int litTotalTime;
-    @Shadow int cookingTimeSpent;
-    @Shadow int cookingTotalTime;
-
-    private int getLitTimeRemainingUA() {
-        return this.litTimeRemaining;
-    }
-    private int getLitTotalTimeUA() {
-        return this.litTotalTime;
-    }
-    private int getCookingTimeSpentUA() {
-        return this.cookingTimeSpent;
-    }
-    private int getCookingTotalTimeUA() {
-        return this.cookingTotalTime;
-    }
-
-    private void setLitTimeRemainingUA(int value) {
-        this.litTimeRemaining = value;
-    }
-    private void setLitTotalTimeUA(int value) {
-        this.litTotalTime = value;
-    }
-    private void setCookingTimeSpentUA(int value) {
-        this.cookingTimeSpent = value;
-    }
-    private void setCookingTotalTimeUA(int value) {
-        this.cookingTotalTime = value;
-    }
-    #else
-    @Shadow int burnTime;
-    @Shadow int fuelTime;
-    @Shadow int cookTime;
-    @Shadow int cookTimeTotal;
-
-    private int getLitTimeRemainingUA() {
-        return this.burnTime;
-    }
-    private int getLitTotalTimeUA() {
-        return this.fuelTime;
-    }
-    private int getCookingTimeSpentUA() {return this.cookTime;}
-    private int getCookingTotalTimeUA() {
-        return this.cookTimeTotal;
-    }
-
-    private void setLitTimeRemainingUA(int value) {
-        this.burnTime = value;
-    }
-    private void setLitTotalTimeUA(int value) {
-        this.fuelTime = value;
-    }
-    private void setCookingTimeSpentUA(int value) {
-        this.cookTime = value;
-    }
-    private void setCookingTotalTimeUA(int value) {
-        this.cookTimeTotal = value;
-    }
-    #endif
-    #if MC_VER >= MC_1_21_3
-    @Shadow @Final private ServerRecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
-    #elif MC_VER == MC_1_21_1
-    @Shadow @Final private RecipeManager.MatchGetter<SingleStackRecipeInput, ? extends AbstractCookingRecipe> matchGetter;
-    #else
-    @Shadow @Final private RecipeManager.MatchGetter<Inventory, ? extends AbstractCookingRecipe> matchGetter;
-    #endif
-
-    #if MC_VER >= MC_1_21_3
-    @Shadow private static int getCookTime(ServerWorld world, AbstractFurnaceBlockEntity furnace) {
-        return 0;
-    }
-    #else
-    @Shadow private static int getCookTime(World world, AbstractFurnaceBlockEntity furnace) {
-        return 0;
-    }
-    #endif
     protected AbstractFurnaceBlockEntityMixin(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
     }
 
-    @Shadow private boolean isBurning() {
-        return true;
+    #if MC_VER >= MC_1_21_4
+    @Shadow int litTimeRemaining;
+    @Shadow int litTotalTime;
+    @Shadow int cookingTimer;
+    @Shadow int cookingTotalTime;
+
+    @Unique
+    private int getLitTimeRemaining() {
+        return this.litTimeRemaining;
     }
-    @Shadow protected DefaultedList<ItemStack> inventory;
+    @Unique
+    private int getLitTotalTime() {
+        return this.litTotalTime;
+    }
+    @Unique
+    private int getCookingTimer() {
+        return this.cookingTimer;
+    }
+    @Unique
+    private int getCookingTotalTime() {
+        return this.cookingTotalTime;
+    }
+
+    @Unique
+    private void setLitTimeRemaining(int value) {
+        this.litTimeRemaining = value;
+    }
+    @Unique
+    private void setLitTotalTime(int value) {
+        this.litTotalTime = value;
+    }
+    @Unique
+    private void setCookingTimer(int value) {
+        this.cookingTimer = value;
+    }
+    @Unique
+    private void setCookingTotalTime(int value) {
+        this.cookingTotalTime = value;
+    }
+    #else
+    @Shadow int litTime;
+    @Shadow int litDuration;
+    @Shadow int cookingProgress;
+    @Shadow int cookingTotalTime;
+
+    @Unique
+    private int getLitTimeRemaining() {
+        return this.litTime;
+    }
+    @Unique
+    private int getLitTotalTime() {
+        return this.litDuration;
+    }
+    @Unique
+    private int getCookingTimerUA() {return this.cookingProgress;}
+    @Unique
+    private int getCookingTotalTime() {
+        return this.cookingTotalTime;
+    }
+
+    @Unique
+    private void setLitTimeRemaining(int value) {
+        this.litTime = value;
+    }
+    @Unique
+    private void setLitTotalTime(int value) {
+        this.litDuration = value;
+    }
+    @Unique
+    private void setCookingTimerUA(int value) {
+        this.cookingProgress = value;
+    }
+    @Unique
+    private void setCookingTotalTime(int value) {
+        this.cookingTotalTime = value;
+    }
+    #endif
+    #if MC_VER >= MC_1_21_1
+    @Shadow @Final private RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
+    #else
+    @Shadow @Final private RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
+    #endif
 
     #if MC_VER >= MC_1_21_3
-    @Shadow protected abstract int getFuelTime(FuelRegistry fuelRegistry, ItemStack fuel);
+    @Shadow private static int getTotalCookTime(ServerLevel level, AbstractFurnaceBlockEntity furnace) {
+        return 0;
+    }
     #else
-    @Shadow protected abstract int getFuelTime(ItemStack fuel);
+    @Shadow private static int getTotalCookTime(Level level, AbstractFurnaceBlockEntity furnace) {
+        return 0;
+    }
+    #endif
+
+    @Shadow private boolean isLit() {
+        return true;
+    }
+    @Shadow protected NonNullList<ItemStack> items;
+
+    #if MC_VER >= MC_1_21_3
+    @Shadow protected abstract int getBurnDuration(FuelValues fuelValues, ItemStack fuel);
+    #else
+    @Shadow protected abstract int getBurnDuration(ItemStack fuel);
     #endif
 
     @Shadow
-    public void setLastRecipe(@Nullable #if MC_VER == MC_1_20_2 RecipeEntry<?> #elif MC_VER > MC_1_20_2 RecipeEntry #else Recipe<?> #endif recipe) {}
+    public void setRecipeUsed(@Nullable #if MC_VER >= MC_1_20_2 RecipeHolder<?> #else Recipe<?> #endif recipe) {}
 
     @Override
-    public boolean canSimulate() {
+    public boolean unloaded_activity$canSimulate() {
         return true;
     }
 
-    public boolean shouldSimulate(World world, BlockPos pos, BlockState state, BlockEntity blockEntity) {
+    @Unique
+    public boolean shouldSimulate(Level level, BlockPos pos, BlockState state) {
         if (state == null) return false;
         return UnloadedActivity.config.updateFurnace;
     }
 
-    @Override public void simulateTime(ServerWorld world, BlockPos pos, BlockState state, BlockEntity blockEntity, long timeDifference)  {
+    @Override public void unloaded_activity$simulateTime(ServerLevel level, BlockPos pos, BlockState state, long timeDifference)  {
 
-        if (shouldSimulate(world, pos, state, blockEntity)) {
-            AbstractFurnaceBlockEntity abstractFurnaceBlockEntity = (AbstractFurnaceBlockEntity) blockEntity;
-            boolean oldIsBurning = this.isBurning();
+        if (shouldSimulate(level, pos, state)) {
+            AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity)(Object) this;
+            boolean oldIsLit = this.isLit();
             boolean stateChanged = false;
-            ItemStack itemStack = this.inventory.get(0);
-            ItemStack fuelStack = this.inventory.get(1);
-            ItemStack finishedStack = this.inventory.get(2);
+            ItemStack itemStack = this.items.get(0);
+            ItemStack fuelStack = this.items.get(1);
+            ItemStack finishedStack = this.items.get(2);
             int inputCount = itemStack.getCount();
             int fuelCount = fuelStack.getCount();
 
             #if MC_VER >= MC_1_21_3
-            SingleStackRecipeInput singleStackRecipeInput = new SingleStackRecipeInput(itemStack);
+            SingleRecipeInput singleRecipeInput = new SingleRecipeInput(itemStack);
             #endif
 
-            #if MC_VER > MC_1_20_2
-            RecipeEntry
-            #elif MC_VER == MC_1_20_2
-            RecipeEntry<?>
-            #else
-            Recipe<?>
-            #endif
-            recipe = inputCount != 0 ?
+            var recipe = inputCount != 0 ?
                 #if MC_VER >= MC_1_21_1
-                this.matchGetter.getFirstMatch(new SingleStackRecipeInput(itemStack), world).orElse(null)
+                this.quickCheck.getRecipeFor(new SingleRecipeInput(itemStack), level).orElse(null)
                 #else
-                this.matchGetter.getFirstMatch(abstractFurnaceBlockEntity, world).orElse(null)
+                this.quickCheck.getRecipeFor(this, level).orElse(null)
                 #endif
             : null;
 
-            int maxPerStack = abstractFurnaceBlockEntity.getMaxCountPerStack();
-
             #if MC_VER >= MC_1_21_3
-            int fuelTime = this.getFuelTime(world.getFuelRegistry(),fuelStack);
+            int burnDuration = this.getBurnDuration(level.fuelValues(),fuelStack);
             #else
-            int fuelTime = this.getFuelTime(fuelStack);
+            int burnDuration = this.getBurnDuration(fuelStack);
             #endif
-            if (fuelTime == 0)
-                fuelTime = this.getLitTotalTimeUA();
+            if (burnDuration == 0)
+                burnDuration = this.getCookingTimer();
 
-            if (fuelTime != 0) {
-                if (this.getCookingTotalTimeUA() == 0)
-                    this.setCookingTotalTimeUA(getCookTime(world, abstractFurnaceBlockEntity));
+            if (burnDuration != 0) {
+                if (this.getCookingTotalTime() == 0)
+                    this.setCookingTotalTime(getTotalCookTime(level, furnace));
 
-                int spacesLeft = maxPerStack - finishedStack.getCount();
+                int spacesLeft = getMaxStackSize() - finishedStack.getCount();
 
                 //The amount of time to burn before we catch up to now or until we run out of something.
                 int availableBurning = 0;
 
                 if (recipe != null) { //if recipe is null then availableBurning will remain 0
-                    availableBurning = (int) min(timeDifference, (long) this.getCookingTotalTimeUA() * min(inputCount, spacesLeft) - this.getCookingTimeSpentUA());
-                    availableBurning = min(availableBurning, fuelTime * fuelCount + this.getLitTimeRemainingUA());
+                    availableBurning = (int) min(timeDifference, (long) this.getCookingTotalTime() * min(inputCount, spacesLeft) - this.getCookingTimer());
+                    availableBurning = min(availableBurning, burnDuration * fuelCount + this.getLitTimeRemaining());
                 }
 
                 long leftoverTime = timeDifference - availableBurning;
 
-                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.getLitTimeRemainingUA(), 0) / (float) fuelTime);
-                this.setLitTimeRemainingUA((int) max((this.getLitTimeRemainingUA() - availableBurning + fuelsConsumed * fuelTime) - leftoverTime, 0));
+                int fuelsConsumed = (int) ceil((float) max(availableBurning - this.getLitTimeRemaining(), 0) / (float) burnDuration);
+                this.setLitTimeRemaining((int) max((this.getLitTimeRemaining() - availableBurning + fuelsConsumed * burnDuration) - (int)leftoverTime, 0));
 
-                int itemsCrafted = (availableBurning + this.getCookingTimeSpentUA()) / this.getCookingTotalTimeUA();
-                this.setCookingTimeSpentUA((int) max(((availableBurning + this.getCookingTimeSpentUA()) % this.getCookingTotalTimeUA()) - leftoverTime * 2, 0));
+                int itemsCrafted = (availableBurning + this.getCookingTimer()) / this.getCookingTotalTime();
+                this.setCookingTimer((int) max(((availableBurning + this.getCookingTimer()) % this.getCookingTotalTime()) - leftoverTime * 2, 0));
 
                 if (fuelsConsumed > 0) {
                     stateChanged = true;
                     Item fuelItem = fuelStack.getItem();
-                    fuelStack.decrement(fuelsConsumed);
+                    fuelStack.shrink(fuelsConsumed);
                     if (fuelStack.isEmpty()) {
                         #if MC_VER >= MC_1_21_3
-                        this.inventory.set(1, fuelItem.getRecipeRemainder());
+                        this.items.set(1, fuelItem.getCraftingRemainder());
                         #else
-                        Item remainder = fuelItem.getRecipeRemainder();
-                        this.inventory.set(1, remainder == null ? fuelStack.EMPTY : new ItemStack(remainder));
+                        Item remainder = fuelItem.getCraftingRemainingItem();
+                        this.items.set(1, remainder == null ? ItemStack.EMPTY : new ItemStack(remainder));
                         #endif
                     }
                 }
@@ -228,29 +228,29 @@ public abstract class AbstractFurnaceBlockEntityMixin extends LockableContainerB
                 if (itemsCrafted > 0) {
                     stateChanged = true;
                     for (int i = 0; i < itemsCrafted; i++) {
-                        craftRecipe(#if MC_VER >= MC_1_19_4 world.getRegistryManager(), #endif recipe, #if MC_VER >= MC_1_21_3 singleStackRecipeInput, #endif this.inventory, maxPerStack, abstractFurnaceBlockEntity);
-                        setLastRecipe(recipe);
+                        burn(#if MC_VER >= MC_1_19_4 level.registryAccess(), #endif recipe, #if MC_VER >= MC_1_21_3 singleRecipeInput, #endif this.items, getMaxStackSize(), furnace);
+                        setRecipeUsed(recipe);
                     }
                 }
 
-                if (itemStack.getCount() == 0 || maxPerStack - finishedStack.getCount() == 0)
-                    this.setCookingTimeSpentUA(0);
+                if (itemStack.getCount() == 0 || getMaxStackSize() - finishedStack.getCount() == 0)
+                    this.setCookingTimer(0);
 
-                if (oldIsBurning != this.isBurning()) {
+                if (oldIsLit != isLit()) {
                     stateChanged = true;
-                    state = state.with(AbstractFurnaceBlock.LIT, this.isBurning());
-                    world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                    state = state.setValue(AbstractFurnaceBlock.LIT, isLit());
+                    level.setBlock(pos, state, Block.UPDATE_ALL);
                 }
 
-                if (!this.isBurning())
-                    this.setLitTotalTimeUA(0);
+                if (!isLit())
+                    this.setLitTotalTime(0);
 
                 if (stateChanged) {
-                    AbstractFurnaceBlockEntity.markDirty(world, pos, state);
+                    AbstractFurnaceBlockEntity.setChanged(level, pos, state);
                 }
             }
         }
 
-        super.simulateTime(world, pos, state, blockEntity, timeDifference);
+        super.unloaded_activity$simulateTime(level, pos, state, timeDifference);
     }
 }

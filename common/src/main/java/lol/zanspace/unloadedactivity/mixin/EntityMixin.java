@@ -3,19 +3,21 @@ package lol.zanspace.unloadedactivity.mixin;
 import lol.zanspace.unloadedactivity.interfaces.SimulateEntity;
 import lol.zanspace.unloadedactivity.TimeMachine;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.CommandOutput;
+import net.minecraft.commands.CommandSource;
 #if MC_VER > MC_1_21_5
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 #endif
-import net.minecraft.util.Nameable;
-import net.minecraft.world.World;
-import net.minecraft.world.entity.EntityLike;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -25,20 +27,18 @@ import static java.lang.Long.max;
 
 
 @Mixin(value = Entity.class, priority = 999)
-public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput, SimulateEntity {
+public abstract class EntityMixin implements Nameable, EntityAccess, CommandSource, SimulateEntity {
 
+    @Unique
     private long lastTick = 0;
 
-    @Shadow public World world;
+    @Shadow public Level level;
     @Inject(at = @At("HEAD"), method = "tick")
     public void tickMovement(CallbackInfo ci) {
-
-        World world = this.world;
-
-        if (world.isClient())
+        if (level.isClientSide())
             return;
 
-        long currentTime = world.getTimeOfDay();
+        long currentTime = level.getDayTime();
 
         if (this.lastTick != 0) {
 
@@ -53,62 +53,62 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
     }
 
     @Inject( at = @At("RETURN"), method = "<init>")
-    private void init(EntityType type, World world, CallbackInfo ci) {
-        this.lastTick = world.getTimeOfDay();
+    private void init(EntityType<?> type, Level level, CallbackInfo ci) {
+        this.lastTick = level.getDayTime();
     }
 
     #if MC_VER <= MC_1_21_5
-    @Inject( at = @At("RETURN"), method = "writeNbt")
-    private void writeNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> cir) {
-        NbtCompound returnedNbt = cir.getReturnValue();
+    @Inject( at = @At("RETURN"), method = "saveWithoutId")
+    private void save(CompoundTag nbt, CallbackInfoReturnable<CompoundTag> cir) {
+        CompoundTag returnedNbt = cir.getReturnValue();
 
-        NbtCompound entityData = new NbtCompound();
+        CompoundTag entityData = new CompoundTag();
 
         entityData.putLong("last_tick", this.lastTick);
 
         returnedNbt.put("unloaded_activity", entityData);
     }
     #else
-    @Inject(method = "writeData", at = @At("RETURN"))
-    private void writeNbt(WriteView nbt, CallbackInfo ci) {
-        NbtCompound entityData = new NbtCompound();
+    @Inject(method = "saveWithoutId", at = @At("RETURN"))
+    private void save(ValueOutput nbt, CallbackInfo ci) {
+        CompoundTag entityData = new CompoundTag();
 
         entityData.putLong("last_tick", this.lastTick);
 
-        nbt.put("unloaded_activity", NbtCompound.CODEC, entityData);
+        nbt.store("unloaded_activity", CompoundTag.CODEC, entityData);
     }
     #endif
 
     #if MC_VER <= MC_1_21_5
-    @Inject(method = "readNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomDataFromNbt(Lnet/minecraft/nbt/NbtCompound;)V", shift = At.Shift.AFTER))
-    private void readNbt(NbtCompound nbtCompound, CallbackInfo ci) {
+    @Inject(method = "load", at = @At(value = "INVOKE", target = "net/minecraft/world/entity/Entity.readAdditionalSaveData (Lnet/minecraft/nbt/CompoundTag;)V", shift = At.Shift.AFTER))
+    private void load(CompoundTag nbt, CallbackInfo ci) {
     #else
-    @Inject(method = "readData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;readCustomData(Lnet/minecraft/storage/ReadView;)V", shift = At.Shift.AFTER))
-    private void readNbt(ReadView nbtCompound, CallbackInfo ci) {
+    @Inject(method = "load", at = @At(value = "INVOKE", target = "net/minecraft/world/entity/Entity.readAdditionalSaveData (Lnet/minecraft/world/level/storage/ValueInput;)V", shift = At.Shift.AFTER))
+    private void load(ValueInput nbt, CallbackInfo ci) {
     #endif
         #if MC_VER <= MC_1_21_5
-        NbtCompound entityData = nbtCompound.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
+        CompoundTag entityData = nbt.getCompound("unloaded_activity")#if MC_VER >= MC_1_21_5 .orElse(new CompoundTag())#endif;
         #else
-        NbtCompound entityData = nbtCompound.read("unloaded_activity", NbtCompound.CODEC).orElse(new NbtCompound());
+        CompoundTag entityData = nbt.read("unloaded_activity", CompoundTag.CODEC).orElse(new CompoundTag());
         #endif
 
         boolean isEmpty = entityData.isEmpty();
 
         if (!isEmpty) {
-            this.lastTick = entityData.getLong("last_tick"#if MC_VER >= MC_1_21_5 , 0#endif);
+            this.lastTick = entityData.getLong("last_tick")#if MC_VER >= MC_1_21_5 .orElse(0L) #endif;
         }
 
         if (UnloadedActivity.config.convertCCAData && isEmpty) {
             #if MC_VER <= MC_1_21_5
-            NbtCompound cardinalData = nbtCompound.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
+            CompoundTag cardinalData = nbt.getCompound("cardinal_components")#if MC_VER >= MC_1_21_5 .orElse(new CompoundTag())#endif;
             #else
-            NbtCompound cardinalData = nbtCompound.read("cardinal_components", NbtCompound.CODEC).orElse(new NbtCompound());
+            CompoundTag cardinalData = nbt.read("cardinal_components", CompoundTag.CODEC).orElse(new CompoundTag());
             #endif
 
             if (!cardinalData.isEmpty()) {
-                NbtCompound lastEntityTick = cardinalData.getCompound("unloadedactivity:last-entity-tick")#if MC_VER >= MC_1_21_5 .orElse(new NbtCompound())#endif;
+                CompoundTag lastEntityTick = cardinalData.getCompound("unloadedactivity:last-entity-tick")#if MC_VER >= MC_1_21_5 .orElse(new CompoundTag())#endif;
                 if (!lastEntityTick.isEmpty()) {
-                    this.lastTick = lastEntityTick.getLong("last-tick"#if MC_VER >= MC_1_21_5 , 0#endif);
+                    this.lastTick = lastEntityTick.getLong("last_tick")#if MC_VER >= MC_1_21_5 .orElse(0L) #endif;
                 }
 
                 // This is so that cardinal components doesn't start sending warnings.
@@ -117,7 +117,7 @@ public abstract class EntityMixin implements Nameable, EntityLike, CommandOutput
         }
 
         if (this.lastTick == 0) {
-            this.lastTick = world.getTimeOfDay();
+            this.lastTick = level.getDayTime();
         }
     }
 }

@@ -1,26 +1,26 @@
 package lol.zanspace.unloadedactivity.neoforge.mixin;
 
 #if MC_VER >= MC_1_19_4
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.core.RegistryAccess;
 #endif
 #if MC_VER >= MC_1_21_3
-import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 #elif MC_VER >= MC_1_20_2
-import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.world.item.crafting.RecipeHolder;
 #else
-import net.minecraft.recipe.Recipe;
+import net.minecraft.world.item.crafting.Recipe;
 #endif
 #if MC_VER >= MC_1_21_3
-import net.minecraft.recipe.input.SingleStackRecipeInput;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 #endif
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.core.NonNullList;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -31,28 +31,28 @@ public interface AbstractFurnaceBlockEntityInvoker {
     #if MC_VER >= MC_1_20_6 && MC_VER <= MC_1_21_1
     @Invoker("burn")
     #else
-    @Invoker("craftRecipe")
+    @Invoker("burn")
     #endif
     #if MC_VER >= MC_1_20_6
     public static boolean invokeCraftRecipe(
     #else
-    public boolean invokeCraftRecipe(
+    public boolean invokeBurn(
     #endif
         #if MC_VER >= MC_1_19_4
-        DynamicRegistryManager registryManager,
+        RegistryAccess registryAccess,
         #endif
         #if MC_VER >= MC_1_21_3
-        @Nullable RecipeEntry<? extends AbstractCookingRecipe>
+        @Nullable RecipeHolder<? extends AbstractCookingRecipe>
         #elif MC_VER >= MC_1_20_2
-        @Nullable RecipeEntry<?>
+        @Nullable RecipeHolder<?>
         #else
         @Nullable Recipe<?>
         #endif
         recipe,
         #if MC_VER >= MC_1_21_3
-        SingleStackRecipeInput input,
+        SingleRecipeInput input,
         #endif
-        DefaultedList<ItemStack> slots,
+        NonNullList<ItemStack> slots,
         int count
         #if MC_VER >= MC_1_20_6 && MC_VER <= MC_1_21_1
         , AbstractFurnaceBlockEntity furnace

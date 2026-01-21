@@ -1,15 +1,13 @@
 package lol.zanspace.unloadedactivity.interfaces;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.biome.Biome;
-
-import static java.lang.Math.floorMod;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface SimulateChunkBlocks {
-    default double getOdds(ServerWorld world, BlockPos pos) {
+    default double getOdds(ServerLevel level, BlockPos pos) {
         return 0;
     }
 
@@ -27,16 +25,16 @@ public interface SimulateChunkBlocks {
     default boolean implementsSimulateRandTicks() {
         return false;
     }
-    default boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
         return this.implementsSimulateRandTicks();
     }
-    default void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {}
+    default void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {}
 
     default boolean implementsSimulatePrecTicks() {
         return false;
     }
-    default boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
+    default boolean canSimulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
         return this.implementsSimulatePrecTicks();
     }
-    default void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {}
+    default void simulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {}
 }

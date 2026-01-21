@@ -2,31 +2,49 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
-import net.minecraft.block.*;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
-import static java.lang.Math.min;
-import static net.minecraft.block.BambooBlock.*;
+#if MC_VER >= MC_1_19_4
+import net.minecraft.world.level.block.BambooStalkBlock;
+#else
+import net.minecraft.world.level.block.BambooBlock;
+#endif
 
+#if MC_VER >= MC_1_19_4
+@Mixin(BambooStalkBlock.class)
+#else
 @Mixin(BambooBlock.class)
-public abstract class BambooMixin extends Block implements Fertilizable {
-    public BambooMixin(Settings settings) {
-        super(settings);
+#endif
+public abstract class BambooMixin extends Block implements BonemealableBlock {
+
+    public BambooMixin(Properties properties) {
+        super(properties);
     }
-    @Override public double getOdds(ServerWorld world, BlockPos pos) {return 1d/3d;}
+
+    @Shadow @Final public static IntegerProperty STAGE;
+
+    @Override public double getOdds(ServerLevel level, BlockPos pos) {return 1d/3d;}
+
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
+
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
         if (!UnloadedActivity.config.growBamboo) return false;
-        if (!world.isAir(pos.up())) return false;
-        if (world.getBaseLightLevel(pos.up(), 0) < 9) return false;
-        if (state.get(STAGE) == 1) return false;
+        if (!level.isEmptyBlock(pos.above())) return false;
+        if (level.getRawBrightness(pos.above(), 0) < 9) return false;
+        if (state.getValue(STAGE) == 1) return false;
         return true;
     }
     @Override public int getMaxHeightUA() {
@@ -34,31 +52,32 @@ public abstract class BambooMixin extends Block implements Fertilizable {
     }
 
     @Shadow
-    protected int countBambooBelow(BlockView world, BlockPos pos) {
+    protected int getHeightBelowUpToMax(BlockGetter blockGetter, BlockPos pos) {
         return 0;
     }
 
-    @Shadow protected abstract int countBambooAbove(BlockView world, BlockPos pos);
+    @Shadow protected abstract int getHeightAboveUpToMax(BlockGetter blockGetter, BlockPos pos);
 
-    public int countAirAbove(BlockView world, BlockPos pos, int maxCount) {
+    @Unique
+    private int countAirAboveUpToMax(BlockGetter blockGetter, BlockPos pos, int maxCount) {
         int i;
-        for (i = 0; i < maxCount && world.getBlockState(pos.up(i + 1)).isAir(); ++i) {
+        for (i = 0; i < maxCount && blockGetter.getBlockState(pos.above(i + 1)).isAir(); ++i) {
         }
         return i;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
 
-        int height = countBambooBelow(world, pos);
+        int height = getHeightBelowUpToMax(level, pos);
 
         if (height >= getMaxHeightUA())
             return;
 
         int heightDifference = getMaxHeightUA() - height;
-        int maxGrowth = this.countAirAbove(world,pos, heightDifference);
+        int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(world, pos) * randomPickChance;
+        double totalOdds = getOdds(level, pos) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
@@ -66,20 +85,21 @@ public abstract class BambooMixin extends Block implements Fertilizable {
         BlockPos currentPos = pos;
 
         for(int i=0;i<growthAmount;i++) {
-            this.grow(world, random, currentPos, currentState);
+            // TODO make this accurate cause the actual random tick function does Not call performBonemeal.
+            this.performBonemeal(level, random, currentPos, currentState);
 
             if (i == growthAmount - 1)
                 return;
 
-            int grew = this.countBambooAbove(world, currentPos);
+            int grew = this.getHeightAboveUpToMax(level, currentPos);
 
             if (grew == 0)
                 return;
 
-            currentPos = currentPos.up(grew);
-            currentState = world.getBlockState(currentPos);
+            currentPos = currentPos.above(grew);
+            currentState = level.getBlockState(currentPos);
 
-            if (!this.canSimulateRandTicks(currentState, world, currentPos))
+            if (!this.canSimulateRandTicks(currentState, level, currentPos))
                 return;
         }
     }

@@ -2,16 +2,21 @@ package lol.zanspace.unloadedactivity.mixin.chunk.precipitationTicks;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
-import net.minecraft.block.*;
-import net.minecraft.block.cauldron.CauldronBehavior;
-import net.minecraft.item.Item;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.AbstractCauldronBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CauldronBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Map;
 
@@ -21,36 +26,36 @@ import static java.lang.Math.min;
 public abstract class CauldronMixin extends AbstractCauldronBlock {
 
     #if MC_VER >= MC_1_20_4
-    public CauldronMixin(Settings settings, CauldronBehavior.CauldronBehaviorMap behaviorMap) {
-        super(settings, behaviorMap);
+    public CauldronMixin(Properties properties, CauldronInteraction.InteractionMap interactionMap) {
+        super(properties, interactionMap);
     }
     #else
-    public CauldronMixin(Settings settings, Map<Item, CauldronBehavior> behaviorMap) {
-        super(settings, behaviorMap);
+    public CauldronMixin(Properties properties, Map<Item, CauldronInteraction> map) {
+        super(properties, map);
     }
     #endif
 
-    @Shadow @Final private static float FILL_WITH_RAIN_CHANCE;
-    @Shadow @Final private static float FILL_WITH_SNOW_CHANCE;
+    @Shadow @Final private static float RAIN_FILL_CHANCE;
+    @Shadow @Final private static float POWDER_SNOW_FILL_CHANCE;
 
     @Override
     public boolean implementsSimulatePrecTicks() {
         return true;
     }
 
-
-    public float getFillOdds(Biome.Precipitation precipitation) {
+    @Unique
+    private float getFillOdds(Biome.Precipitation precipitation) {
         if (precipitation == Biome.Precipitation.RAIN) {
-            return FILL_WITH_RAIN_CHANCE;
+            return RAIN_FILL_CHANCE;
         } else if (precipitation == Biome.Precipitation.SNOW) {
-            return FILL_WITH_SNOW_CHANCE;
+            return POWDER_SNOW_FILL_CHANCE;
         } else {
             return 0.0F;
         }
     }
 
     @Override
-    public boolean canSimulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
+    public boolean canSimulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, Biome.Precipitation precipitation) {
         if (!UnloadedActivity.config.weatherFillCauldron) return false;
         if (timeInWeather == 0) return false;
         if (getFillOdds(precipitation) == 0.0F) return false;
@@ -58,23 +63,23 @@ public abstract class CauldronMixin extends AbstractCauldronBlock {
     }
 
     @Override
-    public void simulatePrecTicks(BlockState state, ServerWorld world, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {
+    public void simulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {
 
-        int maxCauldronLevel = LeveledCauldronBlock.MAX_LEVEL;
+        int maxCauldronLevel = LayeredCauldronBlock.MAX_FILL_LEVEL;
 
         double totalOdds = precipitationPickChance*getFillOdds(precipitation);
 
-        int fill = Utils.getOccurrences(timeInWeather, totalOdds, maxCauldronLevel, world.random);
+        int fill = Utils.getOccurrences(timeInWeather, totalOdds, maxCauldronLevel, level.random);
 
         if (fill == 0)
             return;
 
         if (precipitation == Biome.Precipitation.RAIN) {
-            world.setBlockState(pos, Blocks.WATER_CAULDRON.getDefaultState().with(LeveledCauldronBlock.LEVEL, fill));
+            level.setBlockAndUpdate(pos, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, fill));
         } else {
-            world.setBlockState(pos, Blocks.POWDER_SNOW_CAULDRON.getDefaultState().with(LeveledCauldronBlock.LEVEL, fill));
+            level.setBlockAndUpdate(pos, Blocks.POWDER_SNOW_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, fill));
         }
 
-        world.emitGameEvent(null, GameEvent.BLOCK_CHANGE, pos);
+        level.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
     }
 }

@@ -31,11 +31,16 @@ bin/
 
 # minecraft
 
-run/
-forge/run
-fabric/run
-neoforge/run
+run/*
+common/run/*
+forge/run/*
+fabric/run/*
+neoforge/run/*
 Merged/
+#!/common/run/saves
+#!/fabric/run/saves
+#!/forge/run/saves
+#!/neoforge/run/saves
 .architectury-transformer/
 
 # java

@@ -24,7 +24,7 @@ public final class UnloadedActivityNeoForge {
             ModLoadingContext.get().registerExtensionPoint(
                 ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) ->
-                    new UnloadedActivityClothScreen().getScreen(screen, mc.world != null))
+                    new UnloadedActivityClothScreen().getScreen(screen, mc.level != null))
             );
             #else
             ModLoadingContext.get().registerExtensionPoint(

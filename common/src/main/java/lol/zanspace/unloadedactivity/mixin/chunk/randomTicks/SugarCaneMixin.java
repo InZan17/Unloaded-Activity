@@ -2,58 +2,60 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SugarCaneBlock;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(SugarCaneBlock.class)
 public abstract class SugarCaneMixin extends Block {
 
-    @Shadow @Final public static IntProperty AGE;
-
-    public SugarCaneMixin(Settings settings) {
-        super(settings);
+    public SugarCaneMixin(Properties properties) {
+        super(properties);
     }
 
+    @Shadow @Final public static IntegerProperty AGE;
+
     @Override
-    public double getOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockPos pos) {
         return 1;
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
 
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
         if (!UnloadedActivity.config.growSugarCane) return false;
-        if (!world.isAir(pos.up())) return false;
+        if (!level.isEmptyBlock(pos.above())) return false;
         return true;
     }
     @Override public int getCurrentAgeUA(BlockState state) {
-        return state.get(AGE);
+        return state.getValue(AGE);
     }
     @Override public int getMaxAgeUA() {
         return 15;
     }
     @Override public int getMaxHeightUA() {return 2;}
 
-    public int countAirAbove(BlockView world, BlockPos pos, int maxCount) {
+    @Unique
+    private int countAirAbove(BlockGetter blockGetter, BlockPos pos, int maxCount) {
         int i;
-        for (i = 0; i < maxCount && world.getBlockState(pos.up(i + 1)).isAir(); ++i) {
+        for (i = 0; i < maxCount && blockGetter.getBlockState(pos.above(i + 1)).isAir(); ++i) {
         }
         return i;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
 
         int height = 0;
-        while (world.getBlockState(pos.down(height+1)).isOf(this)) {
+        while (level.getBlockState(pos.below(height+1)).is(this)) {
             ++height;
         }
 
@@ -65,11 +67,11 @@ public abstract class SugarCaneMixin extends Block {
 
         int heightDifference = getMaxHeightUA()-height-1;
 
-        int maxGrowth = countAirAbove(world, pos, heightDifference);
+        int maxGrowth = countAirAbove(level, pos, heightDifference);
         int remainingAge = maxAge - age + maxGrowth*maxAge;
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(world, pos) * randomPickChance;
+        double totalOdds = getOdds(level, pos) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, remainingAge, random);
 
@@ -83,24 +85,24 @@ public abstract class SugarCaneMixin extends Block {
         int ageRemainder = growthAmount % 16;
 
         if (growBlocks != 0) {
-            state = state.with(AGE, 0);
+            state = state.setValue(AGE, 0);
         } else {
-            state = state.with(AGE, ageRemainder);
+            state = state.setValue(AGE, ageRemainder);
         }
-        world.setBlockState(pos, state, Block.NO_REDRAW);
+        level.setBlock(pos, state, Block.UPDATE_INVISIBLE);
 
         for (int i=0;i<growBlocks;i++) {
 
-            BlockPos placementPos = pos.up(i+1);
+            BlockPos placementPos = pos.above(i+1);
 
-            if (!world.getBlockState(placementPos).isAir()) {
+            if (!level.getBlockState(placementPos).isAir()) {
                 return;
             }
 
-            world.setBlockState(placementPos, this.getDefaultState());
+            level.setBlockAndUpdate(placementPos, this.defaultBlockState());
 
             if (i+1==growBlocks)
-                world.setBlockState(placementPos, this.getDefaultState().with(AGE, ageRemainder));
+                level.setBlockAndUpdate(placementPos, this.defaultBlockState().setValue(AGE, ageRemainder));
         }
     }
 }

@@ -1,9 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import net.minecraft.block.BeetrootsBlock;
-import net.minecraft.block.CropBlock;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.BeetrootBlock;
+import net.minecraft.world.level.block.CropBlock;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VER >= MC_1_21_1
@@ -12,18 +12,19 @@ import lol.zanspace.unloadedactivity.ExpectPlatform;
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
 #endif
 
-@Mixin(BeetrootsBlock.class)
-public abstract class BeetrootsMixin extends CropBlock{
-    public BeetrootsMixin(Settings settings) {
-        super(settings);
+@Mixin(BeetrootBlock.class)
+public abstract class BeetrootsMixin extends CropBlock {
+
+    protected BeetrootsMixin(Properties properties) {
+        super(properties);
     }
 
     @Override
-    public double getOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockPos pos) {
         #if MC_VER >= MC_1_21_1
-        float f = ExpectPlatform.getAvailableMoisture(world.getBlockState(pos), world, pos);
+        float f = ExpectPlatform.getGrowthSpeed(level.getBlockState(pos), level, pos);
         #else
-        float f = CropBlockInvoker.getAvailableMoisture(this, world, pos);
+        float f = CropBlockInvoker.getGrowthSpeed(this, level, pos);
         #endif
         return (1.0/(double)((int)(25.0F / f) + 1))/3;
     }

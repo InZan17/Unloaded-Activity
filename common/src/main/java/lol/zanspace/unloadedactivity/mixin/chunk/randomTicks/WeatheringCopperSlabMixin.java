@@ -1,0 +1,100 @@
+package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
+
+import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.Utils;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.ChangeOverTimeBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.WeatheringCopperSlabBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+
+import java.util.Iterator;
+import java.util.Optional;
+
+@Mixin(WeatheringCopperSlabBlock.class)
+public abstract class WeatheringCopperSlabMixin extends SlabBlock implements WeatheringCopper {
+
+    public WeatheringCopperSlabMixin(Properties properties) {
+        super(properties);
+    }
+
+    @Override
+    public double getOdds(ServerLevel level, BlockPos pos) {
+        return 0.05688889f;
+    }
+    @Override
+    public boolean implementsSimulateRandTicks() {return true;}
+    @Shadow
+    public WeatherState getAge() {
+        return null;
+    }
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+        if (!UnloadedActivity.config.ageCopper) return false;
+        int currentAge = getCurrentAgeUA(state);
+        if (currentAge == getMaxAgeUA()) return false;
+        return true;
+    }
+
+    @Override public int getCurrentAgeUA(BlockState state) {
+        return this.getAge().ordinal();
+    }
+
+    @Override public int getMaxAgeUA() {
+        return 3;
+    }
+
+    @Override
+    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
+
+        double tryDegradeOdds = getOdds(level, pos);
+
+        BlockPos blockPos;
+        float nearbyBlocks = 0;
+        Iterator<BlockPos> iterator = BlockPos.withinManhattan(pos, 4, 4, 4).iterator();
+        while (iterator.hasNext() && (blockPos = iterator.next()).distManhattan(pos) <= 4) {
+            if (blockPos.equals(pos) || !((level.getBlockState(blockPos).getBlock()) instanceof ChangeOverTimeBlock))
+                continue;
+            nearbyBlocks++;
+        }
+        float degradeOdds = 1 / (nearbyBlocks + 1);
+        float degradeOdds2 = degradeOdds * degradeOdds * 0.75f;
+
+        double totalOdds = randomPickChance * tryDegradeOdds * degradeOdds2;
+        int currentAge = getCurrentAgeUA(state);
+        int ageDifference = getMaxAgeUA() - currentAge;
+
+        int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
+
+        if (ageAmount == 0)
+            return;
+
+        state = getDegradeResult(ageAmount, state, level, pos);
+        level.setBlockAndUpdate(pos, state);
+    }
+
+    @Unique
+    private BlockState getDegradeResult(int steps, BlockState state, ServerLevel level, BlockPos pos) {
+
+        steps--;
+
+        Optional<BlockState> optionalState = this.getNext(state);
+
+        if (optionalState.isEmpty())
+            return state;
+
+        if (steps != 0) {
+            return getDegradeResult(steps, optionalState.get(), level, pos);
+            //im too lazy to see how getDegradationResult actually degrades the thing
+        }
+
+        return optionalState.get();
+    }
+}

@@ -5,27 +5,27 @@ import lol.zanspace.unloadedactivity.neoforge.mixin.CropBlockInvoker;
 #endif
 
 #if MC_VER >= MC_1_19_4
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.core.RegistryAccess;
 #endif
 #if MC_VER >= MC_1_21_3
-import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 #elif MC_VER >= MC_1_20_2
-import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.world.item.crafting.RecipeHolder;
 #else
-import net.minecraft.recipe.Recipe;
+import net.minecraft.world.item.crafting.Recipe;
 #endif
 #if MC_VER >= MC_1_21_3
-import net.minecraft.recipe.input.SingleStackRecipeInput;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 #endif
 
+import net.minecraft.core.NonNullList;
 import lol.zanspace.unloadedactivity.neoforge.mixin.AbstractFurnaceBlockEntityInvoker;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,32 +36,32 @@ public class ExpectPlatformImpl {
         return FMLPaths.CONFIGDIR.get();
     }
     #if MC_VER >= MC_1_21_1
-    public static float getAvailableMoisture(BlockState blockState, BlockView world, BlockPos pos) {
-        return CropBlockInvoker.getAvailableMoisture(blockState, world, pos);
+    public static float getGrowthSpeed(BlockState blockState, BlockGetter blockGetter, BlockPos pos) {
+        return CropBlockInvoker.invokeGetGrowthSpeed(blockState, blockGetter, pos);
     }
     #endif
-    public static boolean craftRecipe(
+    public static boolean burn(
         #if MC_VER >= MC_1_19_4
-        DynamicRegistryManager registryManager,
+        RegistryAccess registryAccess,
         #endif
         #if MC_VER >= MC_1_21_3
-        @Nullable RecipeEntry<? extends AbstractCookingRecipe>
+        @Nullable RecipeHolder<? extends AbstractCookingRecipe>
         #elif MC_VER >= MC_1_20_2
-        @Nullable RecipeEntry<?>
+        @Nullable RecipeHolder<?>
         #else
         @Nullable Recipe<?>
         #endif
         recipe,
         #if MC_VER >= MC_1_21_3
-        SingleStackRecipeInput input,
+        SingleRecipeInput input,
         #endif
-        DefaultedList<ItemStack> slots,
+        NonNullList<ItemStack> slots,
         int count,
         AbstractFurnaceBlockEntity furnace
     ) {
         #if MC_VER >= MC_1_20_6
         return AbstractFurnaceBlockEntityInvoker.invokeCraftRecipe(
-            #if MC_VER >= MC_1_19_4 registryManager, #endif
+            #if MC_VER >= MC_1_19_4 registryAccess, #endif
             recipe,
             #if MC_VER >= MC_1_21_3 input, #endif
             slots,
@@ -70,7 +70,7 @@ public class ExpectPlatformImpl {
         );
         #else
         AbstractFurnaceBlockEntityInvoker furnaceInvoker = (AbstractFurnaceBlockEntityInvoker) furnace;
-        return furnaceInvoker.invokeCraftRecipe(#if MC_VER >= MC_1_19_4 registryManager, #endif recipe, slots, count);
+        return furnaceInvoker.invokeBurn(#if MC_VER >= MC_1_19_4 registryAccess, #endif recipe, slots, count);
         #endif
     }
 }

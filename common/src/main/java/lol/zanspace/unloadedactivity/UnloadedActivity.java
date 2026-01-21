@@ -21,7 +21,7 @@ public class UnloadedActivity {
 
     public static void init() {
         loadConfig();
-        LOGGER.info("Nice weather today, huh?");
+        LOGGER.info("Bleeghhh...");
     }
     public static void loadConfig() {
         LOGGER.info("Loading config.");

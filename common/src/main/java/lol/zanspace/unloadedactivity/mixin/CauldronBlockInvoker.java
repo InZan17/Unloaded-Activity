@@ -1,18 +1,18 @@
 package lol.zanspace.unloadedactivity.mixin;
 
-import net.minecraft.block.CauldronBlock;
+import net.minecraft.world.level.block.CauldronBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(CauldronBlock.class)
 public interface CauldronBlockInvoker {
-    @Accessor("FILL_WITH_RAIN_CHANCE")
-    public static float getRainFIllChance() {
+    @Accessor("RAIN_FILL_CHANCE")
+    public static float getRainFillChance() {
         throw new AssertionError();
     }
 
-    @Accessor("FILL_WITH_SNOW_CHANCE")
-    public static float getSnowFIllChance() {
+    @Accessor("POWDER_SNOW_FILL_CHANCE")
+    public static float getSnowFillChance() {
         throw new AssertionError();
     }
 }

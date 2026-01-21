@@ -20,7 +20,7 @@ public final class UnloadedActivityForge {
             ModLoadingContext.get().registerExtensionPoint(
                     ConfigScreenHandler.ConfigScreenFactory.class,
                     () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) ->
-                            new UnloadedActivityClothScreen().getScreen(screen, mc.world != null))
+                            new UnloadedActivityClothScreen().getScreen(screen, mc.level != null))
             );
         }
     }

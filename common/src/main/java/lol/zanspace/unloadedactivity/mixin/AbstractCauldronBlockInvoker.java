@@ -1,18 +1,18 @@
 package lol.zanspace.unloadedactivity.mixin;
 
-import net.minecraft.block.AbstractCauldronBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractCauldronBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractCauldronBlock.class)
 public interface AbstractCauldronBlockInvoker {
-    @Invoker("canBeFilledByDripstone")
-    public boolean canBeFilledByDripstone(Fluid fluid);
+    @Invoker("canReceiveStalactiteDrip")
+    public boolean canReceiveStalactiteDrip(Fluid fluid);
 
-    @Invoker("fillFromDripstone")
-    public void fillFromDripstone(BlockState state, World world, BlockPos pos, Fluid fluid);
+    @Invoker("receiveStalactiteDrip")
+    public void receiveStalactiteDrip(BlockState state, Level level, BlockPos pos, Fluid fluid);
 }

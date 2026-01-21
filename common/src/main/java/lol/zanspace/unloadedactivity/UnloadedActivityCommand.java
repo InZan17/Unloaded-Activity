@@ -4,10 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import lol.zanspace.unloadedactivity.config.UnloadedActivityConfig;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -20,31 +21,31 @@ import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 #if MC_VER >= MC_1_21_11
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 #endif
 
 public class UnloadedActivityCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder commandBuilder = literal("unloadedactivity").requires(source -> {
             // If it's single player then the host should have access to the commands. Otherwise, only people with permission level 4 have access to them.
 
             #if MC_VER >= MC_1_21_11
-            if (source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.fromLevel(4)))) return true;
+            if (source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(4)))) return true;
             #else
-            if (source.hasPermissionLevel(4)) return true;
+            if (source.hasPermission(Commands.LEVEL_OWNERS)) return true;
             #endif
 
-            ServerPlayerEntity player = source.getPlayer();
+            ServerPlayer player = source.getPlayer();
             if (player == null) return false;
             #if MC_VER >= MC_1_21_10
-            return source.getServer().isHost(player.getPlayerConfigEntry());
+            return source.getServer().isSingleplayerOwner(player.nameAndId());
             #else
-            return source.getServer().isHost(player.getGameProfile());
+            return source.getServer().isSingleplayerOwner(player.getGameProfile());
             #endif
         });
 
@@ -68,23 +69,23 @@ public class UnloadedActivityCommand {
         commandBuilder.then(configBuilder);
     }
 
-    static <T> int executeConfigSet(CommandContext<ServerCommandSource> context, UnloadedActivityConfig.ConfigOption<T> configOption) {
+    static <T> int executeConfigSet(CommandContext<CommandSourceStack> context, UnloadedActivityConfig.ConfigOption<T> configOption) {
         T value = context.getArgument("value", configOption.tClass);
         configOption.setter.accept(value);
         UnloadedActivity.saveConfig();
         #if MC_VER >= MC_1_20_1
-        context.getSource().sendFeedback(() -> Text.literal(configOption.name + " has been set to: " + value), true);
+        context.getSource().sendSuccess(() -> Component.literal(configOption.name + " has been set to: " + value), true);
         #else
-        context.getSource().sendFeedback(Text.literal(configOption.name + " has been set to: " + value), true);
+        context.getSource().sendSuccess(Component.literal(configOption.name + " has been set to: " + value), true);
         #endif
         return 0;
     }
 
-    static <T> int executeConfigGet(ServerCommandSource source, UnloadedActivityConfig.ConfigOption<T> configOption) {
+    static <T> int executeConfigGet(CommandSourceStack source, UnloadedActivityConfig.ConfigOption<T> configOption) {
         #if MC_VER >= MC_1_20_1
-        source.sendFeedback(() -> Text.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
+        source.sendSuccess(() -> Component.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
         #else
-        source.sendFeedback(Text.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
+        source.sendSuccess(Component.literal(configOption.name + " is currently set to: " + configOption.getter.apply(null)), false);
         #endif
         return 0;
     }
@@ -93,9 +94,9 @@ public class UnloadedActivityCommand {
         commandBuilder.then(
             literal("benchmark").requires(source ->
             #if MC_VER >= MC_1_21_11
-                source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.fromLevel(4)))
+                source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(4)))
             #else
-                source.hasPermissionLevel(4)
+                source.hasPermission(Commands.LEVEL_OWNERS)
             #endif
             ).then(
                 argument("method", string()).then(
@@ -107,9 +108,9 @@ public class UnloadedActivityCommand {
                                     java.lang.reflect.Method method;
 
                                     try {
-                                        method = Utils.class.getMethod(getString(context, "method"), long.class, double.class, int.class, Random.class);
+                                        method = Utils.class.getMethod(getString(context, "method"), long.class, double.class, int.class, RandomSource.class);
                                     } catch (NoSuchMethodException e) {
-                                        context.getSource().sendMessage(Text.literal("No such method."));
+                                        context.getSource().sendSystemMessage(Component.literal("No such method."));
                                         return 0;
                                     }
 
@@ -118,14 +119,14 @@ public class UnloadedActivityCommand {
                                     int maxOccurrences = getInteger(context, "maxOccurrences");
                                     double odds = getDouble(context, "odds");
 
-                                    Random random = context.getSource().getWorld().random;
+                                    RandomSource random = context.getSource().getLevel().random;
 
                                     long now = Instant.now().toEpochMilli();
 
                                     for (int i = 0; i<trials; ++i) {
                                         try {
-                                            long newAttempts = attempts > 0L ? attempts : random.nextBetween(10_000, 100_000_000);
-                                            int newMaxOccurrences = maxOccurrences > 0 ? maxOccurrences : random.nextBetween(1, 100);
+                                            long newAttempts = attempts > 0L ? attempts : random.nextIntBetweenInclusive(10_000, 100_000_000);
+                                            int newMaxOccurrences = maxOccurrences > 0 ? maxOccurrences : random.nextIntBetweenInclusive(1, 100);
                                             double newOdds = odds > 0.0 ? odds : random.nextDouble();
                                             method.invoke(Utils.class, newAttempts, newOdds, newMaxOccurrences, random);
                                         } catch (IllegalAccessException e) {
@@ -137,7 +138,7 @@ public class UnloadedActivityCommand {
                                     long difference = Instant.now().toEpochMilli() - now;
 
                                     float avg = (float)difference/(float)trials;
-                                    context.getSource().sendMessage(Text.literal("Total: "+difference + "ms\nAverage: " + avg + "ms"));
+                                    context.getSource().sendSystemMessage(Component.literal("Total: "+difference + "ms\nAverage: " + avg + "ms"));
                                     return 1;
                                 })
                             )

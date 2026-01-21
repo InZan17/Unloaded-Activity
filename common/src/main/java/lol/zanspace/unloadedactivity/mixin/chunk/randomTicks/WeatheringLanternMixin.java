@@ -1,37 +1,39 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VER >= MC_1_21_10
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
-import net.minecraft.block.*;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.world.level.block.*;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Iterator;
 import java.util.Optional;
 
-@Mixin(OxidizablePaneBlock.class)
-public abstract class OxidizablePaneBlockMixin extends PaneBlock implements Oxidizable {
+@Mixin(WeatheringLanternBlock.class)
+public abstract class WeatheringLanternMixin extends LanternBlock implements WeatheringCopper {
 
-    public OxidizablePaneBlockMixin(Settings settings) {
-        super(settings);
+    public WeatheringLanternMixin(Properties properties) {
+        super(properties);
     }
 
     @Override
-    public double getOdds(ServerWorld world, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockPos pos) {
         return 0.05688889f;
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
     @Shadow
-    public OxidationLevel getDegradationLevel() {
+    public WeatherState getAge() {
         return null;
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerWorld world, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
         if (!UnloadedActivity.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -39,7 +41,7 @@ public abstract class OxidizablePaneBlockMixin extends PaneBlock implements Oxid
     }
 
     @Override public int getCurrentAgeUA(BlockState state) {
-        return this.getDegradationLevel().ordinal();
+        return this.getAge().ordinal();
     }
 
     @Override public int getMaxAgeUA() {
@@ -47,17 +49,17 @@ public abstract class OxidizablePaneBlockMixin extends PaneBlock implements Oxid
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerWorld world, BlockPos pos, Random random, long timePassed, int randomTickSpeed) {
+    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
-        double tryDegradeOdds = getOdds(world, pos);
+        double tryDegradeOdds = getOdds(level, pos);
 
         BlockPos blockPos;
         float nearbyBlocks = 0;
-        Iterator<BlockPos> iterator = BlockPos.iterateOutwards(pos, 4, 4, 4).iterator();
-        while (iterator.hasNext() && (blockPos = iterator.next()).getManhattanDistance(pos) <= 4) {
-            if (blockPos.equals(pos) || !((world.getBlockState(blockPos).getBlock()) instanceof Degradable))
+        Iterator<BlockPos> iterator = BlockPos.withinManhattan(pos, 4, 4, 4).iterator();
+        while (iterator.hasNext() && (blockPos = iterator.next()).distManhattan(pos) <= 4) {
+            if (blockPos.equals(pos) || !((level.getBlockState(blockPos).getBlock()) instanceof ChangeOverTimeBlock))
                 continue;
             nearbyBlocks++;
         }
@@ -73,21 +75,22 @@ public abstract class OxidizablePaneBlockMixin extends PaneBlock implements Oxid
         if (ageAmount == 0)
             return;
 
-        state = getDegradeResult(ageAmount, state, world, pos);
-        world.setBlockState(pos, state);
+        state = getDegradeResult(ageAmount, state, level, pos);
+        level.setBlockAndUpdate(pos, state);
     }
 
-    public BlockState getDegradeResult(int steps, BlockState state, ServerWorld world, BlockPos pos) {
+    @Unique
+    private BlockState getDegradeResult(int steps, BlockState state, ServerLevel level, BlockPos pos) {
 
         steps--;
 
-        Optional<BlockState> optionalState = this.getDegradationResult(state);
+        Optional<BlockState> optionalState = this.getNext(state);
 
         if (optionalState.isEmpty())
             return state;
 
         if (steps != 0) {
-            return getDegradeResult(steps, optionalState.get(), world, pos);
+            return getDegradeResult(steps, optionalState.get(), level, pos);
             //im too lazy to see how getDegradationResult actually degrades the thing
         }
 
@@ -97,7 +100,7 @@ public abstract class OxidizablePaneBlockMixin extends PaneBlock implements Oxid
 
 #else
 // Empty mixin to the air block whenever this block isn't in the current version.
-import net.minecraft.block.AirBlock;
+import net.minecraft.world.level.block.AirBlock;
 @Mixin(AirBlock.class)
-public class OxidizableBulbBlockMixin {}
+public class WeatheringLanternMixin {}
 #endif
