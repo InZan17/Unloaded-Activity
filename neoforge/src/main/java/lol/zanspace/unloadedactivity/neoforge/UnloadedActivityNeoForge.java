@@ -1,6 +1,7 @@
 package lol.zanspace.unloadedactivity.neoforge;
 
 import lol.zanspace.unloadedactivity.config.UnloadedActivityClothScreen;
+import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;

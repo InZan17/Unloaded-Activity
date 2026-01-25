@@ -54,7 +54,7 @@ public abstract class BlockEntityMixin implements SimulateBlockEntity, BlockEnti
     #endif
     #else
     @Inject(method = {"saveWithoutMetadata(Lnet/minecraft/world/level/storage/ValueOutput;)V", "saveCustomOnly(Lnet/minecraft/world/level/storage/ValueOutput;)V"}, at = @At("RETURN"))
-    private void save(ValueOutput output, CallbackInfo ci)
+    private void save(ValueOutput nbt, CallbackInfo ci)
     #endif
     {
         CompoundTag blockData = new CompoundTag();
@@ -62,9 +62,9 @@ public abstract class BlockEntityMixin implements SimulateBlockEntity, BlockEnti
         blockData.putLong("last_tick", this.lastTick);
 
         #if MC_VER <= MC_1_21_5
-        output.store("unloaded_activity", blockData);
+        nbt.put("unloaded_activity", blockData);
         #else
-        output.store("unloaded_activity", CompoundTag.CODEC, blockData);
+        nbt.store("unloaded_activity", CompoundTag.CODEC, blockData);
         #endif
     }
     #if MC_VER <= MC_1_20_4

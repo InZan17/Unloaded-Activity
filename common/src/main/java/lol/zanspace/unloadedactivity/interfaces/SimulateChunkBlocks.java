@@ -1,15 +1,20 @@
 package lol.zanspace.unloadedactivity.interfaces;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Optional;
+
 public interface SimulateChunkBlocks {
-    default double getOdds(ServerLevel level, BlockPos pos) {
-        return 0;
-    }
+
+    SimulationData getSimulationData();
+
+    default double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {return 0;};
 
     default int getCurrentAgeUA(BlockState state) {
         return 0;
@@ -22,13 +27,15 @@ public interface SimulateChunkBlocks {
     default int getMaxHeightUA() {
         return 0;
     }
+
     default boolean implementsSimulateRandTicks() {
-        return false;
+        return !getSimulationData().isEmpty();
+    };
+
+    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+        return true;
     }
-    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
-        return this.implementsSimulateRandTicks();
-    }
-    default void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {}
+    default BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {return state;}
 
     default boolean implementsSimulatePrecTicks() {
         return false;
@@ -37,4 +44,6 @@ public interface SimulateChunkBlocks {
         return this.implementsSimulatePrecTicks();
     }
     default void simulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {}
+
+
 }

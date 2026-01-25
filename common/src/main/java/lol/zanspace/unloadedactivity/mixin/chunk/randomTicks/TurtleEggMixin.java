@@ -2,7 +2,10 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
+#if MC_VER >= MC_1_21_3
 import net.minecraft.world.entity.EntitySpawnReason;
+#endif
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.world.entity.EntityType;
 #if MC_VER >= MC_1_21_11
 import net.minecraft.world.entity.animal.turtle.Turtle;
@@ -22,6 +25,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import lol.zanspace.unloadedactivity.Utils;
+
+import java.util.Optional;
+
 import static java.lang.Math.floorMod;
 import static java.lang.Math.min;
 
@@ -53,20 +59,20 @@ public abstract class TurtleEggMixin extends Block {
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 1d/500d;
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
 
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!onSand(level, pos)) return false;
         if (!UnloadedActivity.config.hatchTurtleEggs) return false;
         return true;
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         //at a certain point in the day the odds of hatching become 100% instead of 1/500
         int quickHatchStart = 21061;
@@ -74,7 +80,7 @@ public abstract class TurtleEggMixin extends Block {
         int dayLength = 24000;
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double hatchChance = getOdds(level, pos);
+        double hatchChance = getOdds(level, state, pos, simulateProperty, propertyName);
         double totalOdds = randomPickChance * hatchChance;
 
         int currentAge = getCurrentAgeUA(state);
@@ -119,7 +125,7 @@ public abstract class TurtleEggMixin extends Block {
 
 
         if (growthAmount == 0)
-            return;
+            return state;
 
         int newAge = currentAge + growthAmount;
 
@@ -136,7 +142,7 @@ public abstract class TurtleEggMixin extends Block {
                 #endif
 
                 if (turtle == null)
-                    return;
+                    return null;
 
                 turtle.setAge((int) min(-24000+leftover,0)-1); //we do -1 so that it can grow up by itself and drop a scute
                 turtle.setHomePos(pos);
@@ -148,6 +154,8 @@ public abstract class TurtleEggMixin extends Block {
                 level.addFreshEntity(turtle);
 
             }
+            return null;
         }
+        return state;
     }
 }

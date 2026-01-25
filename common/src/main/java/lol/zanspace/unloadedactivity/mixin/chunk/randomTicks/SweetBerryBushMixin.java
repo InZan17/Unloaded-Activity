@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +14,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @Mixin(SweetBerryBushBlock.class)
 public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock #else BushBlock #endif {
@@ -24,12 +28,12 @@ public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 Vegeta
     @Shadow @Final public static int MAX_AGE;
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.2;
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (state == null) return false;
         if (!UnloadedActivity.config.growSweetBerries) return false;
         if (getCurrentAgeUA(state) >= getMaxAgeUA() || level.getRawBrightness(pos.above(), 0) < 9) return false;
@@ -45,21 +49,23 @@ public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 Vegeta
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         int age = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - age;
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, pos) * randomPickChance;
+        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
-            return;
+            return state;
 
         state = state.setValue(AGE, age + growthAmount);
         level.setBlock(pos, state, Block.UPDATE_CLIENTS);
         level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(state));
+
+        return state;
     }
 }

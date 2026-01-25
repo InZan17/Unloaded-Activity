@@ -1,6 +1,7 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
@@ -17,8 +18,8 @@ public abstract class KelpMixin extends GrowingPlantHeadBlock implements LiquidB
         super(properties, direction, voxelShape, bl, d);
     }
 
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growKelp) return false;
-        return super.canSimulateRandTicks(state, level, pos);
+        return super.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName);
     }
 }

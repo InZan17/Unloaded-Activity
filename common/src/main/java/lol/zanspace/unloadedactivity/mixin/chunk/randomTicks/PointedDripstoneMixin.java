@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.mixin.AbstractCauldronBlockInvoker;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +25,8 @@ import org.spongepowered.asm.mixin.Unique;
 #if MC_VER >= MC_1_21_11
 import net.minecraft.world.attribute.EnvironmentAttributes;
 #endif
+
+import java.util.Optional;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -77,13 +81,13 @@ public abstract class PointedDripstoneMixin extends Block {
     private static float LAVA_TRANSFER_PROBABILITY_PER_RANDOM_TICK;
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.01137777;
     }
 
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growDripstone && !UnloadedActivity.config.dripstoneFillCauldrons && !UnloadedActivity.config.dripstoneTurnMudToClay) return false;
         if (!isStalactiteStartPos(state, level, pos)) return false;
         return true;
@@ -135,11 +139,11 @@ public abstract class PointedDripstoneMixin extends Block {
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         BlockPos tipPos = findTip(state, level, pos, 12, false);
         if (tipPos == null)
-            return;
+            return state;
 
         BlockState tip = level.getBlockState(tipPos);
 
@@ -149,7 +153,7 @@ public abstract class PointedDripstoneMixin extends Block {
         int currentLength = pos.getY()-tipPos.getY();
         int lengthDifference = MAX_GROWTH_LENGTH-currentLength;
 
-        double totalGrowOdds = this.getOdds(level,pos) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
+        double totalGrowOdds = this.getOdds(level, state, pos, simulateProperty, propertyName) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
 
         int stalagmiteGroundDistance = getStalagmiteGrowthDistance(level, tipPos);
 
@@ -236,23 +240,25 @@ public abstract class PointedDripstoneMixin extends Block {
             --successesUntilReachGround;
             --totalUpperDripGrowth;
             grow(level, tipPos, Direction.DOWN);
+            //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
             tipPos = findTip(level.getBlockState(pos), level, pos, 12, false);
-            if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
+            if (tipPos == null) return null;
         }
 
         while (totalUpperDripGrowth+totalLowerDripGrowth > 0) {
             if (totalUpperDripGrowth == 0) {
 
                 if (pos.getY()-tipPos.getY() >= MAX_GROWTH_LENGTH)
-                    return;
+                    return null;
 
                 --totalLowerDripGrowth;
                 growStalagmiteBelow(level, tipPos);
             } else if (totalLowerDripGrowth == 0) {
                 --totalUpperDripGrowth;
                 grow(level, tipPos, Direction.DOWN);
+                //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
                 tipPos = findTip(level.getBlockState(pos), level, pos, 12, false);
-                if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
+                if (tipPos == null) return null;
 
             } else if (random.nextBoolean()) {
                 --totalLowerDripGrowth;
@@ -260,12 +266,13 @@ public abstract class PointedDripstoneMixin extends Block {
             } else {
                 --totalUpperDripGrowth;
                 grow(level, tipPos, Direction.DOWN);
+                //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
                 tipPos = findTip(level.getBlockState(pos), level, pos, 12, false);
-                if (tipPos == null) return; //recalculate tip so if tryGrow fails, we wont grow past any blocking blocks. Simply doing tipPos.down() doesnt account for fail.
+                if (tipPos == null) return null;
             }
         }
 
-
+        return null;
     }
 
 }

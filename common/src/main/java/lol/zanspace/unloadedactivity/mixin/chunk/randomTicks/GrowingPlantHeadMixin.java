@@ -1,6 +1,8 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -16,6 +18,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+
+import java.util.Optional;
 
 import static java.lang.Math.min;
 
@@ -38,12 +42,12 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
         return true;
     }
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return growPerTickProbability;
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (this.getCurrentAgeUA(state) >= this.getMaxAgeUA()) return false;
         if (!canGrowInto(level.getBlockState(pos.relative(this.growthDirection)))) return false;
         return true;
@@ -64,7 +68,7 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
         return MAX_AGE;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover>  returnLeftoverTicks) {
 
         int currentAge = getCurrentAgeUA(state);
         int maxAge = getMaxAgeUA();
@@ -72,12 +76,12 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
         ageDifference = min(ageDifference, min(ageDifference, countValidSteps(level, pos, this.growthDirection, ageDifference)));
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, pos) * randomPickChance;
+        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (growthAmount == 0)
-            return;
+            return state;
 
         BlockPos blockPos = pos.relative(this.growthDirection);
         BlockState newState = state;
@@ -88,5 +92,7 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
             blockPos = blockPos.relative(this.growthDirection);
             i++;
         }
+
+        return state;
     }
 }

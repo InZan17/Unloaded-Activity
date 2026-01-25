@@ -1,5 +1,6 @@
 package lol.zanspace.unloadedactivity;
 
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -14,6 +15,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 public class TimeMachine {
     public static long simulateChunk(long timeDifference, ServerLevel level, LevelChunk chunk, int randomTickSpeed) {
@@ -108,10 +111,11 @@ public class TimeMachine {
         if (!UnloadedActivity.config.enableRandomTicks)
             return;
 
-        int minY = level.getMinY();
         #if MC_VER >= MC_1_21_3
+        int minY = level.getMinY();
         int maxY = level.getMaxY();
         #else
+        int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
         #endif
 
@@ -187,10 +191,16 @@ public class TimeMachine {
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
 
-        if (!block.canSimulateRandTicks(state, level, pos))
-            return;
+        for (Map.Entry<String, SimulationData.SimulateProperty> entry : block.getSimulationData().propertyMap.entrySet()) {
+            String propertyName = entry.getKey();
+            SimulationData.SimulateProperty simulateProperty = entry.getValue();
 
-        block.simulateRandTicks(state, level, pos, level.random, timeDifference, randomTickSpeed);
+            if (!block.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
+                continue;
+
+            block.simulateRandTicks(state, level, pos, simulateProperty, propertyName, level.random, timeDifference, randomTickSpeed, Optional.empty());
+        }
+
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(ServerLevel level, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {

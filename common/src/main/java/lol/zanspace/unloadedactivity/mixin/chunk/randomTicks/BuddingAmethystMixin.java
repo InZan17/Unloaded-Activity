@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
@@ -12,6 +14,8 @@ import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @Mixin(BuddingAmethystBlock.class)
 public abstract class BuddingAmethystMixin extends AmethystBlock {
@@ -30,18 +34,18 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
     public boolean implementsSimulateRandTicks() {return true;}
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 1.0/(GROWTH_CHANCE*DIRECTIONS.length);
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growAmethyst) return false;
         return true;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, pos) * randomPickChance;
+        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
         for(int i=0;i<DIRECTIONS.length;i++) {
 
@@ -91,5 +95,6 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
 
             level.setBlockAndUpdate(blockPos, blockState2);
         }
+        return state;
     }
 }

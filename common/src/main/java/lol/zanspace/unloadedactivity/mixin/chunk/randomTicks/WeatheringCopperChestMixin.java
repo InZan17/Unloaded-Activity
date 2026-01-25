@@ -25,7 +25,7 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.05688889f;
     }
     @Override
@@ -34,7 +34,7 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
     public WeatherState getAge() {
         return null;
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -50,11 +50,11 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
-        double tryDegradeOdds = getOdds(level, pos);
+        double tryDegradeOdds = getOdds(level, state, pos, simulateProperty, propertyName);
 
         BlockPos blockPos;
         float nearbyBlocks = 0;

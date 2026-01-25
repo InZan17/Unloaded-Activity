@@ -1,6 +1,6 @@
 {
   "injected_interfaces": {
-    "net/minecraft/world/level/block/state/BlockBehaviour": ["lol/zanspace/unloadedactivity/interfaces/SimulateChunkBlocks"],
+    "net/minecraft/world/level/block/Block": ["lol/zanspace/unloadedactivity/interfaces/SimulateChunkBlocks"],
     "net/minecraft/world/level/block/entity/BlockEntity": [
       "lol/zanspace/unloadedactivity/interfaces/SimulateBlockEntity",
       "lol/zanspace/unloadedactivity/interfaces/BlockEntityTimeData"

@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -17,6 +19,8 @@ import org.spongepowered.asm.mixin.Unique;
 
 #if MC_VER >= MC_1_19_4
 import net.minecraft.world.level.block.BambooStalkBlock;
+
+import java.util.Optional;
 #else
 import net.minecraft.world.level.block.BambooBlock;
 #endif
@@ -34,13 +38,13 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
 
     @Shadow @Final public static IntegerProperty STAGE;
 
-    @Override public double getOdds(ServerLevel level, BlockPos pos) {return 1d/3d;}
+    @Override public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {return 1d/3d;}
 
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growBamboo) return false;
         if (!level.isEmptyBlock(pos.above())) return false;
         if (level.getRawBrightness(pos.above(), 0) < 9) return false;
@@ -66,41 +70,40 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         return i;
     }
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         int height = getHeightBelowUpToMax(level, pos);
 
         if (height >= getMaxHeightUA())
-            return;
+            return state;
 
         int heightDifference = getMaxHeightUA() - height;
         int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, pos) * randomPickChance;
+        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
 
-        BlockState currentState = state;
-        BlockPos currentPos = pos;
 
         for(int i=0;i<growthAmount;i++) {
             // TODO make this accurate cause the actual random tick function does Not call performBonemeal.
-            this.performBonemeal(level, random, currentPos, currentState);
+            this.performBonemeal(level, random, pos, state);
 
             if (i == growthAmount - 1)
-                return;
+                return null;
 
-            int grew = this.getHeightAboveUpToMax(level, currentPos);
+            int grew = this.getHeightAboveUpToMax(level, pos);
 
             if (grew == 0)
-                return;
+                return null;
 
-            currentPos = currentPos.above(grew);
-            currentState = level.getBlockState(currentPos);
+            pos = pos.above(grew);
+            state = level.getBlockState(pos);
 
-            if (!this.canSimulateRandTicks(currentState, level, currentPos))
-                return;
+            if (!this.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
+                return null;
         }
+        return null;
     }
 }

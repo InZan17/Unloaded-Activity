@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity;
 import lol.zanspace.unloadedactivity.config.UnloadedActivityConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

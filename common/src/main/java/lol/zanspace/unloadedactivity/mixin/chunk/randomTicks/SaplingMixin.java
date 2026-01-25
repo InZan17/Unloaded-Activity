@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,6 +19,8 @@ import net.minecraft.util.RandomSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 import static java.lang.Math.*;
 
@@ -40,12 +44,12 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     @Shadow @Final public static IntegerProperty STAGE;
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.14285714285; // 1/7
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growSaplings) return false;
         if (level.getRawBrightness(pos, 0) < 9) return false;
         if (!state.is(this)) return false;
@@ -61,7 +65,7 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         if (level.getBrightness(LightLayer.BLOCK, pos.above()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
@@ -72,7 +76,7 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
 
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double randomGrowChance = getOdds(level, pos);
+        double randomGrowChance = getOdds(level, state, pos, simulateProperty, propertyName);
         double totalOdds = randomPickChance * randomGrowChance;
 
         int currentAge = getCurrentAgeUA(state);
@@ -84,7 +88,7 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
         int growthAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference + 1, random);
 
         if (growthAmount == 0)
-            return;
+            return state;
 
         int newAge = currentAge + growthAmount;
 
@@ -93,6 +97,8 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
         level.setBlock(pos, state, Block.UPDATE_INVISIBLE);
         if (newAge > maxAge) {
             this.advanceTree(level, pos, state, random);
+            return null;
         }
+        return state;
     }
 }

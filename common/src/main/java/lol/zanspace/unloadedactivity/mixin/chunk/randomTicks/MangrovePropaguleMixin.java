@@ -1,5 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 
@@ -39,10 +40,10 @@ public abstract class MangrovePropaguleMixin extends SaplingBlock {
     }
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (isHanging(state))
             return false;
 
-        return super.canSimulateRandTicks(state, level, pos);
+        return super.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName);
     }
 }

@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -25,7 +27,7 @@ public abstract class WeatheringCopperFullMixin extends Block implements Weather
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.05688889f;
     }
     @Override
@@ -34,7 +36,7 @@ public abstract class WeatheringCopperFullMixin extends Block implements Weather
     public WeatherState getAge() {
         return null;
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -50,11 +52,11 @@ public abstract class WeatheringCopperFullMixin extends Block implements Weather
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
-        double tryDegradeOdds = getOdds(level, pos);
+        double tryDegradeOdds = getOdds(level, state, pos, simulateProperty, propertyName);
 
         BlockPos blockPos;
         float nearbyBlocks = 0;
@@ -74,10 +76,12 @@ public abstract class WeatheringCopperFullMixin extends Block implements Weather
         int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (ageAmount == 0)
-            return;
+            return state;
 
         state = getDegradeResult(ageAmount, state, level, pos);
         level.setBlockAndUpdate(pos, state);
+
+        return null;
     }
 
     @Unique

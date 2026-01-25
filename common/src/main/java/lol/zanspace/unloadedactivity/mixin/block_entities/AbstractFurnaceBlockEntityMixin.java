@@ -93,7 +93,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         return this.litDuration;
     }
     @Unique
-    private int getCookingTimerUA() {return this.cookingProgress;}
+    private int getCookingTimer() {return this.cookingProgress;}
     @Unique
     private int getCookingTotalTime() {
         return this.cookingTotalTime;
@@ -108,7 +108,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         this.litDuration = value;
     }
     @Unique
-    private void setCookingTimerUA(int value) {
+    private void setCookingTimer(int value) {
         this.cookingProgress = value;
     }
     @Unique

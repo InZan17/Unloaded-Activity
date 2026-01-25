@@ -1,7 +1,9 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.Both;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -17,6 +19,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.world.level.gamerules.GameRules;
 #else
 import net.minecraft.world.level.GameRules;
+
+import java.util.Optional;
 #endif
 
 @Mixin(SnowLayerBlock.class)
@@ -36,27 +40,28 @@ public abstract class SnowLayerMixin extends Block {
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 1;
     }
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.meltSnow) return false;
         if (level.getBrightness(LightLayer.BLOCK, pos) <= 11) return false;
         return true;
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
-        double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*this.getOdds(level,pos);;
+        double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*this.getOdds(level, state, pos, simulateProperty, propertyName);;
 
         if (Utils.getOccurrences(timePassed, pickOdds, 1, random) != 0) {
             dropResources(state, level, pos);
             level.removeBlock(pos, false);
         }
 
+        return null;
     }
 
     @Override

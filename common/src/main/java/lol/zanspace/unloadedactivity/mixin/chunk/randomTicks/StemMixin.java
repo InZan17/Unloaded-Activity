@@ -5,6 +5,7 @@ import lol.zanspace.unloadedactivity.ExpectPlatform;
 import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
 
 #if MC_VER >= MC_1_20_4
@@ -61,17 +62,17 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockPos pos) {
+    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         #if MC_VER >= MC_1_21_1
         float f = ExpectPlatform.getGrowthSpeed(level.getBlockState(pos), level, pos);
         #else
-        float f = CropBlockInvoker.getGrowthSpeed(this, level, pos);
+        float f = CropBlockInvoker.invokeGetGrowthSpeed(this, level, pos);
         #endif
         return 1.0/(double)((int)(25.0F / f) + 1);
     }
     @Override
     public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.growStems) return false;
         if (level.getRawBrightness(pos, 0) < 9) return false;
         if (NumOfValidPositions(pos, level) == 0 && this.getCurrentAgeUA(state) == this.getMaxAgeUA()) return false;
@@ -79,7 +80,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     }
 
     @Override
-    public void simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, long timePassed, int randomTickSpeed) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
 
         int currentAge = this.getCurrentAgeUA(state);
         int maxAge = this.getMaxAgeUA();
@@ -89,7 +90,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
-        double randomGrowChance = getOdds(level, pos); //chance to grow for every pick
+        double randomGrowChance = getOdds(level, state, pos, simulateProperty, propertyName); //chance to grow for every pick
 
         double totalOdds = randomPickChance * randomGrowChance;
 
@@ -109,7 +110,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
             int growsFruit = Utils.getOccurrences(leftover, chanceForFreeSpace, 1, random);
 
             if (growsFruit == 0)
-                return;
+                return state;
 
             List<Direction> directions = Direction.Plane.HORIZONTAL.shuffledCopy(random);
 
@@ -143,6 +144,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
                 break;
             }
         }
+        return state;
     }
 
     @Unique
