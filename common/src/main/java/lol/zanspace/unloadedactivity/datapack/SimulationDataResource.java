@@ -23,8 +23,6 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener {
     public static final Map<ResourceLocation, SimulationData> TAG_MAP = new HashMap<>();
     public static final Map<ResourceLocation, SimulationData> BLOCK_MAP = new HashMap<>();
 
-    public static final SimulationDataResource INSTANCE = new SimulationDataResource();
-
     public SimulationDataResource() {
         super(GSON, ID);
     }

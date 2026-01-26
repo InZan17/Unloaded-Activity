@@ -1,6 +1,5 @@
 package lol.zanspace.unloadedactivity.neoforge;
 
-import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.UnloadedActivityCommand;
 import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,6 +14,6 @@ public class NeoForgeEventHandler {
 
     @SubscribeEvent
     public void onAddReloadListener(AddReloadListenerEvent event) {
-        event.addListener(SimulationDataResource.INSTANCE);
+        event.addListener(new SimulationDataResource());
     }
 }
