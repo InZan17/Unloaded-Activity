@@ -35,6 +35,15 @@ rootDir.listFiles().each { file ->
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
+    [
+        "fabric-api-base",
+        "fabric-command-api-v2",
+        "fabric-resource-loader-v0"
+    ].forEach {
+        modImplementation(fabricApi.module(it, rootProject.fabric_api_version + "+" + rootProject.minecraft_version))
+        include(fabricApi.module(it, rootProject.fabric_api_version + "+" + rootProject.minecraft_version))
+    }
+
     if (rootProject.include_extra_dependencies == true) {
         modImplementation "com.terraformersmc:modmenu:${rootProject.modmenu_version}"
 
@@ -44,7 +53,7 @@ dependencies {
                     // If version is below 1.20.6 then we exclude fabric-api.
                     // This is because modmenu requires fabric-api for 1.20.6 and above.
                     if (buildProperties.MC_VER >= buildProperties.MC_1_21_8) {
-                        // For some reason the fabric api does not get included. This is a quick fix.
+                        // For some reason the fabric api does not get excluded. This is a quick fix.
                         exclude(group: "net.fabricmc.fabric-api")
                     }
                 }
