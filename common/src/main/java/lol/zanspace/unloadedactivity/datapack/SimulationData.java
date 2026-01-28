@@ -11,7 +11,7 @@ import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-
+import org.jetbrains.annotations.Nullable;
 
 
 import javax.swing.*;
@@ -38,9 +38,20 @@ public class SimulationData {
             var thisSimulateProperty = this.propertyMap.computeIfAbsent(entry.getKey(), k -> new SimulateProperty());
             var otherSimulateProperty = entry.getValue();
 
-            thisSimulateProperty.propertyType = otherSimulateProperty.propertyType.or(() -> otherSimulateProperty.propertyType);
-            thisSimulateProperty.advanceProbability = otherSimulateProperty.advanceProbability.or(() -> otherSimulateProperty.advanceProbability);
-            thisSimulateProperty.maxValue = otherSimulateProperty.maxValue.or(() -> otherSimulateProperty.maxValue);
+
+            thisSimulateProperty.propertyType = otherSimulateProperty.propertyType.or(() -> thisSimulateProperty.propertyType);
+            thisSimulateProperty.maxValue = otherSimulateProperty.maxValue.or(() -> thisSimulateProperty.maxValue);
+
+            if (otherSimulateProperty.advanceProbability.isPresent() && thisSimulateProperty.advanceProbability.isPresent()) {
+                var oldProbability = thisSimulateProperty.advanceProbability.get();
+                var newProbability = otherSimulateProperty.advanceProbability.get().replicate();
+
+                newProbability.replaceSuper(oldProbability);
+
+                thisSimulateProperty.advanceProbability = Optional.of(newProbability);
+            } else {
+                thisSimulateProperty.advanceProbability = otherSimulateProperty.advanceProbability.map(CalculateValue::replicate).or(() -> thisSimulateProperty.advanceProbability);
+            }
         }
     }
 
@@ -89,8 +100,6 @@ public class SimulationData {
             if (mapValue.result().isPresent()) {
                 MapLike<T> map = mapValue.result().get();
 
-                UnloadedActivity.LOGGER.info(map.entries().toList().toString());
-
                 DataResult<String> stringResult = ops.getStringValue(map.get("operator"));
                 if (stringResult.error().isPresent()) {
                     throw new RuntimeException(stringResult.error().get().message());
@@ -114,7 +123,7 @@ public class SimulationData {
                         return new OperatorValue(Operator.MUL, parseProbability(ops, value1), parseProbability(ops, value2));
                     }
                     case "floor" -> {
-                        return new OperatorValue(Operator.FLOOR, parseProbability(ops, oneValue), null);
+                        return new OperatorValue(Operator.FLOOR, parseProbability(ops, oneValue));
                     }
                 }
             }
@@ -178,12 +187,22 @@ public class SimulationData {
 
     public sealed interface CalculateValue permits NumberValue, FetchValue, OperatorValue {
         double calculateValue(ServerLevel level, BlockState state, BlockPos pos);
+
+        /// Doesn't guarantee a clone. If a type doesn't get mutated, it's able to return itself.
+        CalculateValue replicate();
+
+        default void replaceSuper(CalculateValue superValue) {};
     }
 
     record NumberValue(double v) implements CalculateValue {
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
             return v;
+        }
+
+        @Override
+        public CalculateValue replicate() {
+            return this;
         }
     }
 
@@ -205,6 +224,11 @@ public class SimulationData {
                 return 1;
             }
         };
+
+        @Override
+        public CalculateValue replicate() {
+            return this;
+        }
     }
 
     public enum Operator {
@@ -215,7 +239,22 @@ public class SimulationData {
         FLOOR,
     }
 
-    record OperatorValue(Operator operator, CalculateValue value, CalculateValue secondaryValue) implements CalculateValue {
+    static final class OperatorValue implements CalculateValue {
+        public final Operator operator;
+        public CalculateValue value;
+        @Nullable
+        public CalculateValue secondaryValue;
+
+        public OperatorValue(Operator operator, CalculateValue value) {
+            this(operator, value, null);
+        };
+
+        public OperatorValue(Operator operator, CalculateValue value, @Nullable CalculateValue secondaryValue) {
+            this.operator = operator;
+            this.value = value;
+            this.secondaryValue = secondaryValue;
+        };
+
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
 
@@ -246,6 +285,26 @@ public class SimulationData {
             }
 
             return 0;
+        }
+
+        @Override
+        public CalculateValue replicate() {
+            return new OperatorValue(operator, value.replicate(), secondaryValue == null ? null : secondaryValue.replicate());
+        }
+
+        @Override
+        public void replaceSuper(CalculateValue superValue) {
+            if (value instanceof FetchValue fetchValue) {
+                if (fetchValue == FetchValue.SUPER) {
+                    value = superValue;
+                }
+            }
+
+            if (secondaryValue instanceof FetchValue fetchValue) {
+                if (fetchValue == FetchValue.SUPER) {
+                    secondaryValue = superValue;
+                }
+            }
         }
     }
 

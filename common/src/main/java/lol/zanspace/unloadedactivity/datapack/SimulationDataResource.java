@@ -126,6 +126,10 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
             }
         }
 
-        UnloadedActivity.LOGGER.info("Data entries: " + TAG_MAP.keySet().toString());
+        if (this.isBlocks) {
+            UnloadedActivity.LOGGER.info("Block entries: " + BLOCK_MAP.keySet());
+        } else {
+            UnloadedActivity.LOGGER.info("Tag entries: " + TAG_MAP.keySet());
+        }
     }
 }
