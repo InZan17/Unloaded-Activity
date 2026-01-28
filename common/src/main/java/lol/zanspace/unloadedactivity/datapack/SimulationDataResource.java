@@ -50,7 +50,7 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
     }
     #else
     public SimulationDataResource(boolean isBlocks) {
-        super(new GsonBuilder().create(), isBlocks ? BLOCKS_ID : TAGS_ID);
+        super(new GsonBuilder().create(), isBlocks ? BLOCKS_LOCATION : TAGS_LOCATION);
         this.isBlocks = isBlocks;
     }
     #endif
