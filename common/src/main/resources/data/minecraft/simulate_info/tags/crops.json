@@ -1,7 +1,6 @@
 {
   "age": {
     "replace": false,
-    "property_name": "age",
     "property_type": "int",
 
     "conditions": [
