@@ -10,7 +10,7 @@ import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-#if MC_VER >= MC_1_21_1
+#if MC_VER >= MC_1_21_11
 import net.minecraft.resources.Identifier;
 #else
 import net.minecraft.resources.ResourceLocation;
@@ -27,10 +27,12 @@ public class UnloadedActivityClothScreen {
         isTransparent = true;
         #endif
 
-        #if MC_VER >= MC_1_21_1
-        builder.setDefaultBackgroundTexture(Identifier.parse("minecraft:textures/block/dark_oak_planks.png"));
+        #if MC_VER >= MC_1_21_11
+        builder.setDefaultBackgroundTexture(Identifier.withDefaultNamespace("textures/block/dark_oak_planks.png"));
+        #elif MC_VER >= MC_1_21_1
+        builder.setDefaultBackgroundTexture(ResourceLocation.withDefaultNamespace("textures/block/dark_oak_planks.png"));
         #else
-        builder.setDefaultBackgroundTexture(new ResourceLocation("minecraft:textures/block/dark_oak_planks.png"));
+        builder.setDefaultBackgroundTexture(new ResourceLocation("textures/block/dark_oak_planks.png"));
         #endif
         builder.setSavingRunnable(() -> UnloadedActivity.saveConfig());
         ConfigCategory general = builder.getOrCreateCategory(Component.translatable("text.config.unloaded-activity.category.general"));

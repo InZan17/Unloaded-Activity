@@ -1,5 +1,7 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -73,10 +75,12 @@ public abstract class WeatheringLanternMixin extends LanternBlock implements Wea
         int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (ageAmount == 0)
-            return;
+            return state;
 
         state = getDegradeResult(ageAmount, state, level, pos);
         level.setBlockAndUpdate(pos, state);
+
+        return null;
     }
 
     @Unique

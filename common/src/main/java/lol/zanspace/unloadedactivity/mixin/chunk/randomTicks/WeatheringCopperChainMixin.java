@@ -1,5 +1,7 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
+import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VER >= MC_1_21_10
@@ -73,10 +75,12 @@ public abstract class WeatheringCopperChainMixin extends ChainBlock implements W
         int ageAmount = Utils.getOccurrences(timePassed, totalOdds, ageDifference, random);
 
         if (ageAmount == 0)
-            return;
+            return state;
 
         state = getDegradeResult(ageAmount, state, level, pos);
         level.setBlockAndUpdate(pos, state);
+
+        return null;
     }
 
     @Unique

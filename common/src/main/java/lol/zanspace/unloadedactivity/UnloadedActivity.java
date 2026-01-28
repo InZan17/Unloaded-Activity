@@ -3,6 +3,11 @@ package lol.zanspace.unloadedactivity;
 import lol.zanspace.unloadedactivity.config.UnloadedActivityConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+#if MC_VER >= MC_1_21_11
+import net.minecraft.resources.Identifier;
+#else
+import net.minecraft.resources.ResourceLocation;
+#endif
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,5 +63,15 @@ public class UnloadedActivity {
         } catch (IOException e) {
             LOGGER.warn("Error saving UnloadedActivity configs: " + e.getLocalizedMessage());
         }
+    }
+
+    public static #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif id(String path) {
+        #if MC_VER >= MC_1_21_11
+        return Identifier.fromNamespaceAndPath("unloaded_activity", path);
+        #elif MC_VER >= MC_1_21_1
+        return ResourceLocation.fromNamespaceAndPath("unloaded_activity", path);
+        #else
+        return new ResourceLocation("unloaded_activity", path);
+        #endif
     }
 }

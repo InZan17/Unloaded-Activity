@@ -8,9 +8,7 @@ import net.minecraft.world.Container;
 #if MC_VER >= MC_1_21_3
 import net.minecraft.world.level.block.entity.FuelValues;
 #endif
-#if MC_VER >= MC_1_20_2
 import net.minecraft.world.item.crafting.*;
-#endif
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.inventory.StackedContentsCompatible;

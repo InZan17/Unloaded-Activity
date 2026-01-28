@@ -1,143 +1,131 @@
 package lol.zanspace.unloadedactivity.datapack;
 
 import com.google.gson.*;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceKey;
+#if MC_VER >= MC_1_21_11
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
+#if MC_VER >= MC_1_21_4
+import net.minecraft.resources.FileToIdConverter;
+#endif
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.block.Block;
 
 import java.util.*;
 
-public class SimulationDataResource extends SimpleJsonResourceReloadListener {
+public class SimulationDataResource extends SimpleJsonResourceReloadListener #if MC_VER >= MC_1_21_3
+<SimulationData>
+#endif {
 
-    private static final String ID = "simulate_info";
+    private static final String BLOCKS_LOCATION = "simulate_info/blocks";
+    private static final String TAGS_LOCATION = "simulate_info/tags";
 
-    private static final Gson GSON = new GsonBuilder().create();
+    public static final #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif BLOCKS_ID = UnloadedActivity.id("simulate_blocks");
+    public static final #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif TAGS_ID = UnloadedActivity.id("simulate_tags");
 
-    public static final Map<ResourceLocation, SimulationData> TAG_MAP = new HashMap<>();
-    public static final Map<ResourceLocation, SimulationData> BLOCK_MAP = new HashMap<>();
+    public final boolean isBlocks;
 
-    public SimulationDataResource() {
-        super(GSON, ID);
+    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> TAG_MAP = new HashMap<>();
+    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> BLOCK_MAP = new HashMap<>();
+
+    #if MC_VER >= MC_1_21_3
+    public SimulationDataResource(boolean isBlocks) {
+        super(
+            SimulationData.CODEC,
+            #if MC_VER >= MC_1_21_4
+            FileToIdConverter.json(isBlocks ? BLOCKS_LOCATION : TAGS_LOCATION)
+            #else
+            isBlocks ? BLOCKS_ID : TAGS_ID
+            #endif
+        );
+        this.isBlocks = isBlocks;
     }
+    #else
+    public SimulationDataResource(boolean isBlocks) {
+        super(new GsonBuilder().create(), isBlocks ? BLOCKS_ID : TAGS_ID);
+        this.isBlocks = isBlocks;
+    }
+    #endif
 
+    #if MC_VER >= MC_1_21_3
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> object, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(
+            Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> object,
+            ResourceManager resourceManager,
+            ProfilerFiller profilerFiller
+    )
+    #else
+    @Override
+    protected void apply(
+        Map<
+            #if MC_VER >= MC_1_21_11
+            Identifier
+            #else
+            ResourceLocation
+            #endif,
+            JsonElement
+        > object,
+        ResourceManager resourceManager,
+        ProfilerFiller profilerFiller
+    )
+    #endif
+    {
 
-        TAG_MAP.clear();
-        BLOCK_MAP.clear();
+        if (this.isBlocks) {
+            BLOCK_MAP.clear();
+        } else {
+            TAG_MAP.clear();
+        }
 
-        Map<ResourceLocation, List<SimulationData>> tagData = new HashMap<>();
-        Map<ResourceLocation, List<SimulationData>> blockData = new HashMap<>();
+        Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<SimulationData>> datas = new HashMap<>();
 
-        object.forEach((key, jsonElement) -> {
+        object.forEach((key, input) -> {
             try {
-                for (var blockOrTagEntry : jsonElement.getAsJsonObject().entrySet()) {
-                    String blockOrTag = blockOrTagEntry.getKey();
-                    UnloadedActivity.LOGGER.info(blockOrTag);
-                    boolean isTag = blockOrTag.startsWith("#");
-                    if (isTag) {
-                        blockOrTag = blockOrTag.substring(1);
-                    }
-                    var id = ResourceLocation.tryParse(blockOrTag);
-
-                    SimulationData simulationData = new SimulationData();
-
-                    for (var propertyEntry : blockOrTagEntry.getValue().getAsJsonObject().entrySet()) {
-
-                        JsonObject jsonSimulationData = propertyEntry.getValue().getAsJsonObject();
-
-                        SimulationData.SimulateProperty simulateProperty = new SimulationData.SimulateProperty();
-
-                        {
-                            JsonElement value = jsonSimulationData.get("property_type");
-                            if (value != null) {
-                                simulateProperty.propertyType = Optional.of(value.getAsString());
-                            }
-                        }
-
-                        {
-                            JsonElement value = jsonSimulationData.get("advance_probability");
-                            if (value != null) {
-                                simulateProperty.parseAndApplyProbability(value);
-                            }
-                        }
-
-                        {
-                            JsonElement value = jsonSimulationData.get("max_value");
-                            if (value != null) {
-                                simulateProperty.maxValue = Optional.of(value.getAsInt());
-                            }
-                        }
-
-                        {
-                            JsonElement conditions = jsonSimulationData.get("conditions");
-                            if (conditions != null) {
-                                JsonArray conditionArray = conditions.getAsJsonArray();
-                                for (var conditionValue : conditionArray.asList()) {
-                                    simulateProperty.parseAndApplyCondition(conditionValue);
-                                }
-                            }
-                        }
-
-                        String propertyName = propertyEntry.getKey();
-
-                        simulationData.propertyMap.put(propertyName, simulateProperty);
-                    }
-
-                    if (isTag) {
-                        var list = tagData.computeIfAbsent(id, k -> new ArrayList<>());
-                        list.add(simulationData);
-                    } else {
-                        var list = blockData.computeIfAbsent(id, k -> new ArrayList<>());
-                        list.add(simulationData);
-                    }
+                #if MC_VER >= MC_1_21_3
+                SimulationData simulationData = input;
+                #else
+                var result = SimulationData.CODEC.decode(com.mojang.serialization.JsonOps.INSTANCE, input);
+                if (result.error().isPresent()) {
+                    throw new RuntimeException(result.error().get().message());
                 }
+                SimulationData simulationData = result.result().get().getFirst();
+                #endif
 
+                var list = datas.computeIfAbsent(key, k -> new ArrayList<>());
+                list.add(simulationData);
             } catch(Exception e) {
                 UnloadedActivity.LOGGER.error("{}\n{}", key, e);
             }
         });
 
-        for (Map.Entry<ResourceLocation, List<SimulationData>> tagEntry : tagData.entrySet()) {
+        for (Map.Entry<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<SimulationData>> tagEntry : datas.entrySet()) {
             List<SimulationData> dataList = tagEntry.getValue();
 
             if (dataList.isEmpty())
                 continue;
 
-            ResourceLocation id = tagEntry.getKey();
+            var id = tagEntry.getKey();
             SimulationData finalSimulationData = new SimulationData();
 
             for (SimulationData simulationData : dataList) {
                 finalSimulationData.absorb(simulationData);
             }
 
-            TAG_MAP.put(id, finalSimulationData);
-        }
-
-
-        for (Map.Entry<ResourceLocation, List<SimulationData>> blockEntry : blockData.entrySet()) {
-            List<SimulationData> dataList = blockEntry.getValue();
-
-            if (dataList.isEmpty())
-                continue;
-
-            ResourceLocation id = blockEntry.getKey();
-            SimulationData finalSimulationData = new SimulationData();
-
-            for (SimulationData simulationData : dataList) {
-                finalSimulationData.absorb(simulationData);
+            if (this.isBlocks) {
+                BLOCK_MAP.put(id, finalSimulationData);
+            } else {
+                TAG_MAP.put(id, finalSimulationData);
             }
-
-            BLOCK_MAP.put(id, finalSimulationData);
         }
 
-        UnloadedActivity.LOGGER.info("Tag entries: " + TAG_MAP.keySet().toString());
+        UnloadedActivity.LOGGER.info("Data entries: " + TAG_MAP.keySet().toString());
     }
 }

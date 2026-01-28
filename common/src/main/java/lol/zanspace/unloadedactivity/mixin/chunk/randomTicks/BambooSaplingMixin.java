@@ -13,11 +13,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import java.util.Optional;
 
 #if MC_VER >= MC_1_19_4
 import net.minecraft.world.level.block.BambooStalkBlock;
-
-import java.util.Optional;
 #else
 import net.minecraft.world.level.block.BambooBlock;
 #endif

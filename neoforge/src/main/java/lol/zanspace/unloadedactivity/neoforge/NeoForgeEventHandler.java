@@ -3,7 +3,11 @@ package lol.zanspace.unloadedactivity.neoforge;
 import lol.zanspace.unloadedactivity.UnloadedActivityCommand;
 import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
 import net.neoforged.bus.api.SubscribeEvent;
+#if MC_VER >= MC_1_21_4
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+#else
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+#endif
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public class NeoForgeEventHandler {
@@ -12,8 +16,17 @@ public class NeoForgeEventHandler {
         UnloadedActivityCommand.register(event.getDispatcher());
     }
 
+    #if MC_VER >= MC_1_21_4
+    @SubscribeEvent
+    public void onAddReloadListener(AddServerReloadListenersEvent event) {
+        event.addListener(SimulationDataResource.BLOCKS_ID, new SimulationDataResource(true));
+        event.addListener(SimulationDataResource.TAGS_ID, new SimulationDataResource(false));
+    }
+    #else
     @SubscribeEvent
     public void onAddReloadListener(AddReloadListenerEvent event) {
-        event.addListener(new SimulationDataResource());
+        event.addListener(new SimulationDataResource(true));
+        event.addListener(new SimulationDataResource(false));
     }
+    #endif
 }

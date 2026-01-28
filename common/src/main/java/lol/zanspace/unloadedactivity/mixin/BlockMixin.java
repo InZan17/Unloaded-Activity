@@ -8,15 +8,17 @@ import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
 import lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
+
+#if MC_VER >= MC_1_21_11
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -35,7 +37,7 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
     @Override
     public SimulationData getSimulationData() {
 
-        ResourceLocation blockId = this.builtInRegistryHolder.key().location();
+        var blockId = this.builtInRegistryHolder.key()#if MC_VER >= MC_1_21_11 .identifier() #else .location() #endif;
 
         SimulationData blockSimulationData = SimulationDataResource.BLOCK_MAP.get(blockId);
 
@@ -47,7 +49,7 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
 
         for (Iterator<TagKey<Block>> it = builtInRegistryHolder.tags().iterator(); it.hasNext(); ) {
             TagKey<Block> tag = it.next();
-            ResourceLocation tagId = tag.location();
+            var tagId = tag.location();
 
             SimulationData tagSimulationData = SimulationDataResource.TAG_MAP.get(tagId);
 

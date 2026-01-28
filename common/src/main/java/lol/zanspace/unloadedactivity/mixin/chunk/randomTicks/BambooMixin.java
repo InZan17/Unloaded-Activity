@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import java.util.Optional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,8 +20,6 @@ import org.spongepowered.asm.mixin.Unique;
 
 #if MC_VER >= MC_1_19_4
 import net.minecraft.world.level.block.BambooStalkBlock;
-
-import java.util.Optional;
 #else
 import net.minecraft.world.level.block.BambooBlock;
 #endif

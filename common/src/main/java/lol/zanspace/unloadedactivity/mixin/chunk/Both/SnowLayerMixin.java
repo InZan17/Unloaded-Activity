@@ -14,13 +14,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
+import java.util.Optional;
 
 #if MC_VER >= MC_1_21_11
 import net.minecraft.world.level.gamerules.GameRules;
 #else
 import net.minecraft.world.level.GameRules;
-
-import java.util.Optional;
 #endif
 
 @Mixin(SnowLayerBlock.class)
