@@ -19,6 +19,8 @@ public class TorchFlowerMixin extends CropBlock {
         super(properties);
     }
 
+    /*
+
     @Override
     public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         #if MC_VER >= MC_1_21_1
@@ -28,6 +30,8 @@ public class TorchFlowerMixin extends CropBlock {
         #endif
         return (1.0/(double)((int)(25.0F / f) + 1))/3;
     }
+
+     */
 }
 #else
 // IDK how to make it not complain, so we just do an empty mixin to the air block.

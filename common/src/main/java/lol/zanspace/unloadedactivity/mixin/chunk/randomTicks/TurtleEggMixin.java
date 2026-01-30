@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 #if MC_VER >= MC_1_21_3
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -40,6 +40,8 @@ public abstract class TurtleEggMixin extends Block {
         super(properties);
     }
 
+    /*
+
     @Shadow @Final
     public static IntegerProperty HATCH;
     @Shadow @Final
@@ -72,7 +74,7 @@ public abstract class TurtleEggMixin extends Block {
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         //at a certain point in the day the odds of hatching become 100% instead of 1/500
         int quickHatchStart = 21061;
@@ -108,14 +110,14 @@ public abstract class TurtleEggMixin extends Block {
                     long remaining = min(floorMod(quickHatchStart-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(remaining, totalOdds, ageDifference-growthAmount+1, random);
+                    OccurrencesAndDuration oal = Utils.getOccurrencesAndDurationTicks(remaining, totalOdds, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 } else {
                     long remaining = min(floorMod(quickHatchEnd-localTime, dayLength), timePassed);
                     timePassed-=remaining;
                     originTime+=remaining;
-                    OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(remaining, randomPickChance, ageDifference-growthAmount+1, random);
+                    OccurrencesAndDuration oal = Utils.getOccurrencesAndDurationTicks(remaining, randomPickChance, ageDifference-growthAmount+1, random);
                     growthAmount += oal.occurrences;
                     leftover = oal.leftover;
                 }
@@ -158,4 +160,6 @@ public abstract class TurtleEggMixin extends Block {
         }
         return state;
     }
+
+     */
 }

@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -23,6 +23,8 @@ public abstract class LeavesMixin extends Block{
         super(properties);
     }
 
+    /*
+
     @Shadow
     protected boolean decaying(BlockState state) {
         return true;
@@ -40,7 +42,7 @@ public abstract class LeavesMixin extends Block{
         return decaying(state);
     }
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
@@ -55,4 +57,6 @@ public abstract class LeavesMixin extends Block{
 
         return null;
     }
+
+     */
 }

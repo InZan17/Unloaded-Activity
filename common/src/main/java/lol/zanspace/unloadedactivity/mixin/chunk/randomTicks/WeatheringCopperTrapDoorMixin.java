@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -29,6 +29,8 @@ public abstract class WeatheringCopperTrapDoorMixin extends TrapDoorBlock implem
         super(blockSetType, properties);
     }
 
+    /*
+
     @Override
     public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 0.05688889f;
@@ -55,7 +57,7 @@ public abstract class WeatheringCopperTrapDoorMixin extends TrapDoorBlock implem
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
@@ -104,6 +106,8 @@ public abstract class WeatheringCopperTrapDoorMixin extends TrapDoorBlock implem
 
         return optionalState.get();
     }
+
+     */
 }
 
 #else

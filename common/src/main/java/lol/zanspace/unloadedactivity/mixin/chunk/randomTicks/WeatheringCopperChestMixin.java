@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,6 +25,8 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
     public WeatheringCopperChestMixin(WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, Properties properties) {
         super(weatherState, soundEvent, soundEvent2, properties);
     }
+
+    /*
 
     @Override
     public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
@@ -52,7 +54,7 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 
@@ -101,6 +103,8 @@ public abstract class WeatheringCopperChestMixin extends CopperChestBlock implem
 
         return optionalState.get();
     }
+
+     */
 }
 
 #else

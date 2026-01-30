@@ -2,7 +2,7 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 
 import lol.zanspace.unloadedactivity.ExpectPlatform;
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -37,6 +37,8 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     protected StemMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Final
     @Shadow
@@ -80,7 +82,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         int currentAge = this.getCurrentAgeUA(state);
         int maxAge = this.getMaxAgeUA();
@@ -94,7 +96,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
 
         double totalOdds = randomPickChance * randomGrowChance;
 
-        OccurrencesAndLeftover oal = Utils.getOccurrencesAndLeftoverTicks(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
+        OccurrencesAndDuration oal = Utils.getOccurrencesAndDurationTicks(timePassed, totalOdds, ageDifference + min(1, validPositions), random);
 
         int growthAmount = oal.occurrences;
         long leftover = oal.leftover;
@@ -138,6 +140,8 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
                 #else
                 level.setBlockAndUpdate(blockPos, this.fruit.defaultBlockState());
 
+                returnLeftoverTicks.get()
+
                 state = this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction);
                 level.setBlockAndUpdate(pos, state);
                 #endif
@@ -161,4 +165,6 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
         BlockState blockState = level.getBlockState(blockPos.below());
         return level.getBlockState(blockPos).isAir() && (blockState.is(Blocks.FARMLAND) || blockState.is(BlockTags.DIRT));
     }
+
+     */
 }

@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -13,11 +13,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.Optional;
 
 @Mixin(CocoaBlock.class)
 public abstract class CocoaMixin extends HorizontalDirectionalBlock implements BonemealableBlock {
@@ -25,6 +25,9 @@ public abstract class CocoaMixin extends HorizontalDirectionalBlock implements B
     protected CocoaMixin(Properties properties) {
         super(properties);
     }
+
+
+    /*
 
     @Shadow @Final
     public static int MAX_AGE;
@@ -51,7 +54,7 @@ public abstract class CocoaMixin extends HorizontalDirectionalBlock implements B
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         int currentAge = getCurrentAgeUA(state);
         int maxAge = getMaxAgeUA();
@@ -70,4 +73,6 @@ public abstract class CocoaMixin extends HorizontalDirectionalBlock implements B
 
         return state;
     }
+
+     */
 }

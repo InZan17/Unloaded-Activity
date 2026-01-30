@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -24,6 +24,8 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
         super(properties);
     }
 
+    /*
+
     @Shadow @Final
     public static int GROWTH_CHANCE;
 
@@ -42,7 +44,7 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
         return true;
     }
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
@@ -97,4 +99,6 @@ public abstract class BuddingAmethystMixin extends AmethystBlock {
         }
         return state;
     }
+
+     */
 }

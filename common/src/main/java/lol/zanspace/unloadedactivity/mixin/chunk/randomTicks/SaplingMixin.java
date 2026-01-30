@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -30,6 +30,8 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     protected SaplingMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     #if MC_VER >= MC_1_20_4
     @Shadow @Final private TreeGrower treeGrower;
@@ -65,7 +67,7 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         if (level.getBrightness(LightLayer.BLOCK, pos.above()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
             int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
@@ -101,4 +103,6 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
         }
         return state;
     }
+
+     */
 }

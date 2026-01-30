@@ -1,7 +1,7 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -25,6 +25,8 @@ public abstract class IceMixin extends HalfTransparentBlock {
         super(properties);
     }
 
+    /*
+
     @Override
     public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         return 1;
@@ -47,7 +49,7 @@ public abstract class IceMixin extends HalfTransparentBlock {
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed) * this.getOdds(level, state, pos, simulateProperty, propertyName);
 
@@ -58,4 +60,6 @@ public abstract class IceMixin extends HalfTransparentBlock {
 
         return state;
     }
+
+     */
 }

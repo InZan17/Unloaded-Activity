@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -37,6 +37,8 @@ public abstract class PointedDripstoneMixin extends Block {
     public PointedDripstoneMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Shadow private static boolean canGrow(BlockState dripstoneBlockState, BlockState waterState) {
         return true;
@@ -139,7 +141,7 @@ public abstract class PointedDripstoneMixin extends Block {
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         BlockPos tipPos = findTip(state, level, pos, 12, false);
         if (tipPos == null)
@@ -274,5 +276,7 @@ public abstract class PointedDripstoneMixin extends Block {
 
         return null;
     }
+
+     */
 
 }

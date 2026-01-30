@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -25,6 +25,8 @@ public abstract class CactusMixin extends net.minecraft.world.level.block.Block 
     public CactusMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Shadow @Final public static IntegerProperty AGE;
     @Shadow @Final public static int MAX_AGE;
@@ -57,7 +59,7 @@ public abstract class CactusMixin extends net.minecraft.world.level.block.Block 
         return i;
     }
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         int height = 0;
         while (level.getBlockState(pos.below(height+1)).is(this)) {
@@ -123,4 +125,6 @@ public abstract class CactusMixin extends net.minecraft.world.level.block.Block 
         level.setBlock(pos, state, Block.UPDATE_INVISIBLE);
         return state;
     }
+
+     */
 }

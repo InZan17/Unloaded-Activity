@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.Direction;
@@ -29,6 +29,8 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
     protected GrowingPlantHeadMixin(Properties properties, Direction direction, VoxelShape voxelShape, boolean bl) {
         super(properties, direction, voxelShape, bl);
     }
+
+    /*
 
     @Shadow @Final
     public static IntegerProperty AGE;
@@ -68,7 +70,7 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
         return MAX_AGE;
     }
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover>  returnLeftoverTicks) {
+    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndDuration>  returnLeftoverTicks) {
 
         int currentAge = getCurrentAgeUA(state);
         int maxAge = getMaxAgeUA();
@@ -95,4 +97,6 @@ public abstract class GrowingPlantHeadMixin extends GrowingPlantBlock implements
 
         return state;
     }
+
+     */
 }

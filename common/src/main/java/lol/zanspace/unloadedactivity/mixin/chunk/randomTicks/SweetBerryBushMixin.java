@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -23,6 +23,8 @@ public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 Vegeta
     protected SweetBerryBushMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Shadow @Final public static IntegerProperty AGE;
     @Shadow @Final public static int MAX_AGE;
@@ -49,7 +51,7 @@ public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 Vegeta
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         int age = getCurrentAgeUA(state);
         int ageDifference = getMaxAgeUA() - age;
@@ -68,4 +70,6 @@ public abstract class SweetBerryBushMixin extends #if MC_VER >= MC_1_21_5 Vegeta
 
         return state;
     }
+
+     */
 }

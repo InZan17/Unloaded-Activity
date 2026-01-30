@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -12,7 +12,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import java.util.Optional;
+
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +36,8 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
     public BambooMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Shadow @Final public static IntegerProperty STAGE;
 
@@ -69,12 +73,12 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         return i;
     }
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         int height = getHeightBelowUpToMax(level, pos);
 
         if (height >= getMaxHeightUA())
-            return state;
+            return null;
 
         int heightDifference = getMaxHeightUA() - height;
         int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
@@ -82,14 +86,13 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
-        int growthAmount = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, random);
+        var result = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, calculateDuration, random);
 
 
-        for(int i=0;i<growthAmount;i++) {
-            // TODO make this accurate cause the actual random tick function does Not call performBonemeal.
+        for(int i=0;i<result.occurrences();i++) {
             this.performBonemeal(level, random, pos, state);
 
-            if (i == growthAmount - 1)
+            if (i == result.occurrences() - 1)
                 return null;
 
             int grew = this.getHeightAboveUpToMax(level, pos);
@@ -105,4 +108,6 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         }
         return null;
     }
+
+     */
 }

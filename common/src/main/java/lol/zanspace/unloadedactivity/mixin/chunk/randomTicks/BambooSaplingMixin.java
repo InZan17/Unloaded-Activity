@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -11,9 +11,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BambooSaplingBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import java.util.Optional;
 
 #if MC_VER >= MC_1_19_4
 import net.minecraft.world.level.block.BambooStalkBlock;
@@ -27,6 +28,8 @@ public abstract class BambooSaplingMixin extends Block {
     public BambooSaplingMixin(Properties properties) {
         super(properties);
     }
+
+    /*
 
     @Shadow protected void growBamboo(Level level, BlockPos pos) {}
 
@@ -48,25 +51,27 @@ public abstract class BambooSaplingMixin extends Block {
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
         double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
-        OccurrencesAndLeftover growthInfo = Utils.getOccurrencesAndLeftoverTicks(timePassed, totalOdds, 1, random);
+        OccurrencesAndDuration result = Utils.getOccurrences(timePassed, totalOdds, 1, true, random);
 
-        if (growthInfo.occurrences == 0)
-            return state;
+        if (result.occurrences() == 0)
+            return null;
 
         this.growBamboo(level, pos);
         BlockPos newPos = pos.above();
         BlockState newState = level.getBlockState(newPos);
         if (newState.getBlock() instanceof #if MC_VER >= MC_1_19_4 BambooStalkBlock #else BambooBlock #endif bamboo) {
-            if (growthInfo.leftover > 0 && bamboo.canSimulateRandTicks(newState, level, newPos, simulateProperty, propertyName)) {
-                return bamboo.simulateRandTicks(newState, level, newPos, simulateProperty, propertyName, random, growthInfo.leftover, randomTickSpeed, returnLeftoverTicks);
+            if (result.duration() < timePassed && bamboo.canSimulateRandTicks(newState, level, newPos, simulateProperty, propertyName)) {
+                return bamboo.simulateRandTicks(newState, level, newPos, simulateProperty, propertyName, random, timePassed - result.duration(), randomTickSpeed, calculateDuration);
             }
         }
 
-        return state;
+        return null;
     }
+
+     */
 }
