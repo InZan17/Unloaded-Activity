@@ -33,7 +33,7 @@ public abstract class LiquidMixin extends Block implements BucketPickup {
     @Override
     public void simulatePrecTicks(BlockState state, ServerLevel level, BlockPos pos, long timeInWeather, long timePassed, Biome.Precipitation precipitation, double precipitationPickChance) {
 
-        int makeIce = Utils.getOccurrences(timePassed, precipitationPickChance, 1, level.random);
+        int makeIce = Utils.getOccurrences(timePassed, precipitationPickChance, 1, false, level.random).occurrences();
 
         if (makeIce == 0)
             return;

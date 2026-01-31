@@ -7,16 +7,21 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import lol.zanspace.unloadedactivity.ExpectPlatform;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
+import lol.zanspace.unloadedactivity.mixin.chunk.randomTicks.StemMixin;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-
-import javax.swing.*;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SimulationData {
     public static final Codec<SimulationData> CODEC;
@@ -41,6 +46,9 @@ public class SimulationData {
 
             thisSimulateProperty.propertyType = otherSimulateProperty.propertyType.or(() -> thisSimulateProperty.propertyType);
             thisSimulateProperty.maxValue = otherSimulateProperty.maxValue.or(() -> thisSimulateProperty.maxValue);
+            thisSimulateProperty.dependencies.addAll(otherSimulateProperty.dependencies);
+            thisSimulateProperty.updateType = otherSimulateProperty.updateType.or(() -> thisSimulateProperty.updateType);
+            thisSimulateProperty.conditions.addAll(otherSimulateProperty.conditions);
 
             if (otherSimulateProperty.advanceProbability.isPresent() && thisSimulateProperty.advanceProbability.isPresent()) {
                 var oldProbability = thisSimulateProperty.advanceProbability.get();
@@ -56,13 +64,17 @@ public class SimulationData {
     }
 
     public static class SimulateProperty {
+        public Set<String> dependencies;
         public Optional<String> propertyType;
+        public Optional<Integer> updateType;
         public Optional<CalculateValue> advanceProbability;
         public Optional<Integer> maxValue;
-        public List<Condition> conditions;
+        public ArrayList<Condition> conditions;
 
         SimulateProperty() {
+            this.dependencies = new HashSet<>();
             this.propertyType = Optional.empty();
+            this.updateType = Optional.empty();
             this.advanceProbability = Optional.empty();
             this.maxValue = Optional.empty();
             this.conditions = new ArrayList<>();
@@ -83,17 +95,7 @@ public class SimulationData {
             var stringValue = ops.getStringValue(input);
             if (stringValue.result().isPresent()) {
                 String variableName = stringValue.result().get();
-                switch (variableName.toLowerCase()) {
-                    case "growth_speed" -> {
-                        return FetchValue.GROWTH_SPEED;
-                    }
-                    case "super" -> {
-                        return FetchValue.SUPER;
-                    }
-                    default -> {
-                        throw new RuntimeException("Invalid variable: " + variableName);
-                    }
-                }
+                return FetchValue.fromString(variableName);
             }
 
             var mapValue = ops.getMap(input);
@@ -172,12 +174,7 @@ public class SimulationData {
                     }
                 }
 
-                switch (check.toLowerCase()) {
-                    case "raw_brightness" -> {
-                        return new Condition(new RawBrightness(), comparison, value);
-                    }
-                    default -> throw new RuntimeException("Invalid check value: " + check);
-                }
+                return new Condition(FetchValue.fromString(check), comparison, value);
             }
 
             throw new RuntimeException("Invalid condition");
@@ -218,6 +215,24 @@ public class SimulationData {
             }
         },
 
+        AVAILABLE_SPACE_FOR_GOURD {
+            @Override
+            public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
+                return (Utils.isValidGourdPosition(Direction.NORTH, pos, level) ? 1 : 0)
+                    + (Utils.isValidGourdPosition(Direction.EAST, pos, level) ? 1 : 0)
+                    + (Utils.isValidGourdPosition(Direction.SOUTH, pos, level) ? 1 : 0)
+                    + (Utils.isValidGourdPosition(Direction.WEST, pos, level) ? 1 : 0);
+
+            }
+        },
+
+        RAW_BRIGHTNESS {
+            @Override
+            public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
+                return level.getRawBrightness(pos, 0);
+            }
+        },
+
         SUPER {
             @Override
             public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
@@ -229,6 +244,26 @@ public class SimulationData {
         public CalculateValue replicate() {
             return this;
         }
+
+        public static FetchValue fromString(String variableName) {
+            switch (variableName.toLowerCase()) {
+                case "growth_speed" -> {
+                    return GROWTH_SPEED;
+                }
+                case "available_space_for_gourd" -> {
+                    return AVAILABLE_SPACE_FOR_GOURD;
+                }
+                case "raw_brightness" -> {
+                    return RAW_BRIGHTNESS;
+                }
+                case "super" -> {
+                    return SUPER;
+                }
+                default -> {
+                    throw new RuntimeException("Invalid variable: " + variableName);
+                }
+            }
+        };
     }
 
     public enum Operator {
@@ -308,55 +343,44 @@ public class SimulationData {
         }
     }
 
-    public sealed interface GetValueForCondition permits RawBrightness {
-        int getValue(ServerLevel level, BlockState state, BlockPos pos);
-    }
-
-    public static final class RawBrightness implements GetValueForCondition {
-        @Override
-        public int getValue(ServerLevel level, BlockState state, BlockPos pos) {
-            return level.getRawBrightness(pos, 0);
-        }
-    }
-
     public sealed interface CompareTheThing {
-        boolean compare(int v1, int v2);
+        boolean compare(double v1, double v2);
     }
 
     public enum Comparison implements CompareTheThing {
         EQ {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return false;
             }
         },
         NE {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return v1 != v2;
             }
         },
         LT {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return v1 < v2;
             }
         },
         LE {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return v1 <= v2;
             }
         },
         GT {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return v1 > v2;
             }
         },
         GE {
             @Override
-            public boolean compare(int v1, int v2) {
+            public boolean compare(double v1, double v2) {
                 return v1 >= v2;
             }
         };
@@ -387,14 +411,14 @@ public class SimulationData {
         }
     }
 
-    public record Condition (GetValueForCondition valueGetter, Comparison comparison, int value) {
+    public record Condition (FetchValue valueGetter, Comparison comparison, double value) {
         public boolean isValid(ServerLevel level, BlockState state, BlockPos pos) {
-            return comparison.compare(valueGetter.getValue(level, state, pos), value);
+            return comparison.compare(valueGetter.calculateValue(level, state, pos), value);
         }
     }
 
     static {
-        CODEC = new Codec<SimulationData>() {
+        CODEC = new Codec<>() {
             @Override
             public <T> DataResult<T> encode(SimulationData input, DynamicOps<T> ops, T prefix) {
                 throw new UnsupportedOperationException("I am never using this. Therefore, it does not need to be implemented.");
@@ -445,6 +469,30 @@ public class SimulationData {
                     }
 
                     {
+                        T mapValue = propertyInfo.get("update_type");
+                        if (mapValue != null) {
+                            DataResult<String> stringResult = ops.getStringValue(mapValue);
+                            if (stringResult.result().isPresent()) {
+                                String updateType = stringResult.result().get();
+                                switch (updateType.toLowerCase()) {
+                                    case "update_clients" -> simulateProperty.updateType = Optional.of(Block.UPDATE_CLIENTS);
+                                    case "update_invisible" -> simulateProperty.updateType = Optional.of(Block.UPDATE_INVISIBLE);
+                                    case "update_all" -> simulateProperty.updateType = Optional.of(Block.UPDATE_ALL);
+                                    default -> {
+                                        return returnError("Invalid update type: " + updateType);
+                                    }
+                                }
+                            } else {
+                                DataResult<Number> numberResult = ops.getNumberValue(mapValue);
+                                if (numberResult.error().isPresent()) {
+                                    return returnError("Must be a number or a string.", numberResult);
+                                }
+                                simulateProperty.updateType = Optional.of(numberResult.result().get().intValue());
+                            }
+                        }
+                    }
+
+                    {
                         T mapValue = propertyInfo.get("advance_probability");
                         if (mapValue != null) {
                             simulateProperty.parseAndApplyProbability(ops, mapValue);
@@ -476,6 +524,26 @@ public class SimulationData {
                         }
                     }
 
+                    {
+                        T mapValue = propertyInfo.get("dependencies");
+                        if (mapValue != null) {
+                            var dependencies = ops.getStream(mapValue);
+                            if (dependencies.error().isPresent()) {
+                                return returnError(dependencies);
+                            }
+
+                            for (T dependencyValue : dependencies.result().get().toList()) {
+                                var stringResult = ops.getStringValue(dependencyValue);
+
+                                if (stringResult.error().isPresent()) {
+                                    return returnError(stringResult);
+                                }
+
+                                simulateProperty.dependencies.add(stringResult.result().get());
+                            }
+                        }
+                    }
+
                     simulationData.propertyMap.put(propertyName, simulateProperty);
                 }
                 return DataResult.success(Pair.of(simulationData, ops.empty()));
@@ -495,7 +563,15 @@ public class SimulationData {
         #if MC_VER >= MC_1_19_4
         return DataResult.error(() -> info + dataResult.error().get().message());
         #else
-        return DataResult.error(info + dataResult.error().get().message());
+        return DataResult.error(info + "\n" + dataResult.error().get().message());
+        #endif
+    }
+
+    static <R> DataResult<R> returnError(String info) {
+        #if MC_VER >= MC_1_19_4
+        return DataResult.error(() -> info);
+        #else
+        return DataResult.error(info);
         #endif
     }
 }

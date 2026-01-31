@@ -1,7 +1,13 @@
 package lol.zanspace.unloadedactivity;
 
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 import static java.lang.Math.*;
 import static net.minecraft.util.Mth.sign;
@@ -18,10 +24,14 @@ public class Utils {
     public static double getRandomPickOdds(int randomTickSpeed) {
         return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
     }
-    public static int getOccurrences(long cycles, double odds, int maxOccurrences, RandomSource random) {
+    public static OccurrencesAndDuration getOccurrences(long cycles, double odds, int maxOccurrences, boolean calculateDuration, RandomSource random) {
         if (UnloadedActivity.config.debugLogs)
             UnloadedActivity.LOGGER.info("Ran getOccurrences. cycles: "+cycles+" odds: "+odds+" maxOccurrences: "+maxOccurrences);
-        return getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
+        if (calculateDuration) {
+            return getOccurrencesAndDurationTicks(cycles, odds, maxOccurrences, random);
+        } else {
+            return new OccurrencesAndDuration(getOccurrencesBinomial(cycles, odds, maxOccurrences, random), cycles);
+        }
     }
 
     //good for very low odds and when maxOccurrences are very high or unrestricted
@@ -219,72 +229,26 @@ public class Utils {
         return (long) floor(number+random.nextDouble());
     }
 
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksFastOld(long cycles, double normalOdds, int randomTickSpeed, int maxOccurrences, RandomSource random) {
-        if (UnloadedActivity.config.debugLogs)
-            UnloadedActivity.LOGGER.info("Ran getOccurrencesAndLeftoverTicksFast. cycles: "+cycles+" normalOdds: "+normalOdds+" maxOccurrences: "+maxOccurrences);
-
-        double multiplier = getRandomPickOdds(randomTickSpeed);
-
-        double newCycles = cycles*multiplier;
-
-        long randRoundCycles = randomRound(newCycles, random);
-
-        OccurrencesAndLeftover oal = getOccurrencesAndLeftoverTicksBruteForce(randRoundCycles, normalOdds, maxOccurrences, random);
-        if (oal.occurrences == maxOccurrences) {
-
-            double differenceRatio = newCycles/randRoundCycles;
-
-            oal.leftover = (long) ((oal.leftover-random.nextFloat())/multiplier*differenceRatio);
-        }
-        return oal;
-    }
-
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicks(long cycles, double odds, int maxOccurrences, RandomSource random) {
+    public static OccurrencesAndDuration getOccurrencesAndDurationTicks(long cycles, double odds, int maxOccurrences, RandomSource random) {
 
         if (odds <= 0)
-            return new OccurrencesAndLeftover(0,0);
+            return new OccurrencesAndDuration(0,cycles);
 
         if (maxOccurrences <= 0)
-            return new OccurrencesAndLeftover(0,cycles);
+            return new OccurrencesAndDuration(0, 0);
 
         int successes = getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
 
-        long leftover;
+        long duration;
 
         if (successes == maxOccurrences) {
             long failedTrials = sampleNegativeBinomialWithMax(cycles, successes, odds, random);
-            leftover = cycles - failedTrials;
+            duration = failedTrials + successes;
         } else {
-            leftover = 0;
+            duration = cycles;
         }
 
-        return new OccurrencesAndLeftover(successes, leftover);
-    }
-
-    //595ms, 200 chunks
-    public static OccurrencesAndLeftover getOccurrencesAndLeftoverTicksBruteForce(long cycles, double odds, int maxOccurrences, RandomSource random) {
-
-        if (odds <= 0)
-            return new OccurrencesAndLeftover(0,0);
-
-        if (maxOccurrences <= 0)
-            return new OccurrencesAndLeftover(0,cycles);
-
-        int successes = 0;
-        long leftover = 0;
-
-        for (int i = 0; i<cycles;i++) {
-
-            if (successes >= maxOccurrences) {
-                leftover = cycles-i;
-                break;
-            }
-
-            if (random.nextDouble() < odds) {
-                ++successes;
-            }
-        }
-        return new OccurrencesAndLeftover(successes, leftover);
+        return new OccurrencesAndDuration(successes, duration);
     }
 
     public static long getTicksSinceTime(long currentTime, long timePassed, int startTime, int stopTime) {
@@ -311,6 +275,12 @@ public class Utils {
             restOfDayTicks = floorMod(restOfDayTicks, window);
 
         return restOfDayTicks + usefulTicks;
+    }
+
+    public static boolean isValidGourdPosition(Direction direction, BlockPos pos, ServerLevel level) {
+        BlockPos blockPos = pos.relative(direction);
+        BlockState blockState = level.getBlockState(blockPos.below());
+        return level.getBlockState(blockPos).isAir() && (blockState.is(Blocks.FARMLAND) || blockState.is(BlockTags.DIRT));
     }
 }
 

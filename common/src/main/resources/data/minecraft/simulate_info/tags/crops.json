@@ -1,7 +1,7 @@
 {
   "age": {
-    "replace": false,
     "property_type": "int",
+    "update_type": "update_clients",
 
     "conditions": [
       {

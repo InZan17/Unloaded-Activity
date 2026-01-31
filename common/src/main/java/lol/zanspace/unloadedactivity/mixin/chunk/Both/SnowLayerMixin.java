@@ -1,6 +1,6 @@
 package lol.zanspace.unloadedactivity.mixin.chunk.Both;
 
-import lol.zanspace.unloadedactivity.OccurrencesAndLeftover;
+import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
@@ -13,8 +13,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import java.util.Optional;
 
 #if MC_VER >= MC_1_21_11
 import net.minecraft.world.level.gamerules.GameRules;
@@ -51,11 +52,11 @@ public abstract class SnowLayerMixin extends Block {
     }
 
     @Override
-    public BlockState simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, Optional<OccurrencesAndLeftover> returnLeftoverTicks) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*this.getOdds(level, state, pos, simulateProperty, propertyName);;
 
-        if (Utils.getOccurrences(timePassed, pickOdds, 1, random) != 0) {
+        if (Utils.getOccurrences(timePassed, pickOdds, 1, false, random).occurrences() != 0) {
             dropResources(state, level, pos);
             level.removeBlock(pos, false);
         }
@@ -96,7 +97,7 @@ public abstract class SnowLayerMixin extends Block {
 
         int heightDifference = maxSnowHeight-currentSnowHeight;
 
-        int newLayers = Utils.getOccurrences(timeInWeather, precipitationPickChance, heightDifference, level.random);
+        int newLayers = Utils.getOccurrences(timeInWeather, precipitationPickChance, heightDifference, false, level.random).occurrences();
 
         if (newLayers == 0)
             return;

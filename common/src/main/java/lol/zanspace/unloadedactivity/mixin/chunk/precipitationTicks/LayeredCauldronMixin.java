@@ -75,7 +75,7 @@ public abstract class LayeredCauldronMixin extends AbstractCauldronBlock {
 
         double totalOdds = precipitationPickChance*getFillOdds(precipitation);
 
-        int fill = Utils.getOccurrences(timeInWeather, totalOdds, levelDifference, level.random);
+        int fill = Utils.getOccurrences(timeInWeather, totalOdds, levelDifference, false, level.random).occurrences();
 
         if (fill == 0)
             return;

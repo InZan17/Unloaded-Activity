@@ -11,12 +11,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import oshi.util.tuples.Pair;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TimeMachine {
     public static long simulateChunk(long timeDifference, ServerLevel level, LevelChunk chunk, int randomTickSpeed) {
@@ -184,23 +183,115 @@ public class TimeMachine {
             simulateBlockRandomTicks(blockPos, level, timeDifference, randomTickSpeed);
     }
 
-    public static void simulateBlockRandomTicks(BlockPos pos, ServerLevel level, long timeDifference, int randomTickSpeed) {
+    public static void simulateBlockRandomTicks(BlockPos pos, ServerLevel level, long timeLeft, int randomTickSpeed) {
         if (!UnloadedActivity.config.enableRandomTicks)
             return;
 
         BlockState state = level.getBlockState(pos);
-        Block block = state.getBlock();
 
-        for (Map.Entry<String, SimulationData.SimulateProperty> entry : block.getSimulationData().propertyMap.entrySet()) {
-            String propertyName = entry.getKey();
-            SimulationData.SimulateProperty simulateProperty = entry.getValue();
+        boolean blockHasChanged = true;
 
-            if (!block.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
-                continue;
+        while (blockHasChanged) {
+            blockHasChanged = false;
 
-            block.simulateRandTicks(state, level, pos, simulateProperty, propertyName, level.random, timeDifference, randomTickSpeed, Optional.empty());
+            Block block = state.getBlock();
+
+            Map<String, SimulationData.SimulateProperty> pendingProperties = new HashMap<>(block.getSimulationData().propertyMap);
+
+            Map<String, Long> finishedProperties = new HashMap<>();
+
+            Set<String> propertiesWithDependents = new HashSet<>();
+
+            var pendingPropertiesIterator = pendingProperties.entrySet().iterator();
+            while (pendingPropertiesIterator.hasNext()) {
+                var entry = pendingPropertiesIterator.next();
+
+                String propertyName = entry.getKey();
+                var simulateProperty = entry.getValue();
+
+                if (block.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                    finishedProperties.put(propertyName, 0L);
+                    pendingPropertiesIterator.remove();
+                }
+
+                propertiesWithDependents.addAll(simulateProperty.dependencies);
+            }
+
+            boolean continueCheck = true;
+
+            while (continueCheck) {
+                continueCheck = false;
+
+                var iterator = pendingProperties.entrySet().iterator();
+
+                while (iterator.hasNext()) {
+                    var entry = iterator.next();
+
+                    boolean validDependencies = true;
+                    long maxDuration = 0;
+
+                    var simulateProperty = entry.getValue();
+                    var propertyName = entry.getKey();
+                    for (String dependency : simulateProperty.dependencies) {
+                        Long dependencyDuration = finishedProperties.get(dependency);
+
+                        if (dependencyDuration == null) {
+                            validDependencies = false;
+                            break;
+                        }
+
+                        maxDuration = Math.max(maxDuration, dependencyDuration);
+                    }
+
+                    if (!validDependencies) {
+                        continue;
+                    }
+
+                    iterator.remove();
+
+                    if (!block.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
+                        continue;
+
+                    long simulateTime = timeLeft - maxDuration;
+
+                    assert (simulateTime >= 0);
+
+                    if (simulateTime == 0) {
+                        continue;
+                    }
+
+                    var result = block.simulateRandTicks(state, level, pos, simulateProperty, propertyName, level.random, simulateTime, randomTickSpeed, propertiesWithDependents.contains(propertyName));
+                    if (result == null) {
+                        continueCheck = false;
+                        break;
+                    }
+
+                    state = result.getLeft();
+                    pos = result.getRight();
+
+                    long duration = result.getMiddle().duration();
+
+                    assert (duration <= simulateTime);
+
+                    long simulationDuration = result.getMiddle().duration() + maxDuration;
+
+                    assert (simulationDuration <= timeLeft);
+
+                    if (state.getBlock() != block) {
+                        continueCheck = false;
+                        timeLeft -= simulationDuration;
+                        if (timeLeft > 0)
+                            blockHasChanged = true;
+                        break;
+                    }
+
+                    if (block.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                        continueCheck = true;
+                        finishedProperties.put(propertyName, simulationDuration);
+                    }
+                }
+            }
         }
-
     }
 
     public static <T extends BlockEntity> void simulateBlockEntity(ServerLevel level, BlockPos pos, BlockState blockState, T blockEntity, long timeDifference) {
