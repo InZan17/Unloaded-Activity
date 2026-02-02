@@ -49,6 +49,7 @@ public class SimulationData {
             thisSimulateProperty.maxHeight = otherSimulateProperty.maxHeight.or(() -> thisSimulateProperty.maxHeight);
             thisSimulateProperty.dependencies.addAll(otherSimulateProperty.dependencies);
             thisSimulateProperty.updateType = otherSimulateProperty.updateType.or(() -> thisSimulateProperty.updateType);
+            thisSimulateProperty.updateNeighbors = otherSimulateProperty.updateNeighbors.or(() -> thisSimulateProperty.updateNeighbors);
             thisSimulateProperty.resetOnHeightChange = otherSimulateProperty.resetOnHeightChange.or(() -> thisSimulateProperty.resetOnHeightChange);
             thisSimulateProperty.keepUpdatingAfterMaxHeight = otherSimulateProperty.keepUpdatingAfterMaxHeight.or(() -> thisSimulateProperty.keepUpdatingAfterMaxHeight);
             thisSimulateProperty.conditions.addAll(otherSimulateProperty.conditions);
@@ -70,6 +71,7 @@ public class SimulationData {
         public Set<String> dependencies = new HashSet<>();
         public Optional<String> propertyType = Optional.empty();
         public Optional<Integer> maxHeight = Optional.empty();
+        public Optional<Boolean> updateNeighbors = Optional.empty();
         public Optional<Boolean> resetOnHeightChange = Optional.empty();
         public Optional<Boolean> keepUpdatingAfterMaxHeight = Optional.empty();
         public Optional<Integer> updateType = Optional.empty();
@@ -516,6 +518,17 @@ public class SimulationData {
                             }
                             simulateProperty.maxHeight = valueResult.result().map(Number::intValue);
                             UnloadedActivity.LOGGER.info("" + simulateProperty.maxHeight);
+                        }
+                    }
+
+                    {
+                        T mapValue = propertyInfo.get("update_neighbors");
+                        if (mapValue != null) {
+                            DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                            if (valueResult.error().isPresent()) {
+                                return returnError(valueResult);
+                            }
+                            simulateProperty.updateNeighbors = valueResult.result();
                         }
                     }
 

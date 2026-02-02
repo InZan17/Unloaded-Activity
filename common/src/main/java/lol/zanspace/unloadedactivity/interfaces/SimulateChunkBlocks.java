@@ -207,6 +207,11 @@ public interface SimulateChunkBlocks {
                     }
 
                     level.setBlockAndUpdate(pos, state);
+                    boolean updateNeighbors = simulateProperty.updateNeighbors.orElse(false);
+                    if (updateNeighbors) {
+                        level.neighborChanged(state, pos, thisBlock, pos, false);
+                        level.scheduleTick(pos, thisBlock, 1);
+                    }
                 }
             } else {
                 state = state.setValue(integerProperty, newPropertyValue);

@@ -1,0 +1,11 @@
+{
+  "age": {
+    "property_type": "int",
+    "update_neighbors": true,
+    "update_type": "update_invisible",
+    "reset_on_height_change": true,
+    "keep_updating_after_max_height": false,
+    "max_height": 3,
+    "advance_probability": 1
+  }
+}
