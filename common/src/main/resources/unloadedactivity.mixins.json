@@ -36,7 +36,6 @@
     "chunk.randomTicks.PointedDripstoneMixin",
     "chunk.randomTicks.SaplingMixin",
     "chunk.randomTicks.StemMixin",
-    "chunk.randomTicks.SugarCaneMixin",
     "chunk.randomTicks.SweetBerryBushMixin",
     "chunk.randomTicks.TorchFlowerMixin",
     "chunk.randomTicks.TurtleEggMixin",

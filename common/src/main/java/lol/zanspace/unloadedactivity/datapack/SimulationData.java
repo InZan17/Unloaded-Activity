@@ -46,8 +46,11 @@ public class SimulationData {
 
             thisSimulateProperty.propertyType = otherSimulateProperty.propertyType.or(() -> thisSimulateProperty.propertyType);
             thisSimulateProperty.maxValue = otherSimulateProperty.maxValue.or(() -> thisSimulateProperty.maxValue);
+            thisSimulateProperty.maxHeight = otherSimulateProperty.maxHeight.or(() -> thisSimulateProperty.maxHeight);
             thisSimulateProperty.dependencies.addAll(otherSimulateProperty.dependencies);
             thisSimulateProperty.updateType = otherSimulateProperty.updateType.or(() -> thisSimulateProperty.updateType);
+            thisSimulateProperty.resetOnHeightChange = otherSimulateProperty.resetOnHeightChange.or(() -> thisSimulateProperty.resetOnHeightChange);
+            thisSimulateProperty.keepUpdatingAfterMaxHeight = otherSimulateProperty.keepUpdatingAfterMaxHeight.or(() -> thisSimulateProperty.keepUpdatingAfterMaxHeight);
             thisSimulateProperty.conditions.addAll(otherSimulateProperty.conditions);
 
             if (otherSimulateProperty.advanceProbability.isPresent() && thisSimulateProperty.advanceProbability.isPresent()) {
@@ -64,21 +67,15 @@ public class SimulationData {
     }
 
     public static class SimulateProperty {
-        public Set<String> dependencies;
-        public Optional<String> propertyType;
-        public Optional<Integer> updateType;
-        public Optional<CalculateValue> advanceProbability;
-        public Optional<Integer> maxValue;
-        public ArrayList<Condition> conditions;
-
-        SimulateProperty() {
-            this.dependencies = new HashSet<>();
-            this.propertyType = Optional.empty();
-            this.updateType = Optional.empty();
-            this.advanceProbability = Optional.empty();
-            this.maxValue = Optional.empty();
-            this.conditions = new ArrayList<>();
-        }
+        public Set<String> dependencies = new HashSet<>();
+        public Optional<String> propertyType = Optional.empty();
+        public Optional<Integer> maxHeight = Optional.empty();
+        public Optional<Boolean> resetOnHeightChange = Optional.empty();
+        public Optional<Boolean> keepUpdatingAfterMaxHeight = Optional.empty();
+        public Optional<Integer> updateType = Optional.empty();
+        public Optional<CalculateValue> advanceProbability = Optional.empty();
+        public Optional<Integer> maxValue = Optional.empty();
+        public ArrayList<Condition> conditions = new ArrayList<>();
 
         public <T> void parseAndApplyProbability(DynamicOps<T> ops, T input) {
             CalculateValue calculateValue = parseProbability(ops, input);
@@ -507,6 +504,40 @@ public class SimulationData {
                                 return returnError(valueResult);
                             }
                             simulateProperty.maxValue = valueResult.result().map(Number::intValue);
+                        }
+                    }
+
+                    {
+                        T mapValue = propertyInfo.get("max_height");
+                        if (mapValue != null) {
+                            DataResult<Number> valueResult = ops.getNumberValue(mapValue);
+                            if (valueResult.error().isPresent()) {
+                                return returnError(valueResult);
+                            }
+                            simulateProperty.maxHeight = valueResult.result().map(Number::intValue);
+                            UnloadedActivity.LOGGER.info("" + simulateProperty.maxHeight);
+                        }
+                    }
+
+                    {
+                        T mapValue = propertyInfo.get("reset_on_height_change");
+                        if (mapValue != null) {
+                            DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                            if (valueResult.error().isPresent()) {
+                                return returnError(valueResult);
+                            }
+                            simulateProperty.resetOnHeightChange = valueResult.result();
+                        }
+                    }
+
+                    {
+                        T mapValue = propertyInfo.get("keep_updating_after_max_height");
+                        if (mapValue != null) {
+                            DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                            if (valueResult.error().isPresent()) {
+                                return returnError(valueResult);
+                            }
+                            simulateProperty.keepUpdatingAfterMaxHeight = valueResult.result();
                         }
                     }
 
