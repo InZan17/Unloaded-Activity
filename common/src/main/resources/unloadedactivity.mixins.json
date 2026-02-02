@@ -25,7 +25,6 @@
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
     "chunk.randomTicks.BuddingAmethystMixin",
-    "chunk.randomTicks.CactusMixin",
     "chunk.randomTicks.CaveVinesMixin",
     "chunk.randomTicks.CocoaMixin",
     "chunk.randomTicks.GrowingPlantHeadMixin",
