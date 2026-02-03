@@ -29,49 +29,30 @@ public abstract class BambooSaplingMixin extends Block {
         super(properties);
     }
 
-    /*
-
     @Shadow protected void growBamboo(Level level, BlockPos pos) {}
 
     @Override
-    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        return 1d/3d;
-    }
-    @Override
-    public boolean implementsSimulateRandTicks() {return true;}
-
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        if (!UnloadedActivity.config.growBamboo) return false;
-        if (!level.isEmptyBlock(pos.above())) return false;
-        if (level.getRawBrightness(pos.above(), 0) < 9) return false;
-        return true;
-    }
-    @Override public int getMaxHeightUA() {
-        return 15;
-    }
-
-    @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (propertyName.equals("@grow_bamboo")) {
 
-        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
+            int maxHeight = simulateProperty.maxHeight.orElse(15);
 
-        OccurrencesAndDuration result = Utils.getOccurrences(timePassed, totalOdds, 1, true, random);
+            if (maxHeight <= 1 || !level.isEmptyBlock(pos.above()))
+                return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-        if (result.occurrences() == 0)
-            return null;
+            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
+            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
-        this.growBamboo(level, pos);
-        BlockPos newPos = pos.above();
-        BlockState newState = level.getBlockState(newPos);
-        if (newState.getBlock() instanceof #if MC_VER >= MC_1_19_4 BambooStalkBlock #else BambooBlock #endif bamboo) {
-            if (result.duration() < timePassed && bamboo.canSimulateRandTicks(newState, level, newPos, simulateProperty, propertyName)) {
-                return bamboo.simulateRandTicks(newState, level, newPos, simulateProperty, propertyName, random, timePassed - result.duration(), randomTickSpeed, calculateDuration);
+            var result = Utils.getOccurrences(timePassed, totalOdds, 1, true, random);
+
+            if (result.occurrences() != 0) {
+                this.growBamboo(level, pos);
+                pos = pos.above();
+                state = level.getBlockState(pos);
             }
+
+            return Triple.of(state, result, pos);
         }
-
-        return null;
+        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
     }
-
-     */
 }

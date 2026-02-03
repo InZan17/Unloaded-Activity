@@ -61,13 +61,7 @@ public interface SimulateChunkBlocks {
     }
 
     default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-
-        UnloadedActivity.LOGGER.info("wawa" + state.getBlock());
-
-        Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
-
         if (simulateProperty.maxHeight.isPresent()) {
-            UnloadedActivity.LOGGER.info("22" + state.getBlock());
             Block thisBlock = state.getBlock();
 
             BlockState blockStateAbove = level.getBlockState(pos.above());
@@ -78,7 +72,6 @@ public interface SimulateChunkBlocks {
             if (blockingAbove && (stopUpdatingAfterMaxHeight || continuesAbove)) {
                 return true;
             }
-            UnloadedActivity.LOGGER.info("22waesda" + state.getBlock());
 
             int maxHeight = simulateProperty.maxHeight.get();
 
@@ -93,7 +86,8 @@ public interface SimulateChunkBlocks {
                 return true;
             }
         }
-        UnloadedActivity.LOGGER.info("2sfsdfsdf2" + state.getBlock());
+
+        Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
 
         if (maybeProperty.isPresent()) {
             Property<?> property = maybeProperty.get();
@@ -110,14 +104,11 @@ public interface SimulateChunkBlocks {
                 }
             }
         }
-        UnloadedActivity.LOGGER.info("uh oh" + state.getBlock());
         // No property is present. Say this property is finished.
         return true;
     }
 
     default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-
-        UnloadedActivity.LOGGER.info("simulating" + state.getBlock());
         Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
 
         if (maybeProperty.isEmpty())
@@ -174,16 +165,9 @@ public interface SimulateChunkBlocks {
 
             int newPropertyValue = current + result.occurrences();
 
-
-            UnloadedActivity.LOGGER.info("got this " + result.occurrences());
-
             if (simulateProperty.maxHeight.isPresent()) {
-                int maxHeight = simulateProperty.maxHeight.get();
                 int growBlocks = newPropertyValue/(max + 1);
                 int valueRemainer = newPropertyValue % (max + 1);
-
-                UnloadedActivity.LOGGER.info("growBlocks " + growBlocks);
-                UnloadedActivity.LOGGER.info("valueRemainer " + valueRemainer);
 
                 boolean resetOnHeightChange = simulateProperty.resetOnHeightChange.orElse(true);
 

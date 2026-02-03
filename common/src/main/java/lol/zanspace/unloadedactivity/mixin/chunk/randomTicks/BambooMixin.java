@@ -37,25 +37,14 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         super(properties);
     }
 
-    /*
-
     @Shadow @Final public static IntegerProperty STAGE;
 
-    @Override public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {return 1d/3d;}
-
     @Override
-    public boolean implementsSimulateRandTicks() {return true;}
-
-    @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        if (!UnloadedActivity.config.growBamboo) return false;
-        if (!level.isEmptyBlock(pos.above())) return false;
-        if (level.getRawBrightness(pos.above(), 0) < 9) return false;
-        if (state.getValue(STAGE) == 1) return false;
-        return true;
-    }
-    @Override public int getMaxHeightUA() {
-        return 15;
+    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+        if (propertyName.equals("@grow_bamboo")) {
+            return state.getValue(STAGE) == 1;
+        }
+        return super.isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
     }
 
     @Shadow
@@ -72,42 +61,64 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
         }
         return i;
     }
+
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (propertyName.equals("@grow_bamboo")) {
+            int height = getHeightBelowUpToMax(level, pos);
 
-        int height = getHeightBelowUpToMax(level, pos);
+            int maxHeight = simulateProperty.maxHeight.orElse(15);
 
-        if (height >= getMaxHeightUA())
-            return null;
+            if (height >= maxHeight)
+                return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-        int heightDifference = getMaxHeightUA() - height;
-        int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
+            int heightDifference = maxHeight - height;
+            int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
 
-        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-        double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
+            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
+            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
 
-        var result = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, calculateDuration, random);
+            var result = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, false, random);
 
+            int totalGrowth = 0;
 
-        for(int i=0;i<result.occurrences();i++) {
-            this.performBonemeal(level, random, pos, state);
+            for(int i=0;i<result.occurrences();i++) {
+                this.performBonemeal(level, random, pos, state);
 
-            if (i == result.occurrences() - 1)
-                return null;
+                int grew = this.getHeightAboveUpToMax(level, pos);
 
-            int grew = this.getHeightAboveUpToMax(level, pos);
+                totalGrowth += grew;
 
-            if (grew == 0)
-                return null;
+                pos = pos.above(grew);
+                state = level.getBlockState(pos);
 
-            pos = pos.above(grew);
-            state = level.getBlockState(pos);
+                boolean blockChanged = state.getBlock() != this;
 
-            if (!this.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
-                return null;
+                if (blockChanged || this.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                    if (blockChanged || calculateDuration) {
+                        return Triple.of(state, OccurrencesAndDuration.recalculatedDuration(i+1, timePassed, totalOdds, random), pos);
+                    } else {
+                        return Triple.of(state, result, pos);
+                    }
+                }
+
+                // If it has successfully grown, the isRandTicksFinished check should've passed.
+                // The following checks are failed growths and doesn't need to calculate the duration.
+
+                if (totalGrowth >= maxGrowth) {
+                    return Triple.of(state, result, pos);
+                }
+
+                if (i + 1 == result.occurrences()) {
+                    return Triple.of(state, result, pos);
+                }
+
+                if (!this.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName)) {
+                    return Triple.of(state, result, pos);
+                }
+            }
+            return Triple.of(state, result, pos);
         }
-        return null;
+        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
     }
-
-     */
 }

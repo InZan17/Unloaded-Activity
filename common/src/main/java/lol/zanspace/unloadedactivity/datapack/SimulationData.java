@@ -232,6 +232,13 @@ public class SimulationData {
             }
         },
 
+        RAW_BRIGHTNESS_ABOVE {
+            @Override
+            public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
+                return level.getRawBrightness(pos.above(), 0);
+            }
+        },
+
         SUPER {
             @Override
             public double calculateValue(ServerLevel level, BlockState state, BlockPos pos) {
@@ -254,6 +261,9 @@ public class SimulationData {
                 }
                 case "raw_brightness" -> {
                     return RAW_BRIGHTNESS;
+                }
+                case "raw_brightness_above" -> {
+                    return RAW_BRIGHTNESS_ABOVE;
                 }
                 case "super" -> {
                     return SUPER;
