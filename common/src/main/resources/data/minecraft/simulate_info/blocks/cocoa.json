@@ -1,0 +1,7 @@
+{
+  "age": {
+    "property_type": "int",
+    "update_type": "update_clients",
+    "advance_probability": 0.2
+  }
+}
