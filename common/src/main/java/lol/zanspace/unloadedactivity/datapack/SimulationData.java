@@ -487,6 +487,7 @@ public class SimulationData {
                                     case "update_clients" -> simulateProperty.updateType = Optional.of(Block.UPDATE_CLIENTS);
                                     case "update_invisible" -> simulateProperty.updateType = Optional.of(Block.UPDATE_INVISIBLE);
                                     case "update_all" -> simulateProperty.updateType = Optional.of(Block.UPDATE_ALL);
+                                    case "update_none" -> simulateProperty.updateType = Optional.of(Block.UPDATE_NONE);
                                     default -> {
                                         return returnError("Invalid update type: " + updateType);
                                     }

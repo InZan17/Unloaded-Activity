@@ -1,0 +1,30 @@
+{
+  "stage": {
+    "property_type": "int",
+    "update_type": "update_none",
+
+    "conditions": [
+      {
+        "check": "raw_brightness_above",
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+
+    "advance_probability": 0.14285714285
+  },
+
+  "@grow_tree": {
+    "conditions": [
+      {
+        "check": "raw_brightness_above",
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+    "dependencies": [
+      "stage"
+    ],
+    "advance_probability": 0.14285714285
+  }
+}
