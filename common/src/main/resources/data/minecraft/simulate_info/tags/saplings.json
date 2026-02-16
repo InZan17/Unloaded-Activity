@@ -11,7 +11,14 @@
       }
     ],
 
-    "advance_probability": 0.14285714285
+    "advance_probability": {
+      "check": "local_brightness_above",
+      "comparison": "greater_or_equal",
+      "value": 9,
+
+      "true": 0.14285714285,
+      "false": 0
+    }
   },
 
   "@grow_tree": {
@@ -25,6 +32,13 @@
     "dependencies": [
       "stage"
     ],
-    "advance_probability": 0.14285714285
+    "advance_probability": {
+      "check": "local_brightness_above",
+      "comparison": "greater_or_equal",
+      "value": 9,
+
+      "true": 0.14285714285,
+      "false": 0
+    }
   }
 }
