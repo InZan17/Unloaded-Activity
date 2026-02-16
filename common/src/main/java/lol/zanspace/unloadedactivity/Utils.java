@@ -1,6 +1,8 @@
 package lol.zanspace.unloadedactivity;
 
 
+import com.mojang.datafixers.util.Pair;
+import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,17 +23,69 @@ public class Utils {
         }
         return choose;
     }
+
     public static double getRandomPickOdds(int randomTickSpeed) {
         return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
     }
-    public static OccurrencesAndDuration getOccurrences(long cycles, double odds, int maxOccurrences, boolean calculateDuration, RandomSource random) {
-        if (UnloadedActivity.config.debugLogs)
-            UnloadedActivity.LOGGER.info("Ran getOccurrences. cycles: "+cycles+" odds: "+odds+" maxOccurrences: "+maxOccurrences);
-        if (calculateDuration) {
-            return getOccurrencesAndDurationTicks(cycles, odds, maxOccurrences, random);
-        } else {
-            return new OccurrencesAndDuration(getOccurrencesBinomial(cycles, odds, maxOccurrences, random), cycles);
+
+    public static OccurrencesAndDuration getOccurrences(ServerLevel level, BlockState state, BlockPos pos, long endTime, long cycles, SimulationData.CalculateValue probability, int maxOccurrences, int randomTickSpeed, boolean calculateDuration, RandomSource random) {
+        if (maxOccurrences <= 0)
+            return OccurrencesAndDuration.empty();
+
+        double randomPickOdds = getRandomPickOdds(randomTickSpeed);
+
+        int successes = 0;
+
+        long remainingCycles = cycles;
+
+        double averageProbability = 0.0;
+
+        while (remainingCycles > 0) {
+            long currentTime = endTime - remainingCycles;
+            long nextOddsSwitch = probability.getNextOddsSwitchDuration(level, state, pos, currentTime, false, false);
+
+            long simulateForCycles = Math.min(nextOddsSwitch, remainingCycles);
+
+            double odds = probability.calculateValue(level, state, pos, currentTime, false, false);
+
+            if (UnloadedActivity.config.debugLogs)
+                UnloadedActivity.LOGGER.info("Simulating from " + currentTime + " to " + (currentTime + simulateForCycles) + " (difference: " + simulateForCycles + ") with odds " + odds);
+
+            int successesThisRound = getOccurrencesBinomial(simulateForCycles, odds * randomPickOdds, maxOccurrences - successes, random);
+
+            successes += successesThisRound;
+
+            if (successes >= maxOccurrences) {
+                if (calculateDuration) {
+                    long failedTrials = sampleNegativeBinomialWithMax(simulateForCycles, successesThisRound, odds * randomPickOdds, random);
+                    long duration = failedTrials + successesThisRound;
+
+
+                    averageProbability += odds * duration;
+
+                    long passedCycles = cycles - remainingCycles;
+
+                    if (UnloadedActivity.config.debugLogs)
+                        UnloadedActivity.LOGGER.info("Got simulation duration of " + duration);
+
+                    long finalDuration = passedCycles + duration;
+
+                    return new OccurrencesAndDuration(successes, finalDuration, averageProbability / finalDuration);
+                } else {
+                    long quickDuration = cycles - remainingCycles + simulateForCycles;
+                    return new OccurrencesAndDuration(successes, quickDuration, averageProbability / quickDuration);
+                }
+            }
+
+            remainingCycles -= simulateForCycles;
+
+            averageProbability += odds * simulateForCycles;
         }
+
+        UnloadedActivity.LOGGER.info("successes are " + successes);
+
+        return new OccurrencesAndDuration(successes, cycles, averageProbability / cycles);
+
     }
 
     //good for very low odds and when maxOccurrences are very high or unrestricted
@@ -229,13 +283,14 @@ public class Utils {
         return (long) floor(number+random.nextDouble());
     }
 
+    /*
     public static OccurrencesAndDuration getOccurrencesAndDurationTicks(long cycles, double odds, int maxOccurrences, RandomSource random) {
 
         if (odds <= 0)
-            return new OccurrencesAndDuration(0,cycles);
+            return new OccurrencesAndDuration(0, cycles, 0.0);
 
         if (maxOccurrences <= 0)
-            return new OccurrencesAndDuration(0, 0);
+            return new OccurrencesAndDuration(0, 0, odds);
 
         int successes = getOccurrencesBinomial(cycles, odds, maxOccurrences, random);
 
@@ -249,7 +304,7 @@ public class Utils {
         }
 
         return new OccurrencesAndDuration(successes, duration);
-    }
+    }*/
 
     public static long getTicksSinceTime(long currentTime, long timePassed, int startTime, int stopTime) {
 

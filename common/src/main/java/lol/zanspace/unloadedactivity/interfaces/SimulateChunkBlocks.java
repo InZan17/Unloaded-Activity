@@ -27,7 +27,7 @@ public interface SimulateChunkBlocks {
     };
 
     default double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        return simulateProperty.advanceProbability.map(calculateValue -> calculateValue.calculateValue(level, state, pos)).orElse(0.0);
+        return simulateProperty.advanceProbability.map(calculateValue -> calculateValue.calculateValue(level, state, pos, level.getDayTime(), false, false)).orElse(0.0);
     };
 
     default int getCurrentAgeUA(BlockState state) {
@@ -52,7 +52,7 @@ public interface SimulateChunkBlocks {
             return false;
 
         for (SimulationData.Condition condition : simulateProperty.conditions) {
-            if (!condition.isValid(level, state, pos)) {
+            if (!condition.isValid(level, state, pos, -1, false, false)) {
                 return false;
             }
         }
@@ -128,7 +128,6 @@ public interface SimulateChunkBlocks {
             if (simulateProperty.maxHeight.isPresent()) {
                 int maxHeight = simulateProperty.maxHeight.get();
 
-
                 int height;
                 for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
 
@@ -155,10 +154,7 @@ public interface SimulateChunkBlocks {
             if (updateCount <= 0)
                 return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
-
-            OccurrencesAndDuration result = Utils.getOccurrences(timePassed, totalOdds, updateCount, calculateDuration, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), updateCount, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);

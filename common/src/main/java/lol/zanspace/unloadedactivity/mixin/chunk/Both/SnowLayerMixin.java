@@ -56,7 +56,7 @@ public abstract class SnowLayerMixin extends Block {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*this.getOdds(level, state, pos, simulateProperty, propertyName);;
 
-        if (Utils.getOccurrences(timePassed, pickOdds, 1, false, random).occurrences() != 0) {
+        if (Utils.getOccurrencesBinomial(timePassed, pickOdds, 1, random) != 0) {
             dropResources(state, level, pos);
             level.removeBlock(pos, false);
         }
@@ -97,7 +97,7 @@ public abstract class SnowLayerMixin extends Block {
 
         int heightDifference = maxSnowHeight-currentSnowHeight;
 
-        int newLayers = Utils.getOccurrences(timeInWeather, precipitationPickChance, heightDifference, false, level.random).occurrences();
+        int newLayers = Utils.getOccurrencesBinomial(timeInWeather, precipitationPickChance, heightDifference, level.random);
 
         if (newLayers == 0)
             return;

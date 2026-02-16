@@ -40,10 +40,7 @@ public abstract class BambooSaplingMixin extends Block {
             if (maxHeight <= 1 || !level.isEmptyBlock(pos.above()))
                 return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
-
-            var result = Utils.getOccurrences(timePassed, totalOdds, 1, true, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, true, random);
 
             if (result.occurrences() != 0) {
                 this.growBamboo(level, pos);

@@ -49,20 +49,9 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-
         if (propertyName.equals("@grow_tree")) {
-            if (level.getBrightness(LightLayer.BLOCK, pos.above()) < 9) { // If there isnt enough block lights we will do a calculation on how many ticks the tree could have spent in sunlight.
-                int stopGrowTime = 13027; //stops growing at 12739 ticks when raining, 13027 when no rain
-                int startGrowTime = 22974; //starts growing at 23267 ticks when raining, 22974 when no rain
 
-                timePassed = Utils.getTicksSinceTime(level.getDayTime(),timePassed,startGrowTime,stopGrowTime);
-            }
-
-            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-            double randomGrowChance = getOdds(level, state, pos, simulateProperty, propertyName);
-            double totalOdds = randomPickChance * randomGrowChance;
-
-            OccurrencesAndDuration result = Utils.getOccurrences(timePassed, totalOdds, 1, false, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);

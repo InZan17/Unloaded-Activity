@@ -61,7 +61,7 @@ public abstract class AirMixin extends Block {
 
         int maxSnowHeight = getMaxSnowHeight(level);
 
-        int layers = Utils.getOccurrences(timeInWeather, precipitationPickChance, min(maxSnowHeight, SnowLayerBlock.MAX_HEIGHT), false, level.random).occurrences();
+        int layers = Utils.getOccurrencesBinomial(timeInWeather, precipitationPickChance, min(maxSnowHeight, SnowLayerBlock.MAX_HEIGHT), level.random);
 
         if (layers == 0)
             return;

@@ -260,6 +260,9 @@ public class TimeMachine {
                         continue;
                     }
 
+                    if (UnloadedActivity.config.debugLogs)
+                        UnloadedActivity.LOGGER.info("Simulating property " + propertyName + " on block " + block);
+
                     var result = block.simulateRandTicks(state, level, pos, simulateProperty, propertyName, level.random, simulateTime, randomTickSpeed, propertiesWithDependents.contains(propertyName));
                     if (result == null) {
                         continueCheck = false;

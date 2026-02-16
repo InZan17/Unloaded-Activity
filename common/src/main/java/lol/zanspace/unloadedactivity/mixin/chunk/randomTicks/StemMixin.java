@@ -65,10 +65,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
         if (propertyName.equals("@grow_fruit")) {
-            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
-
-            OccurrencesAndDuration result = Utils.getOccurrences(timePassed, totalOdds, 1, true, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);

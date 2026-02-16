@@ -75,10 +75,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
             int heightDifference = maxHeight - height;
             int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
 
-            double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
-            double totalOdds = getOdds(level, state, pos, simulateProperty, propertyName) * randomPickChance;
-
-            var result = Utils.getOccurrences(timePassed, totalOdds, maxGrowth, false, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), maxGrowth, randomTickSpeed, false, random);
 
             int totalGrowth = 0;
 
@@ -96,7 +93,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
 
                 if (blockChanged || this.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
                     if (blockChanged || calculateDuration) {
-                        return Triple.of(state, OccurrencesAndDuration.recalculatedDuration(i+1, timePassed, totalOdds, random), pos);
+                        return Triple.of(state, OccurrencesAndDuration.recalculatedDuration(i+1, timePassed, result.averageProbability(), random), pos);
                     } else {
                         return Triple.of(state, result, pos);
                     }

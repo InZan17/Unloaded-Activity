@@ -102,7 +102,7 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
                 var list = datas.computeIfAbsent(key, k -> new ArrayList<>());
                 list.add(simulationData);
             } catch(Exception e) {
-                UnloadedActivity.LOGGER.error("{}\n{}", key, e);
+                UnloadedActivity.LOGGER.error("{}\n{}\n{}", key, e, e.getStackTrace());
             }
         });
 
