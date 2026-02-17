@@ -1,0 +1,16 @@
+{
+  "budding": {
+    "simulation_type": "budding",
+    "update_type": "update_all",
+    "advance_probability": 0.33333333333333,
+    "budding_direction_property": "facing",
+    "waterlogged_property": "waterlogged",
+    "min_water_value": 8,
+    "budding_blocks": [
+      "minecraft:small_amethyst_bud",
+      "minecraft:medium_amethyst_bud",
+      "minecraft:large_amethyst_bud",
+      "minecraft:amethyst_cluster"
+    ]
+  }
+}

@@ -5,9 +5,25 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.RegistryLoader;
 import net.minecraft.world.level.block.Block;
 
+#if MC_VER >= MC_1_21_11
+import net.minecraft.resources.Identifier;
+#else
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+#endif
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static lol.zanspace.unloadedactivity.datapack.SimulationData.returnError;
 
@@ -23,6 +39,11 @@ public class SimulateProperty {
     public Optional<CalculateValue> advanceProbability = Optional.empty();
     public Optional<Integer> maxValue = Optional.empty();
     public ArrayList<Condition> conditions = new ArrayList<>();
+    public Optional<String> buddingDirectionProperty = Optional.empty();
+    public Optional<Integer> minWaterValue = Optional.empty();
+    public Optional<String> waterloggedProperty = Optional.empty();
+    public ArrayList<Direction> ignoreBuddingDirections = new ArrayList<>();
+    public Optional<ArrayList< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif >> buddingBlocks = Optional.empty();
 
     public void merge(SimulateProperty otherSimulateProperty) {
         this.simulationType = otherSimulateProperty.simulationType.or(() -> this.simulationType);
@@ -35,6 +56,11 @@ public class SimulateProperty {
         this.resetOnHeightChange = otherSimulateProperty.resetOnHeightChange.or(() -> this.resetOnHeightChange);
         this.keepUpdatingAfterMaxHeight = otherSimulateProperty.keepUpdatingAfterMaxHeight.or(() -> this.keepUpdatingAfterMaxHeight);
         this.conditions.addAll(otherSimulateProperty.conditions);
+        this.ignoreBuddingDirections.addAll(otherSimulateProperty.ignoreBuddingDirections);
+        this.minWaterValue = otherSimulateProperty.minWaterValue.or(() -> this.minWaterValue);
+        this.waterloggedProperty = otherSimulateProperty.waterloggedProperty.or(() -> this.waterloggedProperty);
+        this.buddingDirectionProperty = otherSimulateProperty.buddingDirectionProperty.or(() -> this.buddingDirectionProperty);
+        this.buddingBlocks = otherSimulateProperty.buddingBlocks.or(() -> this.buddingBlocks);
 
         if (otherSimulateProperty.advanceProbability.isPresent() && this.advanceProbability.isPresent()) {
             var oldProbability = this.advanceProbability.get();
@@ -68,6 +94,77 @@ public class SimulateProperty {
         }
 
         SimulationType simulationType = this.simulationType.get();
+
+        switch (simulationType) {
+            case INT_PROPERTY -> {
+            }
+            case BUDDING -> {
+
+                if (this.buddingDirectionProperty.isEmpty()) {
+                    throw new RuntimeException("budding_direction_property has not been set.");
+                }
+
+                if (this.buddingBlocks.isEmpty()) {
+                    throw new RuntimeException("budding_blocks has not been set.");
+                }
+
+                if (this.buddingBlocks.get().isEmpty()) {
+                    throw new RuntimeException("budding_blocks must not be empty.");
+                }
+
+                for (var buddingBlockId : this.buddingBlocks.get()) {
+                    Optional<Block> maybeBlock = Registry.BLOCK.getOptional(buddingBlockId);
+                    if (maybeBlock.isEmpty()) {
+                        throw new RuntimeException(buddingBlockId + " is not a valid block.");
+                    }
+
+                    Block block = maybeBlock.get();
+
+                    String buddingDirectionProperty = this.buddingDirectionProperty.get();
+
+                    {
+                        Optional<Property<?>> maybeProperty = block.getProperty(block.defaultBlockState(), buddingDirectionProperty);
+
+                        if (maybeProperty.isEmpty()) {
+                            throw new RuntimeException(buddingDirectionProperty + " is not a valid direction property on " + block + ". It doesn't exist.");
+                        }
+
+                        Property<?> property = maybeProperty.get();
+
+                        if (property instanceof DirectionProperty directionProperty) {
+                            List<Direction> availableDirections = Arrays.stream(Direction.values()).filter(direction -> !this.ignoreBuddingDirections.contains(direction)).toList();
+                            List<Direction> possibleDirections = directionProperty.getPossibleValues().stream().toList();
+                            for (Direction direction : availableDirections) {
+                                if (!possibleDirections.contains(direction)) {
+                                    throw new RuntimeException(block + " direction property " + buddingDirectionProperty + " doesn't support the direction " + direction + ". Consider adding it to ignore_budding_directions.");
+                                }
+                            }
+                        } else {
+                            throw new RuntimeException(buddingDirectionProperty + " is not a valid direction property on " + block + ". It holds a different type.");
+                        }
+                    }
+
+                    if (this.waterloggedProperty.isPresent()) {
+                        String waterloggedProperty = this.waterloggedProperty.get();
+                        Optional<Property<?>> maybeProperty = block.getProperty(block.defaultBlockState(), waterloggedProperty);
+
+                        if (maybeProperty.isEmpty()) {
+                            throw new RuntimeException(waterloggedProperty + " is not a valid boolean property on " + block + ". It doesn't exist.");
+                        }
+
+                        Property<?> property = maybeProperty.get();
+
+                        if (property instanceof BooleanProperty) {
+                            // yay
+                        } else {
+                            throw new RuntimeException(waterloggedProperty + " is not a valid boolean property on " + block + ". It holds a different type.");
+                        }
+                    }
+                }
+            }
+            case ACTION -> {
+            }
+        }
     }
 
     public <T> void parseAndApplyProbability(DynamicOps<T> ops, T input) {
@@ -207,6 +304,81 @@ public class SimulateProperty {
                     return returnError(valueResult);
                 }
                 simulateProperty.keepUpdatingAfterMaxHeight = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("ignore_budding_directions");
+            if (mapValue != null) {
+                var listResult = ops.getStream(mapValue);
+                if (listResult.error().isPresent()) {
+                    return returnError(listResult);
+                }
+
+                for (T ignoredDirection : listResult.result().get().toList()) {
+                    var result = Direction.CODEC.decode(ops, ignoredDirection);
+                    if (result.result().isEmpty()) {
+                        returnError(result);
+                    }
+
+                    simulateProperty.ignoreBuddingDirections.add(result.result().get().getFirst());
+                }
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("min_water_value");
+            if (mapValue != null) {
+                DataResult<Number> valueResult = ops.getNumberValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.minWaterValue = valueResult.result().map(Number::intValue);
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("waterlogged_property");
+            if (mapValue != null) {
+                DataResult<String> valueResult = ops.getStringValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.waterloggedProperty = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("budding_direction_property");
+            if (mapValue != null) {
+                DataResult<String> valueResult = ops.getStringValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.buddingDirectionProperty = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("budding_blocks");
+            if (mapValue != null) {
+                var listResult = ops.getStream(mapValue);
+                if (listResult.error().isPresent()) {
+                    return returnError(listResult);
+                }
+
+                ArrayList< ResourceLocation > buddingBlocks = new ArrayList<>();
+
+                for (T buddingBlockId : listResult.result().get().toList()) {
+                    var result = ResourceLocation.CODEC.decode(ops, buddingBlockId);
+                    if (result.result().isEmpty()) {
+                        returnError(result);
+                    }
+
+                    buddingBlocks.add(result.result().get().getFirst());
+                }
+
+                simulateProperty.buddingBlocks = Optional.of(buddingBlocks);
             }
         }
 
