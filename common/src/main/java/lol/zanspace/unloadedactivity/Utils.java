@@ -2,6 +2,7 @@ package lol.zanspace.unloadedactivity;
 
 
 import com.mojang.datafixers.util.Pair;
+import lol.zanspace.unloadedactivity.datapack.CalculateValue;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +29,7 @@ public class Utils {
         return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
     }
 
-    public static OccurrencesAndDuration getOccurrences(ServerLevel level, BlockState state, BlockPos pos, long endTime, long cycles, SimulationData.CalculateValue probability, int maxOccurrences, int randomTickSpeed, boolean calculateDuration, RandomSource random) {
+    public static OccurrencesAndDuration getOccurrences(ServerLevel level, BlockState state, BlockPos pos, long endTime, long cycles, CalculateValue probability, int maxOccurrences, int randomTickSpeed, boolean calculateDuration, RandomSource random) {
         if (maxOccurrences <= 0)
             return OccurrencesAndDuration.empty();
 

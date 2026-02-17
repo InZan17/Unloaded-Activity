@@ -1,5 +1,6 @@
 package lol.zanspace.unloadedactivity;
 
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -196,7 +197,7 @@ public class TimeMachine {
 
             Block block = state.getBlock();
 
-            Map<String, SimulationData.SimulateProperty> pendingProperties = new HashMap<>(block.getSimulationData().propertyMap);
+            Map<String, SimulateProperty> pendingProperties = new HashMap<>(block.getSimulationData().propertyMap);
 
             Map<String, Long> finishedProperties = new HashMap<>();
 

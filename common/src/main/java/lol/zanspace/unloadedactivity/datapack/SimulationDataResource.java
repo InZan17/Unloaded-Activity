@@ -116,7 +116,7 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
             SimulationData finalSimulationData = new SimulationData();
 
             for (SimulationData simulationData : dataList) {
-                finalSimulationData.absorb(simulationData);
+                finalSimulationData.merge(simulationData);
             }
 
             if (this.isBlocks) {

@@ -3,6 +3,8 @@ package lol.zanspace.unloadedactivity.interfaces;
 import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.Condition;
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.mixin.IntegerPropertyAccessor;
 import net.minecraft.core.BlockPos;
@@ -26,10 +28,6 @@ public interface SimulateChunkBlocks {
         return Optional.empty();
     };
 
-    default double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        return simulateProperty.advanceProbability.map(calculateValue -> calculateValue.calculateValue(level, state, pos, level.getDayTime(), false, false)).orElse(0.0);
-    };
-
     default int getCurrentAgeUA(BlockState state) {
         return 0;
     }
@@ -46,12 +44,12 @@ public interface SimulateChunkBlocks {
         return !getSimulationData().isEmpty();
     };
 
-    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
         boolean isFinished = isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
         if (isFinished)
             return false;
 
-        for (SimulationData.Condition condition : simulateProperty.conditions) {
+        for (Condition condition : simulateProperty.conditions) {
             if (!condition.isValid(level, state, pos, -1, false, false)) {
                 return false;
             }
@@ -60,7 +58,7 @@ public interface SimulateChunkBlocks {
         return true;
     }
 
-    default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+    default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
         if (simulateProperty.maxHeight.isPresent()) {
             Block thisBlock = state.getBlock();
 
@@ -108,7 +106,7 @@ public interface SimulateChunkBlocks {
         return true;
     }
 
-    default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
         Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
 
         if (maybeProperty.isEmpty())

@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity.mixin.chunk.Both;
 import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -40,21 +41,16 @@ public abstract class SnowLayerMixin extends Block {
     }
 
     @Override
-    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        return 1;
-    }
-
-    @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.meltSnow) return false;
         if (level.getBrightness(LightLayer.BLOCK, pos) <= 11) return false;
         return true;
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
-        double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*this.getOdds(level, state, pos, simulateProperty, propertyName);;
+        double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*1;//this.getOdds(level, state, pos, simulateProperty, propertyName);;
 
         if (Utils.getOccurrencesBinomial(timePassed, pickOdds, 1, random) != 0) {
             dropResources(state, level, pos);

@@ -60,12 +60,12 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
             SimulationData tagSimulationData = SimulationDataResource.TAG_MAP.get(tagId);
 
             if (tagSimulationData != null) {
-                finalSimulationData.absorb(tagSimulationData);
+                finalSimulationData.merge(tagSimulationData);
             }
         }
 
         if (blockSimulationData != null) {
-            finalSimulationData.absorb(blockSimulationData);
+            finalSimulationData.merge(blockSimulationData);
         }
 
         SimulationDataResource.BLOCK_MAP.put(blockId, finalSimulationData);
