@@ -5,6 +5,7 @@ import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
+import lol.zanspace.unloadedactivity.datapack.SimulationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -17,12 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-#if MC_VER >= MC_1_19_4
-import net.minecraft.world.level.block.BambooStalkBlock;
-#else
-import net.minecraft.world.level.block.BambooBlock;
-#endif
-
 @Mixin(BambooSaplingBlock.class)
 public abstract class BambooSaplingMixin extends Block {
 
@@ -33,8 +28,8 @@ public abstract class BambooSaplingMixin extends Block {
     @Shadow protected void growBamboo(Level level, BlockPos pos) {}
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (propertyName.equals("@grow_bamboo")) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
 
             int maxHeight = simulateProperty.maxHeight.orElse(15);
 
@@ -51,6 +46,6 @@ public abstract class BambooSaplingMixin extends Block {
 
             return Triple.of(state, result, pos);
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
     }
 }

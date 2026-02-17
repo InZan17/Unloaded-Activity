@@ -1,5 +1,6 @@
 {
-  "@grow_fruit": {
+  "grow_fruit": {
+    "simulation_type": "action",
     "conditions": [
       {
         "check": "raw_brightness",

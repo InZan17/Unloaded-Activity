@@ -41,14 +41,14 @@ public abstract class SnowLayerMixin extends Block {
     }
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (!UnloadedActivity.config.meltSnow) return false;
         if (level.getBrightness(LightLayer.BLOCK, pos) <= 11) return false;
         return true;
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*1;//this.getOdds(level, state, pos, simulateProperty, propertyName);;
 

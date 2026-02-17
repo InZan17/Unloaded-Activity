@@ -12,6 +12,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 #endif
+import lol.zanspace.unloadedactivity.datapack.SimulationType;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -55,17 +56,18 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     #endif
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
-        if (propertyName.equals("@grow_fruit")) {
+    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_fruit")) {
             // When growing fruit, the stem block gets entirely replaced. There is nothing to check.
             return false;
         }
-        return super.isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
+
+        return super.isRandTicksFinished(state, level, pos, simulateProperty);
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (propertyName.equals("@grow_fruit")) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_fruit")) {
             OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
@@ -104,6 +106,6 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
             }
             return Triple.of(state, result, pos);
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
     }
 }

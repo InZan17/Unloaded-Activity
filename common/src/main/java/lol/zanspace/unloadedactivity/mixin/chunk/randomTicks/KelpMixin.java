@@ -19,8 +19,8 @@ public abstract class KelpMixin extends GrowingPlantHeadBlock implements LiquidB
         super(properties, direction, voxelShape, bl, d);
     }
 
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
+    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (!UnloadedActivity.config.growKelp) return false;
-        return super.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName);
+        return super.canSimulateRandTicks(state, level, pos, simulateProperty);
     }
 }

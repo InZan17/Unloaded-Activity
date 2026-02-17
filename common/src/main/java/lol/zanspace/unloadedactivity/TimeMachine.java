@@ -210,7 +210,7 @@ public class TimeMachine {
                 String propertyName = entry.getKey();
                 var simulateProperty = entry.getValue();
 
-                if (block.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                if (block.isRandTicksFinished(state, level, pos, simulateProperty)) {
                     finishedProperties.put(propertyName, 0L);
                     pendingPropertiesIterator.remove();
                 }
@@ -250,7 +250,7 @@ public class TimeMachine {
 
                     iterator.remove();
 
-                    if (!block.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName))
+                    if (!block.canSimulateRandTicks(state, level, pos, simulateProperty))
                         continue;
 
                     long simulateTime = timeLeft - maxDuration;
@@ -264,7 +264,7 @@ public class TimeMachine {
                     if (UnloadedActivity.config.debugLogs)
                         UnloadedActivity.LOGGER.info("Simulating property " + propertyName + " on block " + block);
 
-                    var result = block.simulateRandTicks(state, level, pos, simulateProperty, propertyName, level.random, simulateTime, randomTickSpeed, propertiesWithDependents.contains(propertyName));
+                    var result = block.simulateRandTicks(state, level, pos, simulateProperty, level.random, simulateTime, randomTickSpeed, propertiesWithDependents.contains(propertyName));
                     if (result == null) {
                         continueCheck = false;
                         break;
@@ -289,7 +289,7 @@ public class TimeMachine {
                         break;
                     }
 
-                    if (block.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                    if (block.isRandTicksFinished(state, level, pos, simulateProperty)) {
                         continueCheck = true;
                         finishedProperties.put(propertyName, simulationDuration);
                     }

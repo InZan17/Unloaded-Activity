@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity.mixin;
 import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
 import lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks;
@@ -66,6 +67,13 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
 
         if (blockSimulationData != null) {
             finalSimulationData.merge(blockSimulationData);
+        }
+
+        for (var entry : finalSimulationData.propertyMap.entrySet()) {
+            String fallbackTarget = entry.getKey();
+            SimulateProperty simulateProperty = entry.getValue();
+            simulateProperty.finalize(fallbackTarget);
+            simulateProperty.throwIfInvalid();
         }
 
         SimulationDataResource.BLOCK_MAP.put(blockId, finalSimulationData);

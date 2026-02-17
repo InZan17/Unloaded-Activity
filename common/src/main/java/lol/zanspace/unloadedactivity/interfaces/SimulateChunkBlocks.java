@@ -44,8 +44,8 @@ public interface SimulateChunkBlocks {
         return !getSimulationData().isEmpty();
     };
 
-    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
-        boolean isFinished = isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
+    default boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        boolean isFinished = isRandTicksFinished(state, level, pos, simulateProperty);
         if (isFinished)
             return false;
 
@@ -58,7 +58,7 @@ public interface SimulateChunkBlocks {
         return true;
     }
 
-    default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
+    default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (simulateProperty.maxHeight.isPresent()) {
             Block thisBlock = state.getBlock();
 
@@ -85,120 +85,130 @@ public interface SimulateChunkBlocks {
             }
         }
 
-        Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
+        switch (simulateProperty.simulationType.get()) {
+            case INT_PROPERTY -> {
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target.get());
 
-        if (maybeProperty.isPresent()) {
-            Property<?> property = maybeProperty.get();
+                if (maybeProperty.isPresent()) {
+                    Property<?> property = maybeProperty.get();
 
-            if (property instanceof IntegerProperty integerProperty) {
-                int propertyMax = ((IntegerPropertyAccessor)integerProperty).unloaded_activity$getMax();
-                int max = Math.min(propertyMax, simulateProperty.maxValue.orElse(propertyMax));
-                int current = state.getValue(integerProperty);
+                    if (property instanceof IntegerProperty integerProperty) {
+                        int propertyMax = ((IntegerPropertyAccessor)integerProperty).unloaded_activity$getMax();
+                        int max = Math.min(propertyMax, simulateProperty.maxValue.orElse(propertyMax));
+                        int current = state.getValue(integerProperty);
 
-                if (current >= max) {
-                    return true;
-                } else {
-                    return false;
+                        if (current >= max) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
                 }
             }
         }
-        // No property is present. Say this property is finished.
+
         return true;
     }
 
-    default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
+    default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
-        if (maybeProperty.isEmpty())
-            return Triple.of(state, OccurrencesAndDuration.empty(), pos);
+        switch (simulateProperty.simulationType.get()) {
+            case INT_PROPERTY -> {
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target.get());
 
-        Property<?> property = maybeProperty.get();
+                if (maybeProperty.isEmpty())
+                    return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-        if (property instanceof IntegerProperty integerProperty) {
-            Block thisBlock = state.getBlock();
+                Property<?> property = maybeProperty.get();
 
-            int propertyMax = ((IntegerPropertyAccessor)integerProperty).unloaded_activity$getMax();
-            int max = Math.min(propertyMax, simulateProperty.maxValue.orElse(propertyMax));
-            int current = state.getValue(integerProperty);
+                if (property instanceof IntegerProperty integerProperty) {
+                    Block thisBlock = state.getBlock();
 
-            int updateCount = max - current;
+                    int propertyMax = ((IntegerPropertyAccessor)integerProperty).unloaded_activity$getMax();
+                    int max = Math.min(propertyMax, simulateProperty.maxValue.orElse(propertyMax));
+                    int current = state.getValue(integerProperty);
 
-            if (simulateProperty.maxHeight.isPresent()) {
-                int maxHeight = simulateProperty.maxHeight.get();
+                    int updateCount = max - current;
 
-                int height;
-                for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                    if (simulateProperty.maxHeight.isPresent()) {
+                        int maxHeight = simulateProperty.maxHeight.get();
 
-                int heightDifference = maxHeight - height;
+                        int height;
+                        for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
 
-                int freeSpaceAbove;
-                for(freeSpaceAbove = 1; level.isEmptyBlock(pos.above(freeSpaceAbove)) && freeSpaceAbove <= heightDifference; ++freeSpaceAbove) {}
-                --freeSpaceAbove;
+                        int heightDifference = maxHeight - height;
 
-                // Updates for growing in height
-                updateCount += freeSpaceAbove;
+                        int freeSpaceAbove;
+                        for(freeSpaceAbove = 1; level.isEmptyBlock(pos.above(freeSpaceAbove)) && freeSpaceAbove <= heightDifference; ++freeSpaceAbove) {}
+                        --freeSpaceAbove;
 
-                boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight.orElse(false);
+                        // Updates for growing in height
+                        updateCount += freeSpaceAbove;
 
-                if (stopUpdatingAfterMaxHeight) {
-                    updateCount += max * Math.max(freeSpaceAbove - 1, 0);
-                } else {
-                    updateCount += max * freeSpaceAbove;
-                }
+                        boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight.orElse(false);
+
+                        if (stopUpdatingAfterMaxHeight) {
+                            updateCount += max * Math.max(freeSpaceAbove - 1, 0);
+                        } else {
+                            updateCount += max * freeSpaceAbove;
+                        }
 
 
-            }
+                    }
 
-            if (updateCount <= 0)
-                return Triple.of(state, OccurrencesAndDuration.empty(), pos);
+                    if (updateCount <= 0)
+                        return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), updateCount, randomTickSpeed, calculateDuration, random);
+                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), updateCount, randomTickSpeed, calculateDuration, random);
 
-            if (result.occurrences() == 0)
-                return Triple.of(state, result, pos);
+                    if (result.occurrences() == 0)
+                        return Triple.of(state, result, pos);
 
-            int newPropertyValue = current + result.occurrences();
+                    int newPropertyValue = current + result.occurrences();
 
-            if (simulateProperty.maxHeight.isPresent()) {
-                int growBlocks = newPropertyValue/(max + 1);
-                int valueRemainer = newPropertyValue % (max + 1);
+                    if (simulateProperty.maxHeight.isPresent()) {
+                        int growBlocks = newPropertyValue/(max + 1);
+                        int valueRemainer = newPropertyValue % (max + 1);
 
-                boolean resetOnHeightChange = simulateProperty.resetOnHeightChange.orElse(true);
+                        boolean resetOnHeightChange = simulateProperty.resetOnHeightChange.orElse(true);
 
-                int belowValue = resetOnHeightChange ? 0 : max;
+                        int belowValue = resetOnHeightChange ? 0 : max;
 
-                if (growBlocks != 0) {
-                    state = state.setValue(integerProperty, belowValue);
-                } else {
-                    state = state.setValue(integerProperty, valueRemainer);
-                }
-                level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
+                        if (growBlocks != 0) {
+                            state = state.setValue(integerProperty, belowValue);
+                        } else {
+                            state = state.setValue(integerProperty, valueRemainer);
+                        }
+                        level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
 
-                for (int i=0;i<growBlocks;i++) {
+                        for (int i=0;i<growBlocks;i++) {
 
-                    pos = pos.above();
+                            pos = pos.above();
 
-                    if (i+1==growBlocks) {
-                        state = thisBlock.defaultBlockState().setValue(integerProperty, valueRemainer);
+                            if (i+1==growBlocks) {
+                                state = thisBlock.defaultBlockState().setValue(integerProperty, valueRemainer);
+                            } else {
+                                state = thisBlock.defaultBlockState().setValue(integerProperty, belowValue);
+                            }
+
+                            level.setBlockAndUpdate(pos, state);
+                            boolean updateNeighbors = simulateProperty.updateNeighbors.orElse(false);
+                            if (updateNeighbors) {
+                                level.neighborChanged(state, pos, thisBlock, pos, false);
+                                level.scheduleTick(pos, thisBlock, 1);
+                            }
+                        }
                     } else {
-                        state = thisBlock.defaultBlockState().setValue(integerProperty, belowValue);
+                        state = state.setValue(integerProperty, newPropertyValue);
+                        level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
                     }
 
-                    level.setBlockAndUpdate(pos, state);
-                    boolean updateNeighbors = simulateProperty.updateNeighbors.orElse(false);
-                    if (updateNeighbors) {
-                        level.neighborChanged(state, pos, thisBlock, pos, false);
-                        level.scheduleTick(pos, thisBlock, 1);
-                    }
+
+                    return Triple.of(state, result, pos);
                 }
-            } else {
-                state = state.setValue(integerProperty, newPropertyValue);
-                level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
             }
-
-
-            return Triple.of(state, result, pos);
         }
+
 
         return Triple.of(state, OccurrencesAndDuration.empty(), pos);
     };

@@ -5,6 +5,7 @@ import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
+import lol.zanspace.unloadedactivity.datapack.SimulationType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,16 +42,17 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     #endif
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
-        if (propertyName.equals("@grow_tree")) {
+    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_tree")) {
             return false;
         }
-        return super.isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
+
+        return super.isRandTicksFinished(state, level, pos, simulateProperty);
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (propertyName.equals("@grow_tree")) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_tree")) {
 
             OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
 
@@ -61,6 +63,6 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
 
             return null;
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
     }
 }

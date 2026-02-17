@@ -41,10 +41,10 @@ public abstract class MangrovePropaguleMixin extends SaplingBlock {
     }
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (isHanging(state))
             return false;
 
-        return super.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName);
+        return super.canSimulateRandTicks(state, level, pos, simulateProperty);
     }
 }

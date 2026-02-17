@@ -13,7 +13,8 @@ import static lol.zanspace.unloadedactivity.datapack.SimulationData.returnError;
 
 public class SimulateProperty {
     public Set<String> dependencies = new HashSet<>();
-    public Optional<String> propertyType = Optional.empty();
+    public Optional<SimulationType> simulationType = Optional.empty();
+    public Optional<String> target = Optional.empty();
     public Optional<Integer> maxHeight = Optional.empty();
     public Optional<Boolean> updateNeighbors = Optional.empty();
     public Optional<Boolean> resetOnHeightChange = Optional.empty();
@@ -24,7 +25,8 @@ public class SimulateProperty {
     public ArrayList<Condition> conditions = new ArrayList<>();
 
     public void merge(SimulateProperty otherSimulateProperty) {
-        this.propertyType = otherSimulateProperty.propertyType.or(() -> this.propertyType);
+        this.simulationType = otherSimulateProperty.simulationType.or(() -> this.simulationType);
+        this.target = otherSimulateProperty.target.or(() -> this.target);
         this.maxValue = otherSimulateProperty.maxValue.or(() -> this.maxValue);
         this.maxHeight = otherSimulateProperty.maxHeight.or(() -> this.maxHeight);
         this.dependencies.addAll(otherSimulateProperty.dependencies);
@@ -44,6 +46,28 @@ public class SimulateProperty {
         } else {
             this.advanceProbability = otherSimulateProperty.advanceProbability.map(CalculateValue::replicate).or(() -> this.advanceProbability);
         }
+    }
+
+    public void finalize(String targetFallback) {
+        if (this.target.isEmpty()) {
+            this.target = Optional.of(targetFallback);
+        }
+    }
+
+    public void throwIfInvalid() {
+        if (this.target.isEmpty()) {
+            throw new RuntimeException("target has not been set.");
+        }
+
+        if (this.simulationType.isEmpty()) {
+            throw new RuntimeException("simulation_type has not been set.");
+        }
+
+        if (this.advanceProbability.isEmpty()) {
+            throw new RuntimeException("advance_probability has not been set.");
+        }
+
+        SimulationType simulationType = this.simulationType.get();
     }
 
     public <T> void parseAndApplyProbability(DynamicOps<T> ops, T input) {
@@ -69,13 +93,32 @@ public class SimulateProperty {
         MapLike<T> propertyInfo = propertyInfoResult.result().get();
 
         {
-            T mapValue = propertyInfo.get("property_type");
+            T mapValue = propertyInfo.get("simulation_type");
             if (mapValue != null) {
                 DataResult<String> valueResult = ops.getStringValue(mapValue);
                 if (valueResult.error().isPresent()) {
                     return returnError(valueResult);
                 }
-                simulateProperty.propertyType = valueResult.result();
+
+                String simulationTypeString = valueResult.result().get();
+                Optional<SimulationType> maybeSimulationType = SimulationType.fromString(simulationTypeString);
+
+                if (maybeSimulationType.isEmpty()) {
+                    return returnError(simulationTypeString + " is not a valid simulation type.");
+                }
+
+                simulateProperty.simulationType = maybeSimulationType;
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("target");
+            if (mapValue != null) {
+                DataResult<String> valueResult = ops.getStringValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.target = valueResult.result();
             }
         }
 

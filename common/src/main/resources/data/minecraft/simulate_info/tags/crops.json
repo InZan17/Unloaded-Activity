@@ -1,6 +1,6 @@
 {
   "age": {
-    "property_type": "int",
+    "simulation_type": "int_property",
     "update_type": "update_clients",
 
     "conditions": [

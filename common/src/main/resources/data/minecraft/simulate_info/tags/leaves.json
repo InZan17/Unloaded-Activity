@@ -1,5 +1,6 @@
 {
-  "@decay": {
+  "decay": {
+    "simulation_type": "action",
     "advance_probability": 1
   }
 }

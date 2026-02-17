@@ -1,6 +1,6 @@
 {
   "age": {
-    "property_type": "int",
+    "simulation_type": "int_property",
     "update_type": "update_invisible",
     "reset_on_height_change": true,
     "keep_updating_after_max_height": false,

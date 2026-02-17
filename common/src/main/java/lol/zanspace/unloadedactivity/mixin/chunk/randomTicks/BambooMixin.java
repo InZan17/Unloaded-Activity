@@ -5,6 +5,7 @@ import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
+import lol.zanspace.unloadedactivity.datapack.SimulationType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -41,11 +42,11 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
     @Shadow @Final public static IntegerProperty STAGE;
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName) {
-        if (propertyName.equals("@grow_bamboo")) {
+    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
             return state.getValue(STAGE) == 1;
         }
-        return super.isRandTicksFinished(state, level, pos, simulateProperty, propertyName);
+        return super.isRandTicksFinished(state, level, pos, simulateProperty);
     }
 
     @Shadow
@@ -64,8 +65,8 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (propertyName.equals("@grow_bamboo")) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
             int height = getHeightBelowUpToMax(level, pos);
 
             int maxHeight = simulateProperty.maxHeight.orElse(15);
@@ -92,7 +93,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
 
                 boolean blockChanged = state.getBlock() != this;
 
-                if (blockChanged || this.isRandTicksFinished(state, level, pos, simulateProperty, propertyName)) {
+                if (blockChanged || this.isRandTicksFinished(state, level, pos, simulateProperty)) {
                     if (blockChanged || calculateDuration) {
                         return Triple.of(state, OccurrencesAndDuration.recalculatedDuration(i+1, timePassed, result.averageProbability(), random), pos);
                     } else {
@@ -111,12 +112,12 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
                     return Triple.of(state, result, pos);
                 }
 
-                if (!this.canSimulateRandTicks(state, level, pos, simulateProperty, propertyName)) {
+                if (!this.canSimulateRandTicks(state, level, pos, simulateProperty)) {
                     return Triple.of(state, result, pos);
                 }
             }
             return Triple.of(state, result, pos);
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, propertyName, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
     }
 }

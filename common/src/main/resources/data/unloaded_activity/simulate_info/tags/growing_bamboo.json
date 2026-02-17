@@ -1,5 +1,6 @@
 {
-  "@grow_bamboo": {
+  "grow_bamboo": {
+    "simulation_type": "action",
     "update_type": "update_invisible",
     "reset_on_height_change": true,
     "keep_updating_after_max_height": false,
