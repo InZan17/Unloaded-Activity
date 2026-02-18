@@ -57,7 +57,7 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
 
     @Override
     public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_fruit")) {
+        if (simulateProperty.isAction("grow_fruit")) {
             // When growing fruit, the stem block gets entirely replaced. There is nothing to check.
             return false;
         }
@@ -67,8 +67,8 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_fruit")) {
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
+        if (simulateProperty.isAction("grow_fruit")) {
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);

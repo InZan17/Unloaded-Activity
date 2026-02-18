@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 
-import static lol.zanspace.unloadedactivity.datapack.SimulationData.returnError;
+import static lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData.returnError;
 
 public interface Condition {
     boolean isValid(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);

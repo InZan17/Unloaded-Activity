@@ -43,7 +43,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
 
     @Override
     public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
+        if (simulateProperty.isAction("grow_bamboo")) {
             return state.getValue(STAGE) == 1;
         }
         return super.isRandTicksFinished(state, level, pos, simulateProperty);
@@ -66,7 +66,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
+        if (simulateProperty.isAction("grow_bamboo")) {
             int height = getHeightBelowUpToMax(level, pos);
 
             int maxHeight = simulateProperty.maxHeight.orElse(15);
@@ -77,7 +77,7 @@ public abstract class BambooMixin extends Block implements BonemealableBlock {
             int heightDifference = maxHeight - height;
             int maxGrowth = this.countAirAboveUpToMax(level,pos, heightDifference);
 
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), maxGrowth, randomTickSpeed, false, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, maxGrowth, randomTickSpeed, false, random);
 
             int totalGrowth = 0;
 

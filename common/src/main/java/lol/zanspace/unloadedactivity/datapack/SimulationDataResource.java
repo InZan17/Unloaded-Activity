@@ -33,8 +33,9 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
 
     public final boolean isBlocks;
 
-    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> TAG_MAP = new HashMap<>();
-    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> BLOCK_MAP = new HashMap<>();
+    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, IncompleteSimulationData> TAG_MAP = new HashMap<>();
+    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, IncompleteSimulationData> BLOCK_MAP = new HashMap<>();
+    public static final Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, SimulationData> COMPLETE_BLOCK_MAP = new HashMap<>();
 
     #if MC_VER >= MC_1_21_3
     public SimulationDataResource(boolean isBlocks) {
@@ -85,37 +86,39 @@ public class SimulationDataResource extends SimpleJsonResourceReloadListener #if
             TAG_MAP.clear();
         }
 
-        Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<SimulationData>> datas = new HashMap<>();
+        COMPLETE_BLOCK_MAP.clear();
+
+        Map<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<IncompleteSimulationData>> datas = new HashMap<>();
 
         object.forEach((key, input) -> {
             try {
                 #if MC_VER >= MC_1_21_3
                 SimulationData simulationData = input;
                 #else
-                var result = SimulationData.CODEC.decode(com.mojang.serialization.JsonOps.INSTANCE, input);
+                var result = IncompleteSimulationData.CODEC.decode(com.mojang.serialization.JsonOps.INSTANCE, input);
                 if (result.error().isPresent()) {
                     throw new RuntimeException(result.error().get().message());
                 }
-                SimulationData simulationData = result.result().get().getFirst();
+                IncompleteSimulationData incompleteSimulationData = result.result().get().getFirst();
                 #endif
 
                 var list = datas.computeIfAbsent(key, k -> new ArrayList<>());
-                list.add(simulationData);
+                list.add(incompleteSimulationData);
             } catch(Exception e) {
                 UnloadedActivity.LOGGER.error("{}\n{}\n{}", key, e, e.getStackTrace());
             }
         });
 
-        for (Map.Entry<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<SimulationData>> tagEntry : datas.entrySet()) {
-            List<SimulationData> dataList = tagEntry.getValue();
+        for (Map.Entry<#if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif, List<IncompleteSimulationData>> tagEntry : datas.entrySet()) {
+            List<IncompleteSimulationData> dataList = tagEntry.getValue();
 
             if (dataList.isEmpty())
                 continue;
 
             var id = tagEntry.getKey();
-            SimulationData finalSimulationData = new SimulationData();
+            IncompleteSimulationData finalSimulationData = new IncompleteSimulationData();
 
-            for (SimulationData simulationData : dataList) {
+            for (IncompleteSimulationData simulationData : dataList) {
                 finalSimulationData.merge(simulationData);
             }
 

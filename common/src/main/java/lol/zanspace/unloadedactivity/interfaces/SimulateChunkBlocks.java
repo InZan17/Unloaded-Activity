@@ -70,7 +70,7 @@ public interface SimulateChunkBlocks {
     }
 
     default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        SimulationType simulationType = simulateProperty.simulationType.get();
+        SimulationType simulationType = simulateProperty.simulationType;
 
         if (simulationType != SimulationType.BUDDING && simulateProperty.maxHeight.isPresent()) {
             Block thisBlock = state.getBlock();
@@ -79,7 +79,7 @@ public interface SimulateChunkBlocks {
             boolean emptyAbove = blockStateAbove.isAir();
             boolean blockingAbove = !emptyAbove;
             boolean continuesAbove = blockStateAbove.is(thisBlock);
-            boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight.orElse(false);
+            boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
             if (blockingAbove && (stopUpdatingAfterMaxHeight || continuesAbove)) {
                 return true;
             }
@@ -98,9 +98,9 @@ public interface SimulateChunkBlocks {
             }
         }
 
-        switch (simulateProperty.simulationType.get()) {
+        switch (simulateProperty.simulationType) {
             case INT_PROPERTY -> {
-                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target.get());
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target);
 
                 if (maybeProperty.isPresent()) {
                     Property<?> property = maybeProperty.get();
@@ -120,9 +120,8 @@ public interface SimulateChunkBlocks {
             }
 
             case BUDDING -> {
-                var buddingBlocks = simulateProperty.buddingBlocks.get();
-                var finalBlockId = buddingBlocks.get(buddingBlocks.size()-1);
-                Block finalBlock = Registry.BLOCK.get(finalBlockId);
+                var buddingBlocks = simulateProperty.buddingBlocks;
+                Block finalBlock = buddingBlocks.get(buddingBlocks.size()-1);
 
                 List<Direction> availableDirections = Arrays.stream(Direction.values()).filter(direction -> !simulateProperty.ignoreBuddingDirections.contains(direction)).toList();
 
@@ -133,18 +132,13 @@ public interface SimulateChunkBlocks {
                         return false;
                     }
 
-                    Optional<Property<?>> maybeProperty = finalBlock.getProperty(dirBlockState, simulateProperty.buddingDirectionProperty.get());
-                    if (maybeProperty.isEmpty()) {
-                        return false;
-                    }
+                    if (simulateProperty.buddingDirectionProperty.isPresent()) {
+                        DirectionProperty property = (DirectionProperty)finalBlock.getProperty(dirBlockState, simulateProperty.buddingDirectionProperty.get()).get();
 
-                    if (maybeProperty.get() instanceof DirectionProperty directionProperty) {
-                        Direction blockDirection = dirBlockState.getValue(directionProperty);
+                        Direction blockDirection = dirBlockState.getValue(property);
                         if (blockDirection != direction) {
                             return false;
                         }
-                    } else {
-                        return false;
                     }
                 }
             }
@@ -155,9 +149,9 @@ public interface SimulateChunkBlocks {
 
     default @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
-        switch (simulateProperty.simulationType.get()) {
+        switch (simulateProperty.simulationType) {
             case INT_PROPERTY -> {
-                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target.get());
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target);
 
                 if (maybeProperty.isEmpty())
                     return Triple.of(state, OccurrencesAndDuration.empty(), pos);
@@ -188,7 +182,7 @@ public interface SimulateChunkBlocks {
                         // Updates for growing in height
                         updateCount += freeSpaceAbove;
 
-                        boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight.orElse(false);
+                        boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
 
                         if (stopUpdatingAfterMaxHeight) {
                             updateCount += max * Math.max(freeSpaceAbove - 1, 0);
@@ -202,7 +196,7 @@ public interface SimulateChunkBlocks {
                     if (updateCount <= 0)
                         return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), updateCount, randomTickSpeed, calculateDuration, random);
+                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, updateCount, randomTickSpeed, calculateDuration, random);
 
                     if (result.occurrences() == 0)
                         return Triple.of(state, result, pos);
@@ -213,7 +207,7 @@ public interface SimulateChunkBlocks {
                         int growBlocks = newPropertyValue/(max + 1);
                         int valueRemainer = newPropertyValue % (max + 1);
 
-                        boolean resetOnHeightChange = simulateProperty.resetOnHeightChange.orElse(true);
+                        boolean resetOnHeightChange = simulateProperty.resetOnHeightChange;
 
                         int belowValue = resetOnHeightChange ? 0 : max;
 
@@ -222,7 +216,7 @@ public interface SimulateChunkBlocks {
                         } else {
                             state = state.setValue(integerProperty, valueRemainer);
                         }
-                        level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
+                        level.setBlock(pos, state, simulateProperty.updateType);
 
                         for (int i=0;i<growBlocks;i++) {
 
@@ -235,7 +229,7 @@ public interface SimulateChunkBlocks {
                             }
 
                             level.setBlockAndUpdate(pos, state);
-                            boolean updateNeighbors = simulateProperty.updateNeighbors.orElse(false);
+                            boolean updateNeighbors = simulateProperty.updateNeighbors;
                             if (updateNeighbors) {
                                 level.neighborChanged(state, pos, thisBlock, pos, false);
                                 level.scheduleTick(pos, thisBlock, 1);
@@ -243,7 +237,7 @@ public interface SimulateChunkBlocks {
                         }
                     } else {
                         state = state.setValue(integerProperty, newPropertyValue);
-                        level.setBlock(pos, state, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
+                        level.setBlock(pos, state, simulateProperty.updateType);
                     }
 
 
@@ -259,12 +253,11 @@ public interface SimulateChunkBlocks {
 
                     int stage = 0;
 
-                    var buddingBlocks = simulateProperty.buddingBlocks.get();
 
                     boolean doContinue = false;
 
-                    for (int i=0;i<buddingBlocks.size();i++) {
-                        Block buddingBlockStage = Registry.BLOCK.get(buddingBlocks.get(i));
+                    for (int i=0;i<simulateProperty.buddingBlocks.size();i++) {
+                        Block buddingBlockStage = simulateProperty.buddingBlocks.get(i);
 
                         if (budState.is(buddingBlockStage)) {
                             DirectionProperty directionProperty = (DirectionProperty)buddingBlockStage.getProperty(budState, simulateProperty.buddingDirectionProperty.get()).get();
@@ -283,7 +276,7 @@ public interface SimulateChunkBlocks {
                         continue;
 
 
-                    if (stage == buddingBlocks.size())
+                    if (stage == simulateProperty.buddingBlocks.size())
                         continue;
 
 
@@ -296,18 +289,15 @@ public interface SimulateChunkBlocks {
                             if (!budState.is(Blocks.WATER))
                                 continue;
 
-                            if (simulateProperty.minWaterValue.isPresent()) {
-                                if (budState.getFluidState().getAmount() < simulateProperty.minWaterValue.get()) {
-                                    continue;
-                                }
-                            }
+                            if (budState.getFluidState().getAmount() < simulateProperty.minWaterValue)
+                                continue;
                         }
                         // It's either air or water.
                     }
 
-                    int maxOccurrences = buddingBlocks.size() - stage;
+                    int maxOccurrences = simulateProperty.buddingBlocks.size() - stage;
 
-                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), maxOccurrences, randomTickSpeed, calculateDuration, random);
+                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, maxOccurrences, randomTickSpeed, calculateDuration, random);
 
                     if (result.occurrences() == 0) {
                         continue;
@@ -315,21 +305,23 @@ public interface SimulateChunkBlocks {
 
                     int newStage = stage + result.occurrences();
 
-                    Block newBudBlock = Registry.BLOCK.get(buddingBlocks.get(newStage - 1));
+                    Block newBudBlock = simulateProperty.buddingBlocks.get(newStage - 1);
 
                     BlockState newBudState = newBudBlock.defaultBlockState();
 
-                    String buddingDirectionPropertyName = simulateProperty.buddingDirectionProperty.get();
-                    DirectionProperty directionProperty = (DirectionProperty)newBudBlock.getProperty(newBudState, buddingDirectionPropertyName).get();
+                    if (simulateProperty.buddingDirectionProperty.isPresent()) {
+                        String buddingDirectionPropertyName = simulateProperty.buddingDirectionProperty.get();
+                        DirectionProperty directionProperty = (DirectionProperty)newBudBlock.getProperty(newBudState, buddingDirectionPropertyName).get();
+                        newBudState = newBudState.setValue(directionProperty, direction);
+                    }
 
-                    newBudState = newBudState.setValue(directionProperty, direction);
 
                     if (simulateProperty.waterloggedProperty.isPresent()) {
                         BooleanProperty waterloggedProperty = (BooleanProperty)newBudBlock.getProperty(newBudState, simulateProperty.waterloggedProperty.get()).get();
                         newBudState = newBudState.setValue(waterloggedProperty, budState.getFluidState().getType() == Fluids.WATER);
                     }
 
-                    level.setBlock(budPos, newBudState, simulateProperty.updateType.orElse(Block.UPDATE_ALL));
+                    level.setBlock(budPos, newBudState, simulateProperty.updateType);
                 }
             }
         }

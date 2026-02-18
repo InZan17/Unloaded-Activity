@@ -31,7 +31,7 @@ public abstract class LeavesMixin extends Block{
 
     @Override
     public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("decay")) {
+        if (simulateProperty.isAction("decay")) {
             return !decaying(state);
         }
         return super.isRandTicksFinished(state, level, pos, simulateProperty);
@@ -40,8 +40,8 @@ public abstract class LeavesMixin extends Block{
 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("decay")) {
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, calculateDuration, random);
+        if (simulateProperty.isAction("decay")) {
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);

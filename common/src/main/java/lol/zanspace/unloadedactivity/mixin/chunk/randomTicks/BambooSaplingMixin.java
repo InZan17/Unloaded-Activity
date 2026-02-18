@@ -29,14 +29,14 @@ public abstract class BambooSaplingMixin extends Block {
 
     @Override
     public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
-        if (simulateProperty.simulationType.get() == SimulationType.ACTION && simulateProperty.target.get().equals("grow_bamboo")) {
+        if (simulateProperty.isAction("grow_bamboo")) {
 
             int maxHeight = simulateProperty.maxHeight.orElse(15);
 
             if (maxHeight <= 1 || !level.isEmptyBlock(pos.above()))
                 return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability.get(), 1, randomTickSpeed, true, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, true, random);
 
             if (result.occurrences() != 0) {
                 this.growBamboo(level, pos);

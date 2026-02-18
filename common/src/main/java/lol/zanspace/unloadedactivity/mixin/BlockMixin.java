@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity.mixin;
 import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData;
 import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.datapack.SimulationDataResource;
@@ -46,19 +47,21 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
 
         var blockId = this.builtInRegistryHolder.key()#if MC_VER >= MC_1_21_11 .identifier() #else .location() #endif;
 
-        SimulationData blockSimulationData = SimulationDataResource.BLOCK_MAP.get(blockId);
+        {
+            SimulationData simulationData = SimulationDataResource.COMPLETE_BLOCK_MAP.get(blockId);
+            if (simulationData != null)
+                return simulationData;
+        }
 
-        if (blockSimulationData != null)
-            if (blockSimulationData.isFinal)
-                return blockSimulationData;
+        IncompleteSimulationData blockSimulationData = SimulationDataResource.BLOCK_MAP.get(blockId);
 
-        SimulationData finalSimulationData = new SimulationData();
+        IncompleteSimulationData finalSimulationData = new IncompleteSimulationData();
 
         for (Iterator<TagKey<Block>> it = builtInRegistryHolder.tags().iterator(); it.hasNext(); ) {
             TagKey<Block> tag = it.next();
             var tagId = tag.location();
 
-            SimulationData tagSimulationData = SimulationDataResource.TAG_MAP.get(tagId);
+            IncompleteSimulationData tagSimulationData = SimulationDataResource.TAG_MAP.get(tagId);
 
             if (tagSimulationData != null) {
                 finalSimulationData.merge(tagSimulationData);
@@ -69,15 +72,10 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
             finalSimulationData.merge(blockSimulationData);
         }
 
-        for (var entry : finalSimulationData.propertyMap.entrySet()) {
-            String fallbackTarget = entry.getKey();
-            SimulateProperty simulateProperty = entry.getValue();
-            simulateProperty.finalize(fallbackTarget);
-            simulateProperty.throwIfInvalid();
-        }
+        SimulationData simulationData = new SimulationData(finalSimulationData);
 
-        SimulationDataResource.BLOCK_MAP.put(blockId, finalSimulationData);
+        SimulationDataResource.COMPLETE_BLOCK_MAP.put(blockId, simulationData);
 
-        return finalSimulationData;
+        return simulationData;
     }
 }
