@@ -24,8 +24,6 @@
     "chunk.precipitationTicks.LiquidMixin",
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
-    "chunk.randomTicks.CaveVinesMixin",
-    "chunk.randomTicks.GrowingPlantHeadMixin",
     "chunk.randomTicks.IceMixin",
     "chunk.randomTicks.MangrovePropaguleMixin",
     "chunk.randomTicks.PointedDripstoneMixin",

@@ -1,0 +1,15 @@
+{
+  "age": {
+    "simulation_type": "int_property",
+    "increase_per_height": true,
+    "block_replacement": "minecraft:cave_vines_plant",
+    "reverse_height_growth_direction": true,
+    "random_properties": {
+      "berries": {
+        "property_type": "bool",
+        "probability": 0.11
+      }
+    },
+    "advance_probability": 0.1
+  }
+}
