@@ -1,0 +1,16 @@
+{
+  "age": {
+    "simulation_type": "int_property",
+    "update_type": "update_clients",
+
+    "conditions": [
+      {
+        "check": "raw_brightness_above",
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+
+    "advance_probability": 0.2
+  }
+}
