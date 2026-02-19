@@ -25,7 +25,6 @@
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
     "chunk.randomTicks.IceMixin",
-    "chunk.randomTicks.MangrovePropaguleMixin",
     "chunk.randomTicks.PointedDripstoneMixin",
     "chunk.randomTicks.SaplingMixin",
     "chunk.randomTicks.StemMixin",
