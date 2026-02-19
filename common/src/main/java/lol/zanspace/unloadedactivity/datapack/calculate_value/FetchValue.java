@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.Optional;
 
+import static lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks.getProperty;
+
 public enum FetchValue implements CalculateValue {
     GROWTH_SPEED {
         @Override
@@ -61,7 +63,7 @@ public enum FetchValue implements CalculateValue {
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
 
 
-            Optional<Property<?>> maybeProperty = state.getBlock().getProperty(state, propertyName);
+            Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
             if (maybeProperty.isEmpty())
                 return Double.NaN;
 
@@ -83,7 +85,7 @@ public enum FetchValue implements CalculateValue {
 
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-            Optional<Property<?>> maybeProperty = state.getBlock().getProperty(state, propertyName);
+            Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
             if (maybeProperty.isEmpty())
                 return Double.NaN;
 

@@ -38,11 +38,6 @@ public abstract class BlockMixin implements SimulateChunkBlocks {
     @Shadow @Final private Holder.Reference<Block> builtInRegistryHolder;
 
     @Override
-    public Optional<Property<?>> getProperty(BlockState state, String propertyName) {
-        return state.getProperties().stream().filter(p -> p.getName().equals(propertyName)).findFirst();
-    }
-
-    @Override
     public SimulationData getSimulationData() {
 
         var blockId = this.builtInRegistryHolder.key()#if MC_VER >= MC_1_21_11 .identifier() #else .location() #endif;

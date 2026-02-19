@@ -35,9 +35,9 @@ public interface SimulateChunkBlocks {
 
     SimulationData getSimulationData();
 
-    default Optional<Property<?>> getProperty(BlockState state, String propertyName) {
-        return Optional.empty();
-    };
+    static Optional<Property<?>> getProperty(BlockState state, String propertyName) {
+        return state.getProperties().stream().filter(p -> p.getName().equals(propertyName)).findFirst();
+    }
 
     default int getCurrentAgeUA(BlockState state) {
         return 0;
@@ -131,7 +131,7 @@ public interface SimulateChunkBlocks {
                     }
 
                     if (simulateProperty.buddingDirectionProperty.isPresent()) {
-                        DirectionProperty property = (DirectionProperty)finalBlock.getProperty(dirBlockState, simulateProperty.buddingDirectionProperty.get()).get();
+                        DirectionProperty property = (DirectionProperty)getProperty(dirBlockState, simulateProperty.buddingDirectionProperty.get()).get();
 
                         Direction blockDirection = dirBlockState.getValue(property);
                         if (blockDirection != direction) {
@@ -262,7 +262,7 @@ public interface SimulateChunkBlocks {
                         Block buddingBlockStage = simulateProperty.buddingBlocks.get(i);
 
                         if (budState.is(buddingBlockStage)) {
-                            DirectionProperty directionProperty = (DirectionProperty)buddingBlockStage.getProperty(budState, simulateProperty.buddingDirectionProperty.get()).get();
+                            DirectionProperty directionProperty = (DirectionProperty)getProperty(budState, simulateProperty.buddingDirectionProperty.get()).get();
 
                             if (budState.getValue(directionProperty) == direction) {
                                 stage = i+1;
@@ -313,13 +313,13 @@ public interface SimulateChunkBlocks {
 
                     if (simulateProperty.buddingDirectionProperty.isPresent()) {
                         String buddingDirectionPropertyName = simulateProperty.buddingDirectionProperty.get();
-                        DirectionProperty directionProperty = (DirectionProperty)newBudBlock.getProperty(newBudState, buddingDirectionPropertyName).get();
+                        DirectionProperty directionProperty = (DirectionProperty)getProperty(newBudState, buddingDirectionPropertyName).get();
                         newBudState = newBudState.setValue(directionProperty, direction);
                     }
 
 
                     if (simulateProperty.waterloggedProperty.isPresent()) {
-                        BooleanProperty waterloggedProperty = (BooleanProperty)newBudBlock.getProperty(newBudState, simulateProperty.waterloggedProperty.get()).get();
+                        BooleanProperty waterloggedProperty = (BooleanProperty)getProperty(newBudState, simulateProperty.waterloggedProperty.get()).get();
                         newBudState = newBudState.setValue(waterloggedProperty, budState.getFluidState().getType() == Fluids.WATER);
                     }
 

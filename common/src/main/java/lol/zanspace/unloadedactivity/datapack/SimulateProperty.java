@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -23,6 +24,8 @@ import net.minecraft.resources.ResourceLocation;
 #endif
 
 import java.util.*;
+
+import static lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks.getProperty;
 
 
 public class SimulateProperty {
@@ -117,7 +120,7 @@ public class SimulateProperty {
 
                     if (this.buddingDirectionProperty.isPresent()) {
                         String buddingDirectionProperty = this.buddingDirectionProperty.get();
-                        Optional<Property<?>> maybeProperty = block.getProperty(block.defaultBlockState(), buddingDirectionProperty);
+                        Optional<Property<?>> maybeProperty = getProperty(block.defaultBlockState(), buddingDirectionProperty);
 
                         if (maybeProperty.isEmpty()) {
                             throw new RuntimeException(buddingDirectionProperty + " is not a valid direction property on " + block + ". It doesn't exist.");
@@ -140,7 +143,7 @@ public class SimulateProperty {
 
                     if (this.waterloggedProperty.isPresent()) {
                         String waterloggedProperty = this.waterloggedProperty.get();
-                        Optional<Property<?>> maybeProperty = block.getProperty(block.defaultBlockState(), waterloggedProperty);
+                        Optional<Property<?>> maybeProperty = getProperty(block.defaultBlockState(), waterloggedProperty);
 
                         if (maybeProperty.isEmpty()) {
                             throw new RuntimeException(waterloggedProperty + " is not a valid boolean property on " + block + ". It doesn't exist.");
