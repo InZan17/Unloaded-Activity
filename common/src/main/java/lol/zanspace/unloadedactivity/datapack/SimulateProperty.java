@@ -39,6 +39,7 @@ public class SimulateProperty {
     public Optional<Integer> maxHeight;
     public Optional<String> waterloggedProperty;
     public List<Direction> ignoreBuddingDirections;
+    public List<RandomProperty> randomProperties;
     public Optional<String> buddingDirectionProperty;
 
     public Optional<Block> blockReplacement;
@@ -86,6 +87,12 @@ public class SimulateProperty {
             }
             return maybeBlock.get();
         });
+
+        ArrayList<RandomProperty> randomPropertiesList = new ArrayList<>();
+        for (var entry : incomplete.randomProperties.entrySet()) {
+            randomPropertiesList.add(new RandomProperty(entry.getValue(), entry.getKey()));
+        }
+        this.randomProperties = randomPropertiesList.stream().toList();
 
         // Default values for optional fields with defaults.
         this.updateType = incomplete.updateType.orElse(Block.UPDATE_ALL);

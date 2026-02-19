@@ -38,6 +38,7 @@ public class IncompleteSimulateProperty {
     public Optional<Integer> minWaterValue = Optional.empty();
     public Optional<String> waterloggedProperty = Optional.empty();
     public ArrayList<Direction> ignoreBuddingDirections = new ArrayList<>();
+    public HashMap<String, IncompleteRandomProperty> randomProperties = new HashMap<>();
     public Optional< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif > blockReplacement = Optional.empty();
     public Optional<ArrayList< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif >> buddingBlocks = Optional.empty();
 
@@ -62,6 +63,13 @@ public class IncompleteSimulateProperty {
         this.reverseHeightGrowthDirection = otherSimulateProperty.reverseHeightGrowthDirection.or(() -> this.reverseHeightGrowthDirection);
         this.onlyInWater = otherSimulateProperty.onlyInWater.or(() -> this.onlyInWater);
         this.increasePerHeight = otherSimulateProperty.increasePerHeight.or(() -> this.increasePerHeight);
+
+        for (var entry : otherSimulateProperty.randomProperties.entrySet()) {
+            IncompleteRandomProperty thisRandomProperty = this.randomProperties.computeIfAbsent(entry.getKey(), k -> new IncompleteRandomProperty());
+            IncompleteRandomProperty otherRandomProperty = entry.getValue();
+
+            thisRandomProperty.merge(otherRandomProperty);
+        }
 
         if (otherSimulateProperty.advanceProbability.isPresent() && this.advanceProbability.isPresent()) {
             var oldProbability = this.advanceProbability.get();
@@ -375,6 +383,30 @@ public class IncompleteSimulateProperty {
                     }
 
                     simulateProperty.dependencies.add(stringResult.result().get());
+                }
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("random_properties");
+            if (mapValue != null) {
+                var mapResult = ops.getMap(mapValue);
+                if (mapResult.result().isEmpty()) {
+                    return returnError(mapResult);
+                }
+
+                for (Pair<T, T> pair : mapResult.result().get().entries().toList()) {
+                    var keyResult = ops.getStringValue(pair.getFirst());
+                    if (keyResult.result().isEmpty()) {
+                        returnError(keyResult);
+                    }
+
+                    var valueResult = IncompleteRandomProperty.parse(ops, pair.getSecond());
+                    if (valueResult.result().isEmpty()) {
+                        returnError(valueResult);
+                    }
+
+                    simulateProperty.randomProperties.put(keyResult.result().get(), valueResult.result().get());
                 }
             }
         }
