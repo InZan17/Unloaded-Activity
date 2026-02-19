@@ -7,7 +7,7 @@ public enum Comparison {
     EQ {
         @Override
         public boolean compare(double v1, double v2) {
-            return false;
+            return v1 == v2;
         }
     },
     NE {
