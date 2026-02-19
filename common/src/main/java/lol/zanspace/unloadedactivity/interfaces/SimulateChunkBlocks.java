@@ -91,11 +91,13 @@ public interface SimulateChunkBlocks {
 
             int maxHeight = simulateProperty.maxHeight.get();
 
+            Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
+
             int height;
             if (simulateProperty.reverseHeightGrowthDirection) {
-                for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
             } else {
-                for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
             }
 
             if (height < maxHeight) {
@@ -193,13 +195,14 @@ public interface SimulateChunkBlocks {
                     int updateCount = max - current;
 
                     if (simulateProperty.maxHeight.isPresent()) {
+                        Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
                         int maxHeight = simulateProperty.maxHeight.get();
 
                         int height;
                         if (simulateProperty.reverseHeightGrowthDirection) {
-                            for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                            for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
                         } else {
-                            for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                            for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
                         }
 
                         int heightDifference = maxHeight - height;
@@ -244,11 +247,14 @@ public interface SimulateChunkBlocks {
 
                         int belowValue = resetOnHeightChange ? 0 : max;
 
-                        if (growBlocks != 0) {
-                            state = state.setValue(integerProperty, belowValue);
-                        } else {
+                        if (growBlocks == 0) {
                             state = state.setValue(integerProperty, valueRemainer);
+                        } else if (simulateProperty.blockReplacement.isPresent()) {
+                            state = simulateProperty.blockReplacement.get().defaultBlockState();
+                        } else {
+                            state = state.setValue(integerProperty, belowValue);
                         }
+
                         level.setBlock(pos, state, simulateProperty.updateType);
 
                         for (int i=0;i<growBlocks;i++) {
@@ -260,6 +266,8 @@ public interface SimulateChunkBlocks {
 
                             if (i+1==growBlocks) {
                                 state = thisBlock.defaultBlockState().setValue(integerProperty, valueRemainer);
+                            } else if (simulateProperty.blockReplacement.isPresent()) {
+                                state = simulateProperty.blockReplacement.get().defaultBlockState();
                             } else {
                                 state = thisBlock.defaultBlockState().setValue(integerProperty, belowValue);
                             }
@@ -296,12 +304,13 @@ public interface SimulateChunkBlocks {
 
                     if (simulateProperty.maxHeight.isPresent()) {
                         int maxHeight = simulateProperty.maxHeight.get();
+                        Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
 
                         int height;
                         if (simulateProperty.reverseHeightGrowthDirection) {
-                            for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                            for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
                         } else {
-                            for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                            for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
                         }
 
                         int heightDifference = maxHeight - height;
@@ -346,10 +355,12 @@ public interface SimulateChunkBlocks {
 
                         boolean belowValue = resetOnHeightChange ? false : true;
 
-                        if (growBlocks != 0) {
-                            state = state.setValue(booleanProperty, belowValue);
-                        } else {
+                        if (growBlocks == 0) {
                             state = state.setValue(booleanProperty, valueRemainer != 0);
+                        } else if (simulateProperty.blockReplacement.isPresent()) {
+                            state = simulateProperty.blockReplacement.get().defaultBlockState();
+                        } else {
+                            state = state.setValue(booleanProperty, belowValue);
                         }
                         level.setBlock(pos, state, simulateProperty.updateType);
 
@@ -363,6 +374,8 @@ public interface SimulateChunkBlocks {
 
                             if (i+1==growBlocks) {
                                 state = thisBlock.defaultBlockState().setValue(booleanProperty, valueRemainer != 0);
+                            } else if (simulateProperty.blockReplacement.isPresent()) {
+                                state = simulateProperty.blockReplacement.get().defaultBlockState();
                             } else {
                                 state = thisBlock.defaultBlockState().setValue(booleanProperty, belowValue);
                             }

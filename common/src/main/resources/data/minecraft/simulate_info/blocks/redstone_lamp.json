@@ -3,6 +3,7 @@
     "simulation_type": "bool_property",
     "max_height": 5,
     "reverse_height_growth_direction": true,
+    "block_replacement": "minecraft:stone",
     "advance_probability": 1
   }
 }
