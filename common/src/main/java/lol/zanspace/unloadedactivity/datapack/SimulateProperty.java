@@ -38,10 +38,13 @@ public class SimulateProperty {
     public List<Direction> ignoreBuddingDirections;
     public Optional<String> buddingDirectionProperty;
 
+    public Optional<Block> blockReplacement;
+
     public int updateType;
     public boolean updateNeighbors;
     public boolean resetOnHeightChange;
     public boolean keepUpdatingAfterMaxHeight;
+    public boolean dropsResources;
     public int minWaterValue;
 
     public List<Block> buddingBlocks;
@@ -69,11 +72,21 @@ public class SimulateProperty {
         this.ignoreBuddingDirections = incomplete.ignoreBuddingDirections.stream().toList();
         this.buddingDirectionProperty = incomplete.buddingDirectionProperty;
 
+        // Convert types.
+        this.blockReplacement = incomplete.blockReplacement.map(id -> {
+            Optional<Block> maybeBlock = Registry.BLOCK.getOptional(id);
+            if (maybeBlock.isEmpty()) {
+                throw new RuntimeException(id + " is not a valid block.");
+            }
+            return maybeBlock.get();
+        });
+
         // Default values for optional fields with defaults.
         this.updateType = incomplete.updateType.orElse(Block.UPDATE_ALL);
         this.updateNeighbors = incomplete.updateNeighbors.orElse(false);
         this.resetOnHeightChange = incomplete.resetOnHeightChange.orElse(true);
         this.keepUpdatingAfterMaxHeight = incomplete.keepUpdatingAfterMaxHeight.orElse(true);
+        this.dropsResources = incomplete.dropsResources.orElse(true);
         this.minWaterValue = incomplete.minWaterValue.orElse(0);
 
         // Default value for required fields depending on simulationType.

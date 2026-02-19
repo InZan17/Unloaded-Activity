@@ -30,6 +30,7 @@ public class IncompleteSimulateProperty {
     public Optional<Boolean> updateNeighbors = Optional.empty();
     public Optional<Boolean> resetOnHeightChange = Optional.empty();
     public Optional<Boolean> keepUpdatingAfterMaxHeight = Optional.empty();
+    public Optional<Boolean> dropsResources = Optional.empty();
     public Optional<Integer> updateType = Optional.empty();
     public Optional<CalculateValue> advanceProbability = Optional.empty();
     public Optional<Integer> maxValue = Optional.empty();
@@ -38,6 +39,7 @@ public class IncompleteSimulateProperty {
     public Optional<Integer> minWaterValue = Optional.empty();
     public Optional<String> waterloggedProperty = Optional.empty();
     public ArrayList<Direction> ignoreBuddingDirections = new ArrayList<>();
+    public Optional< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif > blockReplacement = Optional.empty();
     public Optional<ArrayList< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif >> buddingBlocks = Optional.empty();
 
     public void merge(IncompleteSimulateProperty otherSimulateProperty) {
@@ -56,6 +58,8 @@ public class IncompleteSimulateProperty {
         this.waterloggedProperty = otherSimulateProperty.waterloggedProperty.or(() -> this.waterloggedProperty);
         this.buddingDirectionProperty = otherSimulateProperty.buddingDirectionProperty.or(() -> this.buddingDirectionProperty);
         this.buddingBlocks = otherSimulateProperty.buddingBlocks.or(() -> this.buddingBlocks);
+        this.blockReplacement = otherSimulateProperty.blockReplacement.or(() -> this.blockReplacement);
+        this.dropsResources = otherSimulateProperty.dropsResources.or(() -> this.dropsResources);
 
         if (otherSimulateProperty.advanceProbability.isPresent() && this.advanceProbability.isPresent()) {
             var oldProbability = this.advanceProbability.get();
@@ -172,7 +176,6 @@ public class IncompleteSimulateProperty {
                     return returnError(valueResult);
                 }
                 simulateProperty.maxHeight = valueResult.result().map(Number::intValue);
-                UnloadedActivity.LOGGER.info("" + simulateProperty.maxHeight);
             }
         }
 
@@ -184,6 +187,32 @@ public class IncompleteSimulateProperty {
                     return returnError(valueResult);
                 }
                 simulateProperty.updateNeighbors = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("drops_resources");
+            UnloadedActivity.LOGGER.info("wawa " + mapValue);
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                UnloadedActivity.LOGGER.info("" + valueResult);
+                if (valueResult.result().isEmpty()) {
+                    return returnError(valueResult);
+                }
+                UnloadedActivity.LOGGER.info("" + valueResult.result());
+                simulateProperty.dropsResources = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("block_replacement");
+            if (mapValue != null) {
+                var result = ResourceLocation.CODEC.decode(ops, mapValue);
+                if (result.result().isEmpty()) {
+                    returnError(result);
+                }
+
+                simulateProperty.blockReplacement = result.result().map(Pair::getFirst);
             }
         }
 
