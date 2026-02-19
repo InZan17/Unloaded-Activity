@@ -28,6 +28,8 @@ public class IncompleteSimulateProperty {
     public Optional<Boolean> keepUpdatingAfterMaxHeight = Optional.empty();
     public Optional<Boolean> dropsResources = Optional.empty();
     public Optional<Boolean> reverseHeightGrowthDirection = Optional.empty();
+    public Optional<Boolean> increasePerHeight = Optional.empty();
+    public Optional<Boolean> onlyInWater = Optional.empty();
     public Optional<Integer> updateType = Optional.empty();
     public Optional<CalculateValue> advanceProbability = Optional.empty();
     public Optional<Integer> maxValue = Optional.empty();
@@ -58,6 +60,8 @@ public class IncompleteSimulateProperty {
         this.blockReplacement = otherSimulateProperty.blockReplacement.or(() -> this.blockReplacement);
         this.dropsResources = otherSimulateProperty.dropsResources.or(() -> this.dropsResources);
         this.reverseHeightGrowthDirection = otherSimulateProperty.reverseHeightGrowthDirection.or(() -> this.reverseHeightGrowthDirection);
+        this.onlyInWater = otherSimulateProperty.onlyInWater.or(() -> this.onlyInWater);
+        this.increasePerHeight = otherSimulateProperty.increasePerHeight.or(() -> this.increasePerHeight);
 
         if (otherSimulateProperty.advanceProbability.isPresent() && this.advanceProbability.isPresent()) {
             var oldProbability = this.advanceProbability.get();
@@ -207,6 +211,28 @@ public class IncompleteSimulateProperty {
                     return returnError(valueResult);
                 }
                 simulateProperty.reverseHeightGrowthDirection = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("increase_per_height");
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                if (valueResult.result().isEmpty()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.increasePerHeight = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("only_in_water");
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                if (valueResult.result().isEmpty()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.onlyInWater = valueResult.result();
             }
         }
 

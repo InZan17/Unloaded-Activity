@@ -70,7 +70,7 @@ public interface SimulateChunkBlocks {
     }
 
     default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        if (!simulateProperty.isBudding() && !simulateProperty.isDecay() && simulateProperty.maxHeight.isPresent()) {
+        if (!simulateProperty.isBudding() && !simulateProperty.isDecay() && (simulateProperty.increasePerHeight || simulateProperty.maxHeight.isPresent())) {
             Block thisBlock = state.getBlock();
 
             BlockState blockStateAbove;
@@ -89,19 +89,21 @@ public interface SimulateChunkBlocks {
                 return true;
             }
 
-            int maxHeight = simulateProperty.maxHeight.get();
+            if (simulateProperty.maxHeight.isPresent()) {
+                int maxHeight = simulateProperty.maxHeight.get();
 
-            Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
+                Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
 
-            int height;
-            if (simulateProperty.reverseHeightGrowthDirection) {
-                for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
-            } else {
-                for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
-            }
+                int height;
+                if (simulateProperty.reverseHeightGrowthDirection) {
+                    for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
+                } else {
+                    for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
+                }
 
-            if (height < maxHeight) {
-                return false;
+                if (height < maxHeight) {
+                    return false;
+                }
             }
 
             if (stopUpdatingAfterMaxHeight) {
@@ -194,39 +196,60 @@ public interface SimulateChunkBlocks {
 
                     int updateCount = max - current;
 
-                    if (simulateProperty.maxHeight.isPresent()) {
+                    if (simulateProperty.maxHeight.isPresent() || simulateProperty.increasePerHeight) {
                         Block lowerBlock = simulateProperty.blockReplacement.orElse(thisBlock);
-                        int maxHeight = simulateProperty.maxHeight.get();
 
-                        int height;
-                        if (simulateProperty.reverseHeightGrowthDirection) {
-                            for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
-                        } else {
-                            for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
+                        int freeSpaceLimit = Integer.MAX_VALUE;
+
+                        if (simulateProperty.maxHeight.isPresent()) {
+                            int maxHeight = simulateProperty.maxHeight.get();
+
+                            int height;
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                for(height = 1; level.getBlockState(pos.above(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
+                            } else {
+                                for(height = 1; level.getBlockState(pos.below(height)).is(lowerBlock) && height <= maxHeight; ++height) {}
+                            }
+
+                            freeSpaceLimit = Math.min(freeSpaceLimit, maxHeight - height);
                         }
 
-                        int heightDifference = maxHeight - height;
+                        if (simulateProperty.increasePerHeight) {
+                            freeSpaceLimit = Math.min(freeSpaceLimit, updateCount);
+                        }
+
+
 
                         int freeSpace;
-                        if (simulateProperty.reverseHeightGrowthDirection) {
-                            for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        if (simulateProperty.onlyInWater) {
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                for(freeSpace = 1; level.getBlockState(pos.below(freeSpace)).is(Blocks.WATER) && freeSpace <= freeSpaceLimit; ++freeSpace) {}
+                            } else {
+                                for(freeSpace = 1; level.getBlockState(pos.above(freeSpace)).is(Blocks.WATER) && freeSpace <= freeSpaceLimit; ++freeSpace) {}
+                            }
                         } else {
-                            for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= freeSpaceLimit; ++freeSpace) {}
+                            } else {
+                                for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= freeSpaceLimit; ++freeSpace) {}
+                            }
                         }
                         --freeSpace;
 
                         // Updates for growing in height
-                        updateCount += freeSpace;
-
-                        boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
-
-                        if (stopUpdatingAfterMaxHeight) {
-                            updateCount += max * Math.max(freeSpace - 1, 0);
+                        if (simulateProperty.increasePerHeight) {
+                            updateCount = freeSpace;
                         } else {
-                            updateCount += max * freeSpace;
+                            updateCount += freeSpace;
+
+                            boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
+
+                            if (stopUpdatingAfterMaxHeight) {
+                                updateCount += max * Math.max(freeSpace - 1, 0);
+                            } else {
+                                updateCount += max * freeSpace;
+                            }
                         }
-
-
                     }
 
                     if (updateCount <= 0)
@@ -239,7 +262,36 @@ public interface SimulateChunkBlocks {
 
                     int newPropertyValue = current + result.occurrences();
 
-                    if (simulateProperty.maxHeight.isPresent()) {
+                    if (simulateProperty.increasePerHeight) {
+                        if (simulateProperty.blockReplacement.isPresent()) {
+                            state = simulateProperty.blockReplacement.get().defaultBlockState();
+                            level.setBlock(pos, state, simulateProperty.updateType);
+                        }
+
+
+                        for (int i=0;i<result.occurrences();i++) {
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                pos = pos.below();
+                            } else {
+                                pos = pos.above();
+                            }
+
+                            boolean isFinal = i+1 == result.occurrences();
+
+                            if (simulateProperty.blockReplacement.isPresent() && !isFinal) {
+                                state = simulateProperty.blockReplacement.get().defaultBlockState();
+                            } else {
+                                state = thisBlock.defaultBlockState().setValue(integerProperty, current + i + 1);
+                            }
+
+                            level.setBlockAndUpdate(pos, state);
+                            boolean updateNeighbors = simulateProperty.updateNeighbors;
+                            if (updateNeighbors) {
+                                level.neighborChanged(state, pos, thisBlock, pos, false);
+                                level.scheduleTick(pos, thisBlock, 1);
+                            }
+                        }
+                    } else if (simulateProperty.maxHeight.isPresent()) {
                         int growBlocks = newPropertyValue/(max + 1);
                         int valueRemainer = newPropertyValue % (max + 1);
 
@@ -316,10 +368,18 @@ public interface SimulateChunkBlocks {
                         int heightDifference = maxHeight - height;
 
                         int freeSpace;
-                        if (simulateProperty.reverseHeightGrowthDirection) {
-                            for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        if (simulateProperty.onlyInWater) {
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                for(freeSpace = 1; level.getBlockState(pos.below(freeSpace)).is(Blocks.WATER) && freeSpace <= heightDifference; ++freeSpace) {}
+                            } else {
+                                for(freeSpace = 1; level.getBlockState(pos.above(freeSpace)).is(Blocks.WATER) && freeSpace <= heightDifference; ++freeSpace) {}
+                            }
                         } else {
-                            for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                            } else {
+                                for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                            }
                         }
                         --freeSpace;
 

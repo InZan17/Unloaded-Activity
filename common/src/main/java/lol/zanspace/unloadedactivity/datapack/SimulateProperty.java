@@ -48,7 +48,9 @@ public class SimulateProperty {
     public boolean resetOnHeightChange;
     public boolean keepUpdatingAfterMaxHeight;
     public boolean reverseHeightGrowthDirection;
+    public boolean increasePerHeight;
     public boolean dropsResources;
+    public boolean onlyInWater;
     public int minWaterValue;
 
     public List<Block> buddingBlocks;
@@ -92,6 +94,8 @@ public class SimulateProperty {
         this.keepUpdatingAfterMaxHeight = incomplete.keepUpdatingAfterMaxHeight.orElse(true);
         this.reverseHeightGrowthDirection = incomplete.reverseHeightGrowthDirection.orElse(false);
         this.dropsResources = incomplete.dropsResources.orElse(true);
+        this.increasePerHeight = incomplete.increasePerHeight.orElse(false);
+        this.onlyInWater = incomplete.onlyInWater.orElse(true);
         this.minWaterValue = incomplete.minWaterValue.orElse(0);
 
         // Default value for required fields depending on simulationType.
