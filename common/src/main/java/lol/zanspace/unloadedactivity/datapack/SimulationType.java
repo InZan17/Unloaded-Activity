@@ -5,6 +5,7 @@ import java.util.Optional;
 public enum SimulationType {
     INT_PROPERTY,
     BUDDING,
+    DECAY,
     ACTION;
 
     public static Optional<SimulationType> fromString(String string) {
@@ -14,6 +15,9 @@ public enum SimulationType {
             }
             case "budding" -> {
                 return Optional.of(BUDDING);
+            }
+            case "decay" -> {
+                return Optional.of(DECAY);
             }
             case "action" -> {
                 return Optional.of(ACTION);

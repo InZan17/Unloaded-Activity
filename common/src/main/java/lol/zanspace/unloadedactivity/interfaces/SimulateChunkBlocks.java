@@ -70,9 +70,7 @@ public interface SimulateChunkBlocks {
     }
 
     default boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
-        SimulationType simulationType = simulateProperty.simulationType;
-
-        if (simulationType != SimulationType.BUDDING && simulateProperty.maxHeight.isPresent()) {
+        if (!simulateProperty.isBudding() && !simulateProperty.isDecay() && simulateProperty.maxHeight.isPresent()) {
             Block thisBlock = state.getBlock();
 
             BlockState blockStateAbove = level.getBlockState(pos.above());
@@ -141,6 +139,10 @@ public interface SimulateChunkBlocks {
                         }
                     }
                 }
+            }
+
+            case DECAY -> {
+                return false;
             }
         }
 
@@ -323,6 +325,26 @@ public interface SimulateChunkBlocks {
 
                     level.setBlock(budPos, newBudState, simulateProperty.updateType);
                 }
+            }
+            case DECAY -> {
+                OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
+
+                if (result.occurrences() == 0)
+                    return Triple.of(state, result, pos);
+
+                if (simulateProperty.dropsResources) {
+                    Block.dropResources(state, level, pos);
+                }
+
+                if (simulateProperty.blockReplacement.isPresent()) {
+                    state = simulateProperty.blockReplacement.get().defaultBlockState();
+                    level.setBlock(pos, state, simulateProperty.updateType);
+                } else {
+                    level.removeBlock(pos, false);
+                    state = level.getBlockState(pos);
+                }
+
+                return Triple.of(state, result, pos);
             }
         }
 

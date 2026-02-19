@@ -173,6 +173,14 @@ public class SimulateProperty {
         return this.simulationType == SimulationType.BUDDING && this.target.equals(target);
     }
 
+    public boolean isDecay() {
+        return this.simulationType == SimulationType.DECAY;
+    }
+
+    public boolean isDecay(String target) {
+        return this.simulationType == SimulationType.DECAY && this.target.equals(target);
+    }
+
     public boolean isAction() {
         return this.simulationType == SimulationType.ACTION;
     }

@@ -1,6 +1,20 @@
 {
   "decay": {
-    "simulation_type": "action",
+    "simulation_type": "decay",
+    "conditions": [
+      {
+        "check": "bool_property",
+        "property_name": "persistent",
+        "comparison": "not_equal",
+        "value": true
+      },
+      {
+        "check": "int_property",
+        "property_name": "distance",
+        "comparison": "equal",
+        "value": 7
+      }
+    ],
     "advance_probability": 1
   }
 }
