@@ -95,7 +95,7 @@ public class SimulateProperty {
         this.reverseHeightGrowthDirection = incomplete.reverseHeightGrowthDirection.orElse(false);
         this.dropsResources = incomplete.dropsResources.orElse(true);
         this.increasePerHeight = incomplete.increasePerHeight.orElse(false);
-        this.onlyInWater = incomplete.onlyInWater.orElse(true);
+        this.onlyInWater = incomplete.onlyInWater.orElse(false);
         this.minWaterValue = incomplete.minWaterValue.orElse(0);
 
         // Default value for required fields depending on simulationType.
