@@ -73,7 +73,14 @@ public interface SimulateChunkBlocks {
         if (!simulateProperty.isBudding() && !simulateProperty.isDecay() && simulateProperty.maxHeight.isPresent()) {
             Block thisBlock = state.getBlock();
 
-            BlockState blockStateAbove = level.getBlockState(pos.above());
+            BlockState blockStateAbove;
+
+            if (simulateProperty.reverseHeightGrowthDirection) {
+                blockStateAbove = level.getBlockState(pos.below());
+            } else {
+                blockStateAbove = level.getBlockState(pos.above());
+            }
+
             boolean emptyAbove = blockStateAbove.isAir();
             boolean blockingAbove = !emptyAbove;
             boolean continuesAbove = blockStateAbove.is(thisBlock);
@@ -85,7 +92,11 @@ public interface SimulateChunkBlocks {
             int maxHeight = simulateProperty.maxHeight.get();
 
             int height;
-            for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+            if (simulateProperty.reverseHeightGrowthDirection) {
+                for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+            } else {
+                for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+            }
 
             if (height < maxHeight) {
                 return false;
@@ -113,6 +124,18 @@ public interface SimulateChunkBlocks {
                         } else {
                             return false;
                         }
+                    }
+                }
+            }
+
+            case BOOL_PROPERTY -> {
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target);
+
+                if (maybeProperty.isPresent()) {
+                    Property<?> property = maybeProperty.get();
+
+                    if (property instanceof BooleanProperty booleanProperty) {
+                        return state.getValue(booleanProperty);
                     }
                 }
             }
@@ -173,23 +196,31 @@ public interface SimulateChunkBlocks {
                         int maxHeight = simulateProperty.maxHeight.get();
 
                         int height;
-                        for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                        if (simulateProperty.reverseHeightGrowthDirection) {
+                            for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                        } else {
+                            for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                        }
 
                         int heightDifference = maxHeight - height;
 
-                        int freeSpaceAbove;
-                        for(freeSpaceAbove = 1; level.isEmptyBlock(pos.above(freeSpaceAbove)) && freeSpaceAbove <= heightDifference; ++freeSpaceAbove) {}
-                        --freeSpaceAbove;
+                        int freeSpace;
+                        if (simulateProperty.reverseHeightGrowthDirection) {
+                            for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        } else {
+                            for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        }
+                        --freeSpace;
 
                         // Updates for growing in height
-                        updateCount += freeSpaceAbove;
+                        updateCount += freeSpace;
 
                         boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
 
                         if (stopUpdatingAfterMaxHeight) {
-                            updateCount += max * Math.max(freeSpaceAbove - 1, 0);
+                            updateCount += max * Math.max(freeSpace - 1, 0);
                         } else {
-                            updateCount += max * freeSpaceAbove;
+                            updateCount += max * freeSpace;
                         }
 
 
@@ -221,8 +252,11 @@ public interface SimulateChunkBlocks {
                         level.setBlock(pos, state, simulateProperty.updateType);
 
                         for (int i=0;i<growBlocks;i++) {
-
-                            pos = pos.above();
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                pos = pos.below();
+                            } else {
+                                pos = pos.above();
+                            }
 
                             if (i+1==growBlocks) {
                                 state = thisBlock.defaultBlockState().setValue(integerProperty, valueRemainer);
@@ -239,6 +273,109 @@ public interface SimulateChunkBlocks {
                         }
                     } else {
                         state = state.setValue(integerProperty, newPropertyValue);
+                        level.setBlock(pos, state, simulateProperty.updateType);
+                    }
+
+
+                    return Triple.of(state, result, pos);
+                }
+            }
+            case BOOL_PROPERTY -> {
+                Optional<Property<?>> maybeProperty = getProperty(state, simulateProperty.target);
+
+                if (maybeProperty.isEmpty())
+                    return Triple.of(state, OccurrencesAndDuration.empty(), pos);
+
+                Property<?> property = maybeProperty.get();
+
+                if (property instanceof BooleanProperty booleanProperty) {
+                    Block thisBlock = state.getBlock();
+
+                    int current = state.getValue(booleanProperty) ? 1 : 0;
+                    int updateCount = 1 - current;
+
+                    if (simulateProperty.maxHeight.isPresent()) {
+                        int maxHeight = simulateProperty.maxHeight.get();
+
+                        int height;
+                        if (simulateProperty.reverseHeightGrowthDirection) {
+                            for(height = 1; level.getBlockState(pos.above(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                        } else {
+                            for(height = 1; level.getBlockState(pos.below(height)).is(thisBlock) && height <= maxHeight; ++height) {}
+                        }
+
+                        int heightDifference = maxHeight - height;
+
+                        int freeSpace;
+                        if (simulateProperty.reverseHeightGrowthDirection) {
+                            for(freeSpace = 1; level.isEmptyBlock(pos.below(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        } else {
+                            for(freeSpace = 1; level.isEmptyBlock(pos.above(freeSpace)) && freeSpace <= heightDifference; ++freeSpace) {}
+                        }
+                        --freeSpace;
+
+                        // Updates for growing in height
+                        updateCount += freeSpace;
+
+                        boolean stopUpdatingAfterMaxHeight = !simulateProperty.keepUpdatingAfterMaxHeight;
+
+                        if (stopUpdatingAfterMaxHeight) {
+                            updateCount += Math.max(freeSpace - 1, 0);
+                        } else {
+                            updateCount += freeSpace;
+                        }
+
+
+                    }
+
+                    if (updateCount <= 0)
+                        return Triple.of(state, OccurrencesAndDuration.empty(), pos);
+
+                    OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, updateCount, randomTickSpeed, calculateDuration, random);
+
+                    if (result.occurrences() == 0)
+                        return Triple.of(state, result, pos);
+
+                    int newPropertyValue = current + result.occurrences();
+
+                    if (simulateProperty.maxHeight.isPresent()) {
+                        int growBlocks = newPropertyValue / 2;
+                        int valueRemainer = newPropertyValue % 2;
+
+                        boolean resetOnHeightChange = simulateProperty.resetOnHeightChange;
+
+                        boolean belowValue = resetOnHeightChange ? false : true;
+
+                        if (growBlocks != 0) {
+                            state = state.setValue(booleanProperty, belowValue);
+                        } else {
+                            state = state.setValue(booleanProperty, valueRemainer != 0);
+                        }
+                        level.setBlock(pos, state, simulateProperty.updateType);
+
+                        for (int i=0;i<growBlocks;i++) {
+
+                            if (simulateProperty.reverseHeightGrowthDirection) {
+                                pos = pos.below();
+                            } else {
+                                pos = pos.above();
+                            }
+
+                            if (i+1==growBlocks) {
+                                state = thisBlock.defaultBlockState().setValue(booleanProperty, valueRemainer != 0);
+                            } else {
+                                state = thisBlock.defaultBlockState().setValue(booleanProperty, belowValue);
+                            }
+
+                            level.setBlockAndUpdate(pos, state);
+                            boolean updateNeighbors = simulateProperty.updateNeighbors;
+                            if (updateNeighbors) {
+                                level.neighborChanged(state, pos, thisBlock, pos, false);
+                                level.scheduleTick(pos, thisBlock, 1);
+                            }
+                        }
+                    } else {
+                        state = state.setValue(booleanProperty, newPropertyValue != 0);
                         level.setBlock(pos, state, simulateProperty.updateType);
                     }
 

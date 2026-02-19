@@ -4,6 +4,7 @@ import java.util.Optional;
 
 public enum SimulationType {
     INT_PROPERTY,
+    BOOL_PROPERTY,
     BUDDING,
     DECAY,
     ACTION;
@@ -12,6 +13,9 @@ public enum SimulationType {
         switch (string.toLowerCase()) {
             case "int_property" -> {
                 return Optional.of(INT_PROPERTY);
+            }
+            case "bool_property" -> {
+                return Optional.of(BOOL_PROPERTY);
             }
             case "budding" -> {
                 return Optional.of(BUDDING);

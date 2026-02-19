@@ -47,6 +47,7 @@ public class SimulateProperty {
     public boolean updateNeighbors;
     public boolean resetOnHeightChange;
     public boolean keepUpdatingAfterMaxHeight;
+    public boolean reverseHeightGrowthDirection;
     public boolean dropsResources;
     public int minWaterValue;
 
@@ -89,6 +90,7 @@ public class SimulateProperty {
         this.updateNeighbors = incomplete.updateNeighbors.orElse(false);
         this.resetOnHeightChange = incomplete.resetOnHeightChange.orElse(true);
         this.keepUpdatingAfterMaxHeight = incomplete.keepUpdatingAfterMaxHeight.orElse(true);
+        this.reverseHeightGrowthDirection = incomplete.reverseHeightGrowthDirection.orElse(false);
         this.dropsResources = incomplete.dropsResources.orElse(true);
         this.minWaterValue = incomplete.minWaterValue.orElse(0);
 

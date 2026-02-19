@@ -1,0 +1,8 @@
+{
+  "lit": {
+    "simulation_type": "bool_property",
+    "max_height": 5,
+    "reverse_height_growth_direction": true,
+    "advance_probability": 1
+  }
+}

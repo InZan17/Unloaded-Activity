@@ -6,11 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 
 #if MC_VER >= MC_1_21_11
 import net.minecraft.resources.Identifier;
@@ -31,6 +27,7 @@ public class IncompleteSimulateProperty {
     public Optional<Boolean> resetOnHeightChange = Optional.empty();
     public Optional<Boolean> keepUpdatingAfterMaxHeight = Optional.empty();
     public Optional<Boolean> dropsResources = Optional.empty();
+    public Optional<Boolean> reverseHeightGrowthDirection = Optional.empty();
     public Optional<Integer> updateType = Optional.empty();
     public Optional<CalculateValue> advanceProbability = Optional.empty();
     public Optional<Integer> maxValue = Optional.empty();
@@ -60,6 +57,7 @@ public class IncompleteSimulateProperty {
         this.buddingBlocks = otherSimulateProperty.buddingBlocks.or(() -> this.buddingBlocks);
         this.blockReplacement = otherSimulateProperty.blockReplacement.or(() -> this.blockReplacement);
         this.dropsResources = otherSimulateProperty.dropsResources.or(() -> this.dropsResources);
+        this.reverseHeightGrowthDirection = otherSimulateProperty.reverseHeightGrowthDirection.or(() -> this.reverseHeightGrowthDirection);
 
         if (otherSimulateProperty.advanceProbability.isPresent() && this.advanceProbability.isPresent()) {
             var oldProbability = this.advanceProbability.get();
@@ -192,15 +190,23 @@ public class IncompleteSimulateProperty {
 
         {
             T mapValue = propertyInfo.get("drops_resources");
-            UnloadedActivity.LOGGER.info("wawa " + mapValue);
             if (mapValue != null) {
                 DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
-                UnloadedActivity.LOGGER.info("" + valueResult);
                 if (valueResult.result().isEmpty()) {
                     return returnError(valueResult);
                 }
-                UnloadedActivity.LOGGER.info("" + valueResult.result());
                 simulateProperty.dropsResources = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("reverse_height_growth_direction");
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                if (valueResult.result().isEmpty()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.reverseHeightGrowthDirection = valueResult.result();
             }
         }
 
