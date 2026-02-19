@@ -83,8 +83,6 @@ public class Utils {
             averageProbability += odds * simulateForCycles;
         }
 
-        UnloadedActivity.LOGGER.info("successes are " + successes);
-
         return new OccurrencesAndDuration(successes, cycles, averageProbability / cycles);
 
     }
