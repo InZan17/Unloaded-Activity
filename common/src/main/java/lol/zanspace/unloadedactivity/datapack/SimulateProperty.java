@@ -1,27 +1,15 @@
 package lol.zanspace.unloadedactivity.datapack;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.MapLike;
-import lol.zanspace.unloadedactivity.UnloadedActivity;
-import lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks;
 import net.minecraft.core.Direction;
+#if MC_VER >= MC_1_19_4
+import net.minecraft.core.registries.BuiltInRegistries;
+#else
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.resources.RegistryLoader;
+#endif
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-
-#if MC_VER >= MC_1_21_11
-import net.minecraft.resources.Identifier;
-#else
-import net.minecraft.resources.ResourceLocation;
-#endif
 
 import java.util.*;
 
@@ -81,7 +69,11 @@ public class SimulateProperty {
 
         // Convert types.
         this.blockReplacement = incomplete.blockReplacement.map(id -> {
+            #if MC_VER >= MC_1_19_4
+            Optional<Block> maybeBlock = BuiltInRegistries.BLOCK.getOptional(id);
+            #else
             Optional<Block> maybeBlock = Registry.BLOCK.getOptional(id);
+            #endif
             if (maybeBlock.isEmpty()) {
                 throw new RuntimeException(id + " is not a valid block.");
             }
@@ -123,7 +115,12 @@ public class SimulateProperty {
                 ArrayList<Block> buddingBlocksList = new ArrayList<>();
 
                 for (var buddingBlockId : incomplete.buddingBlocks.get()) {
+
+                    #if MC_VER >= MC_1_19_4
+                    Optional<Block> maybeBlock = BuiltInRegistries.BLOCK.getOptional(buddingBlockId);
+                    #else
                     Optional<Block> maybeBlock = Registry.BLOCK.getOptional(buddingBlockId);
+                    #endif
                     if (maybeBlock.isEmpty()) {
                         throw new RuntimeException(buddingBlockId + " is not a valid block.");
                     }
