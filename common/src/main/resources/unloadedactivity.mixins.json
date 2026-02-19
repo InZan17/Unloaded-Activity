@@ -28,7 +28,6 @@
     "chunk.randomTicks.GrowingPlantHeadMixin",
     "chunk.randomTicks.IceMixin",
     "chunk.randomTicks.KelpMixin",
-    "chunk.randomTicks.LeavesMixin",
     "chunk.randomTicks.MangrovePropaguleMixin",
     "chunk.randomTicks.PointedDripstoneMixin",
     "chunk.randomTicks.SaplingMixin",
