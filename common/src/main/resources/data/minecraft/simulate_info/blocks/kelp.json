@@ -1,0 +1,9 @@
+{
+  "age": {
+    "simulation_type": "int_property",
+    "increase_per_height": true,
+    "block_replacement": "minecraft:kelp_plant",
+    "only_in_water": true,
+    "advance_probability": 0.14
+  }
+}
