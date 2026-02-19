@@ -1,5 +1,6 @@
 package lol.zanspace.unloadedactivity.datapack;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
@@ -62,10 +63,20 @@ public interface Condition {
                 }
             }
 
-            Optional<FetchValue> fetchValue = FetchValue.fromString(check);
+            Optional<FetchValue> maybeFetchValue = FetchValue.fromString(check);
 
-            if (fetchValue.isPresent()) {
-                return DataResult.success(new StaticCondition(fetchValue.get(), comparison, value));
+            if (maybeFetchValue.isPresent()) {
+                FetchValue fetchValue = maybeFetchValue.get();
+
+                if (fetchValue.needsPropertyName()) {
+                    DataResult<String> propertyNameResult = ops.getStringValue(map.get("property_name"));
+                    if (propertyNameResult.result().isEmpty()) {
+                        return returnError(propertyNameResult);
+                    }
+                    fetchValue.propertyName = propertyNameResult.result().get();
+                }
+
+                return DataResult.success(new StaticCondition(fetchValue, comparison, value));
             }
 
             if (check.equals("local_brightness_above")) {

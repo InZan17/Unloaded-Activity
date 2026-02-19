@@ -1,5 +1,6 @@
 package lol.zanspace.unloadedactivity.datapack.calculate_value;
 
+import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.CalculateValue;
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
@@ -7,6 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.Optional;
 
@@ -47,6 +51,52 @@ public enum FetchValue implements CalculateValue {
         }
     },
 
+    INT_PROPERTY {
+        @Override
+        public boolean needsPropertyName() {
+            return true;
+        }
+
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+
+
+            Optional<Property<?>> maybeProperty = state.getBlock().getProperty(state, propertyName);
+            if (maybeProperty.isEmpty())
+                return Double.NaN;
+
+            Property<?> property = maybeProperty.get();
+
+            if (property instanceof IntegerProperty integerProperty) {
+                return state.getValue(integerProperty);
+            } else {
+                return Double.NaN;
+            }
+        }
+    },
+
+    BOOL_PROPERTY {
+        @Override
+        public boolean needsPropertyName() {
+            return true;
+        }
+
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            Optional<Property<?>> maybeProperty = state.getBlock().getProperty(state, propertyName);
+            if (maybeProperty.isEmpty())
+                return Double.NaN;
+
+            Property<?> property = maybeProperty.get();
+
+            if (property instanceof BooleanProperty booleanProperty) {
+                return state.getValue(booleanProperty) ? 1 : 0;
+            } else {
+                return Double.NaN;
+            }
+        }
+    },
+
     SUPER {
         @Override
         public boolean isSuper() {
@@ -57,6 +107,12 @@ public enum FetchValue implements CalculateValue {
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
             return 1;
         }
+    };
+
+    public String propertyName = "";
+
+    public boolean needsPropertyName() {
+        return false;
     };
 
     @Override
@@ -90,6 +146,12 @@ public enum FetchValue implements CalculateValue {
             }
             case "raw_brightness_above" -> {
                 return Optional.of(RAW_BRIGHTNESS_ABOVE);
+            }
+            case "int_property" -> {
+                return Optional.of(INT_PROPERTY);
+            }
+            case "bool_property" -> {
+                return Optional.of(BOOL_PROPERTY);
             }
             case "super" -> {
                 return Optional.of(SUPER);

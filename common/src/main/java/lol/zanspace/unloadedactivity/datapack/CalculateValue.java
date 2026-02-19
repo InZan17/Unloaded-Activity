@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData.returnError;
+
 public interface CalculateValue {
     double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
 
@@ -39,9 +41,15 @@ public interface CalculateValue {
         var stringValue = ops.getStringValue(input);
         if (stringValue.result().isPresent()) {
             String variableName = stringValue.result().get();
-            Optional<FetchValue> fetchValue = FetchValue.fromString(variableName);
-            if (fetchValue.isPresent()) {
-                return fetchValue.get();
+            Optional<FetchValue> maybeFetchValue = FetchValue.fromString(variableName);
+            if (maybeFetchValue.isPresent()) {
+                FetchValue fetchValue = maybeFetchValue.get();
+
+                if (fetchValue.needsPropertyName()) {
+                    throw new RuntimeException("Cannot use properties inside probability.");
+                }
+
+                return fetchValue;
             }
             throw new RuntimeException(variableName + " is not a valid fetch value.");
         }
