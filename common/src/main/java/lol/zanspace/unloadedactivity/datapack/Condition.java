@@ -68,14 +68,6 @@ public interface Condition {
             if (maybeFetchValue.isPresent()) {
                 FetchValue fetchValue = maybeFetchValue.get();
 
-                if (fetchValue.needsPropertyName()) {
-                    DataResult<String> propertyNameResult = ops.getStringValue(map.get("property_name"));
-                    if (propertyNameResult.result().isEmpty()) {
-                        return returnError(propertyNameResult);
-                    }
-                    fetchValue.propertyName = propertyNameResult.result().get();
-                }
-
                 return DataResult.success(new StaticCondition(fetchValue, comparison, value));
             }
 

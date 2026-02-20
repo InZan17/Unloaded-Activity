@@ -63,11 +63,6 @@ public enum FetchValue implements CalculateValue {
 
     INT_PROPERTY {
         @Override
-        public boolean needsPropertyName() {
-            return true;
-        }
-
-        @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
 
 
@@ -86,11 +81,6 @@ public enum FetchValue implements CalculateValue {
     },
 
     BOOL_PROPERTY {
-        @Override
-        public boolean needsPropertyName() {
-            return true;
-        }
-
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
             Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
@@ -120,10 +110,6 @@ public enum FetchValue implements CalculateValue {
     };
 
     public String propertyName = "";
-
-    public boolean needsPropertyName() {
-        return false;
-    };
 
     @Override
     public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
@@ -160,16 +146,26 @@ public enum FetchValue implements CalculateValue {
             case "is_sand_below" -> {
                 return Optional.of(IS_SAND_BELOW);
             }
-            case "int_property" -> {
-                return Optional.of(INT_PROPERTY);
-            }
-            case "bool_property" -> {
-                return Optional.of(BOOL_PROPERTY);
-            }
+
             case "super" -> {
                 return Optional.of(SUPER);
             }
         }
+
+        if (variableName.toLowerCase().startsWith("int_property:")) {
+            String propertyName = variableName.substring("int_property:".length());
+            FetchValue fetchValue = INT_PROPERTY;
+            fetchValue.propertyName = propertyName;
+            return Optional.of(fetchValue);
+        }
+
+        if (variableName.toLowerCase().startsWith("bool_property:")) {
+            String propertyName = variableName.substring("bool_property:".length());
+            FetchValue fetchValue = BOOL_PROPERTY;
+            fetchValue.propertyName = propertyName;
+            return Optional.of(fetchValue);
+        }
+
         return Optional.empty();
     };
 }

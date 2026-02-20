@@ -5,8 +5,7 @@
     "update_type":"update_clients",
     "conditions": [
       {
-        "check": "bool_property",
-        "property_name": "hanging",
+        "check": "bool_property:hanging",
         "comparison": "equal",
         "value": true
       }
@@ -15,8 +14,7 @@
   "stage": {
     "conditions": [
       {
-        "check": "bool_property",
-        "property_name": "hanging",
+        "check": "bool_property:hanging",
         "comparison": "equal",
         "value": false
       }
@@ -26,8 +24,7 @@
   "grow_tree": {
     "conditions": [
       {
-        "check": "bool_property",
-        "property_name": "hanging",
+        "check": "bool_property:hanging",
         "comparison": "equal",
         "value": false
       }

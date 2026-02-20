@@ -43,13 +43,7 @@ public interface CalculateValue {
             String variableName = stringValue.result().get();
             Optional<FetchValue> maybeFetchValue = FetchValue.fromString(variableName);
             if (maybeFetchValue.isPresent()) {
-                FetchValue fetchValue = maybeFetchValue.get();
-
-                if (fetchValue.needsPropertyName()) {
-                    throw new RuntimeException("Cannot use properties inside probability.");
-                }
-
-                return fetchValue;
+                return maybeFetchValue.get();
             }
             throw new RuntimeException(variableName + " is not a valid fetch value.");
         }
