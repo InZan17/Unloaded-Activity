@@ -7,6 +7,7 @@ import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -50,6 +51,13 @@ public enum FetchValue implements CalculateValue {
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
             return level.getRawBrightness(pos.above(), 0);
+        }
+    },
+
+    IS_SAND_BELOW {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            return level.getBlockState(pos.below()).is(BlockTags.SAND) ? 1 : 0;
         }
     },
 
@@ -148,6 +156,9 @@ public enum FetchValue implements CalculateValue {
             }
             case "raw_brightness_above" -> {
                 return Optional.of(RAW_BRIGHTNESS_ABOVE);
+            }
+            case "is_sand_below" -> {
+                return Optional.of(IS_SAND_BELOW);
             }
             case "int_property" -> {
                 return Optional.of(INT_PROPERTY);
