@@ -82,6 +82,8 @@ public interface Condition {
             if (check.equals("local_brightness_above")) {
                 return DataResult.success(new LocalBrightnessAboveCondition(comparison, value));
             }
+
+            throw new RuntimeException("Invalid condition check value: " + check);
         }
 
         throw new RuntimeException("Invalid condition");
