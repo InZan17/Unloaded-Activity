@@ -1,0 +1,38 @@
+{
+  "hatch": {
+    "simulation_type": "int_property",
+    "advance_probability": {
+      "21061": 1,
+      "21905": 0.002
+    },
+    "update_type":"update_clients",
+    "conditions": [
+      {
+        "check": "is_sand_below",
+        "comparison": "equal",
+        "value": true
+      }
+    ]
+  },
+  "final_hatch": {
+    "simulation_type": "decay",
+    "advance_probability": {
+      "21061": 1,
+      "21905": 0.002
+    },
+    "dependencies": [
+      "hatch"
+    ],
+    "hatch_entity": "minecraft:turtle",
+    "hatch_count": "int_property:eggs",
+    "starting_age": -24000,
+    "update_type":"update_all",
+    "conditions": [
+      {
+        "check": "is_sand_below",
+        "comparison": "equal",
+        "value": true
+      }
+    ]
+  }
+}
