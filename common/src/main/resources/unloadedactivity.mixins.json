@@ -28,7 +28,6 @@
     "chunk.randomTicks.PointedDripstoneMixin",
     "chunk.randomTicks.SaplingMixin",
     "chunk.randomTicks.StemMixin",
-    "chunk.randomTicks.TurtleEggMixin",
     "chunk.randomTicks.WeatheringCopperBarsMixin",
     "chunk.randomTicks.WeatheringCopperBulbMixin",
     "chunk.randomTicks.WeatheringCopperChainMixin",
