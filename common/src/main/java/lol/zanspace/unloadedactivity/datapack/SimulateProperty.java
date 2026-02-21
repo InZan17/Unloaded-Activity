@@ -6,6 +6,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 #else
 import net.minecraft.core.Registry;
 #endif
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -29,8 +31,11 @@ public class SimulateProperty {
     public List<Direction> ignoreBuddingDirections;
     public List<RandomProperty> randomProperties;
     public Optional<String> buddingDirectionProperty;
+    public Optional<Integer> startingAge;
+    public Optional<CalculateValue> hatchCount;
 
     public Optional<Block> blockReplacement;
+    public Optional<EntityType<?>> hatchEntity;
 
     public int updateType;
     public boolean updateNeighbors;
@@ -66,6 +71,8 @@ public class SimulateProperty {
         this.waterloggedProperty = incomplete.waterloggedProperty;
         this.ignoreBuddingDirections = incomplete.ignoreBuddingDirections.stream().toList();
         this.buddingDirectionProperty = incomplete.buddingDirectionProperty;
+        this.startingAge = incomplete.startingAge;
+        this.hatchCount = incomplete.hatchCount;
 
         // Convert types.
         this.blockReplacement = incomplete.blockReplacement.map(id -> {
@@ -78,6 +85,18 @@ public class SimulateProperty {
                 throw new RuntimeException(id + " is not a valid block.");
             }
             return maybeBlock.get();
+        });
+
+        this.hatchEntity = incomplete.hatchEntity.map(id -> {
+            #if MC_VER >= MC_1_19_4
+            Optional<EntityType<?>> maybeEntity = BuiltInRegistries.ENTITY_TYPE.getOptional(id);
+            #else
+            Optional<EntityType<?>> maybeEntity = Registry.ENTITY_TYPE.getOptional(id);
+            #endif
+            if (maybeEntity.isEmpty()) {
+                throw new RuntimeException(id + " is not a valid mob.");
+            }
+            return maybeEntity.get();
         });
 
         ArrayList<RandomProperty> randomPropertiesList = new ArrayList<>();

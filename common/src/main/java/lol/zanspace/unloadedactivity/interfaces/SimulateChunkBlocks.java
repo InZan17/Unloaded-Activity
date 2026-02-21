@@ -10,6 +10,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
@@ -638,7 +643,8 @@ public interface SimulateChunkBlocks {
                 }
             }
             case DECAY -> {
-                OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
+                long dayTime = level.getDayTime();
+                OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, dayTime, timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration || simulateProperty.hatchEntity.isPresent(), random);
 
                 if (result.occurrences() == 0)
                     return Triple.of(state, result, pos);
@@ -647,12 +653,50 @@ public interface SimulateChunkBlocks {
                     Block.dropResources(state, level, pos);
                 }
 
+                BlockState oldState = state;
+
                 if (simulateProperty.blockReplacement.isPresent()) {
                     state = simulateProperty.blockReplacement.get().defaultBlockState();
                     level.setBlock(pos, state, simulateProperty.updateType);
                 } else {
                     level.removeBlock(pos, false);
                     state = level.getBlockState(pos);
+                }
+
+                if (simulateProperty.hatchEntity.isPresent()) {
+                    int hatchCount;
+                    if (simulateProperty.hatchCount.isPresent()) {
+                        long hatchTime = dayTime - timePassed + result.duration();
+                        hatchCount = (int)simulateProperty.hatchCount.get().calculateValue(level, oldState, pos, hatchTime, false, false);
+                    } else {
+                        hatchCount = 1;
+                    }
+
+                    if (hatchCount > 0) {
+                        for(int i = 0; i < hatchCount; i++) {
+                            Entity hatchedEntity = simulateProperty.hatchEntity.get().create(level);
+                            if (hatchedEntity == null)
+                                continue;
+
+                            #if MC_VER >= MC_1_21_5
+                            hatchedEntity.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0, 0);
+                            #else
+                            hatchedEntity.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0, 0);
+                            #endif
+
+                            if (simulateProperty.startingAge.isPresent() && hatchedEntity instanceof AgeableMob ageableMob) {
+                                ageableMob.setAge(simulateProperty.startingAge.get());
+                            }
+
+                            if (hatchedEntity instanceof Turtle turtle) {
+                                turtle.setHomePos(pos);
+                            }
+
+                            level.addFreshEntity(hatchedEntity);
+                            hatchedEntity.simulateTime(timePassed - result.duration());
+                        }
+
+                    }
                 }
 
                 return Triple.of(state, result, pos);

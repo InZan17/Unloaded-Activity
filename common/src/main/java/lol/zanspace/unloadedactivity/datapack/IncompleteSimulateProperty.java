@@ -39,6 +39,9 @@ public class IncompleteSimulateProperty {
     public Optional<String> waterloggedProperty = Optional.empty();
     public ArrayList<Direction> ignoreBuddingDirections = new ArrayList<>();
     public HashMap<String, IncompleteRandomProperty> randomProperties = new HashMap<>();
+    public Optional<CalculateValue> hatchCount = Optional.empty();
+    public Optional<Integer> startingAge = Optional.empty();
+    public Optional< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif > hatchEntity = Optional.empty();
     public Optional< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif > blockReplacement = Optional.empty();
     public Optional<ArrayList< #if MC_VER >= MC_1_21_11 Identifier #else ResourceLocation #endif >> buddingBlocks = Optional.empty();
 
@@ -63,6 +66,8 @@ public class IncompleteSimulateProperty {
         this.reverseHeightGrowthDirection = otherSimulateProperty.reverseHeightGrowthDirection.or(() -> this.reverseHeightGrowthDirection);
         this.onlyInWater = otherSimulateProperty.onlyInWater.or(() -> this.onlyInWater);
         this.increasePerHeight = otherSimulateProperty.increasePerHeight.or(() -> this.increasePerHeight);
+        this.hatchEntity = otherSimulateProperty.hatchEntity.or(() -> this.hatchEntity);
+        this.startingAge = otherSimulateProperty.startingAge.or(() -> this.startingAge);
 
         for (var entry : otherSimulateProperty.randomProperties.entrySet()) {
             IncompleteRandomProperty thisRandomProperty = this.randomProperties.computeIfAbsent(entry.getKey(), k -> new IncompleteRandomProperty());
@@ -80,6 +85,17 @@ public class IncompleteSimulateProperty {
             this.advanceProbability = Optional.of(newProbability);
         } else {
             this.advanceProbability = otherSimulateProperty.advanceProbability.map(CalculateValue::replicate).or(() -> this.advanceProbability);
+        }
+
+        if (otherSimulateProperty.hatchCount.isPresent() && this.hatchCount.isPresent()) {
+            var oldValue = this.hatchCount.get();
+            var newValue = otherSimulateProperty.hatchCount.get().replicate();
+
+            newValue.replaceSuper(oldValue);
+
+            this.hatchCount = Optional.of(newValue);
+        } else {
+            this.hatchCount = otherSimulateProperty.hatchCount.map(CalculateValue::replicate).or(() -> this.hatchCount);
         }
     }
 
@@ -294,6 +310,37 @@ public class IncompleteSimulateProperty {
 
                     simulateProperty.ignoreBuddingDirections.add(result.result().get().getFirst());
                 }
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("starting_age");
+            if (mapValue != null) {
+                DataResult<Number> valueResult = ops.getNumberValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+                simulateProperty.startingAge = valueResult.result().map(Number::intValue);
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("hatch_entity");
+            if (mapValue != null) {
+                var result = ResourceLocation.CODEC.decode(ops, mapValue);
+                if (result.result().isEmpty()) {
+                    returnError(result);
+                }
+
+                simulateProperty.hatchEntity = result.result().map(Pair::getFirst);
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("hatch_count");
+            if (mapValue != null) {
+                var result = CalculateValue.parse(ops, mapValue);
+                simulateProperty.hatchCount = Optional.of(result);
             }
         }
 
