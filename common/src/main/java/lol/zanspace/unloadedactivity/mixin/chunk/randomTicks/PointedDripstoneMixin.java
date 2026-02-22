@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity.mixin.chunk.randomTicks;
 import lol.zanspace.unloadedactivity.OccurrencesAndDuration;
 import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import lol.zanspace.unloadedactivity.mixin.AbstractCauldronBlockInvoker;
 import net.minecraft.core.Direction;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,8 +40,6 @@ public abstract class PointedDripstoneMixin extends Block {
     public PointedDripstoneMixin(Properties properties) {
         super(properties);
     }
-
-    /*
 
     @Shadow private static boolean canGrow(BlockState dripstoneBlockState, BlockState waterState) {
         return true;
@@ -83,16 +84,19 @@ public abstract class PointedDripstoneMixin extends Block {
     private static float LAVA_TRANSFER_PROBABILITY_PER_RANDOM_TICK;
 
     @Override
-    public double getOdds(ServerLevel level, BlockState state, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        return 0.01137777;
+    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        if (simulateProperty.isAction("dripstone"))
+            return isStalactiteStartPos(state, level, pos);
+
+        return super.canSimulateRandTicks(state, level, pos, simulateProperty);
     }
 
     @Override
-    public boolean implementsSimulateRandTicks() {return true;}
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
-        if (!UnloadedActivity.config.growDripstone && !UnloadedActivity.config.dripstoneFillCauldrons && !UnloadedActivity.config.dripstoneTurnMudToClay) return false;
-        if (!isStalactiteStartPos(state, level, pos)) return false;
-        return true;
+    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+        if (simulateProperty.isAction("dripstone"))
+            return false; // im so lazy
+
+        return super.isRandTicksFinished(state, level, pos, simulateProperty);
     }
 
     @Unique
@@ -141,11 +145,15 @@ public abstract class PointedDripstoneMixin extends Block {
     }
 
     @Override
-    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+
+        if (!simulateProperty.isAction("dripstone"))
+            return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
 
         BlockPos tipPos = findTip(state, level, pos, 12, false);
+
         if (tipPos == null)
-            return state;
+            return Triple.of(state, OccurrencesAndDuration.empty(), pos);
 
         BlockState tip = level.getBlockState(tipPos);
 
@@ -154,9 +162,6 @@ public abstract class PointedDripstoneMixin extends Block {
 
         int currentLength = pos.getY()-tipPos.getY();
         int lengthDifference = MAX_GROWTH_LENGTH-currentLength;
-
-        double totalGrowOdds = this.getOdds(level, state, pos, simulateProperty, propertyName) * Utils.getRandomPickOdds(randomTickSpeed)*0.5; //somewhere there's a 50/50 chance of growing upper or under.
-
         int stalagmiteGroundDistance = getStalagmiteGrowthDistance(level, tipPos);
 
         Fluid dripstoneFluid = liquidState.getFluidState().getType();
@@ -174,19 +179,24 @@ public abstract class PointedDripstoneMixin extends Block {
         int successesUntilReachGround = max(stalagmiteGroundDistance-MAX_STALAGMITE_SEARCH_RANGE_WHEN_GROWING, 0);
         int successesUntilReachCauldron = max(cauldronGroundDistance-MAX_SEARCH_LENGTH_BETWEEN_STALACTITE_TIP_AND_CAULDRON, 0);
 
+        double averageUpperProbability = -1;
 
         if (UnloadedActivity.config.growDripstone) {
             if (currentLength < MAX_GROWTH_LENGTH) {
                 if (canGrow(dripstoneBlockState, liquidState)) {
                     if (PointedDripstoneBlock.canDrip(tip) && canTipGrow(tip, level, tipPos)) {
 
-                        totalUpperDripGrowth = Utils.getOccurrences(timePassed, totalGrowOdds, lengthDifference, random);
+                        var upperResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, lengthDifference, randomTickSpeed, false, random);
+                        averageUpperProbability = upperResult.averageProbability();
+                        totalUpperDripGrowth = upperResult.occurrences();
 
                         if (stalagmiteGroundDistance != -1) {
                             if (totalUpperDripGrowth >= successesUntilReachGround) {
-                                long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachGround, totalGrowOdds, random);
+                                var recalculatedDuration = OccurrencesAndDuration.recalculatedDuration(successesUntilReachGround, timePassed, averageUpperProbability, random);
+                                long leftover = timePassed - recalculatedDuration.duration();
                                 int maxGroundGrowth = min(stalagmiteGroundDistance, MAX_STALAGMITE_SEARCH_RANGE_WHEN_GROWING);
-                                totalLowerDripGrowth = Utils.getOccurrences(leftover, totalGrowOdds, maxGroundGrowth, random);
+                                var lowerResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), leftover, simulateProperty.advanceProbability, maxGroundGrowth, randomTickSpeed, false, random);
+                                totalLowerDripGrowth = lowerResult.occurrences();
                             }
                         }
                     }
@@ -203,7 +213,7 @@ public abstract class PointedDripstoneMixin extends Block {
 
             if (liquidState.is(Blocks.MUD) && !ultraWarm) {
                 double totalDripOdds = WATER_TRANSFER_PROBABILITY_PER_RANDOM_TICK * Utils.getRandomPickOdds(randomTickSpeed);
-                int dripOccurrences = Utils.getOccurrences(timePassed, totalDripOdds, 1, random);
+                int dripOccurrences = Utils.getOccurrencesBinomial(timePassed, totalDripOdds, 1, random);
                 if (dripOccurrences != 0) {
 
                     BlockState clay = Blocks.CLAY.defaultBlockState();
@@ -222,8 +232,15 @@ public abstract class PointedDripstoneMixin extends Block {
 
                     if (!cauldronBlock.isFull(cauldronState) && abstractCauldronBlockInvoker.canReceiveStalactiteDrip(dripstoneFluid)) {
                         double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * Utils.getRandomPickOdds(randomTickSpeed);
-                        long leftover = timePassed - Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachCauldron, totalGrowOdds, random);
-                        int dripOccurrences = Utils.getOccurrences(leftover, totalDripOdds, LayeredCauldronBlock.MAX_FILL_LEVEL, random);
+
+                        long leftover = timePassed;
+
+                        // if successesUntilReachCauldron is 0, that means it didn't need to grow to reach the cauldron.
+                        // If it wasn't 0, it did grow to reach this point, and averageUpperProbability is now a valid value.
+                        if (successesUntilReachCauldron > 0)
+                            leftover = timePassed - (Utils.sampleNegativeBinomialWithMax(timePassed, successesUntilReachCauldron, averageUpperProbability, random));
+
+                        int dripOccurrences = Utils.getOccurrencesBinomial(leftover, totalDripOdds, LayeredCauldronBlock.MAX_FILL_LEVEL, random);
                         while (dripOccurrences > 0) {
                             --dripOccurrences;
                             abstractCauldronBlockInvoker.receiveStalactiteDrip(cauldronState, level, cauldronPos, dripstoneFluid);
@@ -276,7 +293,4 @@ public abstract class PointedDripstoneMixin extends Block {
 
         return null;
     }
-
-     */
-
 }
