@@ -48,21 +48,22 @@ public class Utils {
             long simulateForCycles = Math.min(nextOddsSwitch, remainingCycles);
 
             double odds = probability.calculateValue(level, state, pos, currentTime, false, false);
+            double totalOdds = odds * randomPickOdds;
 
             if (UnloadedActivity.config.debugLogs)
                 UnloadedActivity.LOGGER.info("Simulating from " + currentTime + " to " + (currentTime + simulateForCycles) + " (difference: " + simulateForCycles + ") with odds " + odds);
 
-            int successesThisRound = getOccurrencesBinomial(simulateForCycles, odds * randomPickOdds, maxOccurrences - successes, random);
+            int successesThisRound = getOccurrencesBinomial(simulateForCycles, totalOdds, maxOccurrences - successes, random);
 
             successes += successesThisRound;
 
             if (successes >= maxOccurrences) {
                 if (calculateDuration) {
-                    long failedTrials = sampleNegativeBinomialWithMax(simulateForCycles, successesThisRound, odds * randomPickOdds, random);
+                    long failedTrials = sampleNegativeBinomialWithMax(simulateForCycles, successesThisRound, totalOdds, random);
                     long duration = failedTrials + successesThisRound;
 
 
-                    averageProbability += odds * duration;
+                    averageProbability += totalOdds * duration;
 
                     long passedCycles = cycles - remainingCycles;
 
@@ -74,13 +75,14 @@ public class Utils {
                     return new OccurrencesAndDuration(successes, finalDuration, averageProbability / finalDuration);
                 } else {
                     long quickDuration = cycles - remainingCycles + simulateForCycles;
+                    averageProbability += totalOdds * simulateForCycles;
                     return new OccurrencesAndDuration(successes, quickDuration, averageProbability / quickDuration);
                 }
             }
 
             remainingCycles -= simulateForCycles;
 
-            averageProbability += odds * simulateForCycles;
+            averageProbability += totalOdds * simulateForCycles;
         }
 
         return new OccurrencesAndDuration(successes, cycles, averageProbability / cycles);
