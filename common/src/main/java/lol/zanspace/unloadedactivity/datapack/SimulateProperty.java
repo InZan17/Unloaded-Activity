@@ -21,11 +21,12 @@ import static lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks.getPr
 public class SimulateProperty {
     public String target;
     public SimulationType simulationType;
+    public boolean isPrecipitation;
     public CalculateValue advanceProbability;
 
     public List<String> dependencies;
     public List<Condition> conditions;
-    public Optional<Integer> maxValue;
+    public Optional<CalculateValue> maxValue;
     public Optional<Integer> maxHeight;
     public Optional<String> waterloggedProperty;
     public List<Direction> ignoreBuddingDirections;
@@ -106,6 +107,7 @@ public class SimulateProperty {
         this.randomProperties = randomPropertiesList.stream().toList();
 
         // Default values for optional fields with defaults.
+        this.isPrecipitation = incomplete.isPrecipitation.orElse(false);
         this.updateType = incomplete.updateType.orElse(Block.UPDATE_ALL);
         this.updateNeighbors = incomplete.updateNeighbors.orElse(false);
         this.resetOnHeightChange = incomplete.resetOnHeightChange.orElse(true);

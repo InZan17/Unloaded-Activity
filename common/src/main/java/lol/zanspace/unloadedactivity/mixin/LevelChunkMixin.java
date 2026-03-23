@@ -56,8 +56,7 @@ public abstract class LevelChunkMixin extends ChunkAccess {
         if (UnloadedActivity.config.debugLogs)
             UnloadedActivity.LOGGER.info("Placed "+blockState.getBlock().toString()+" at "+blockPos);
 
-        boolean implementsSimulate = blockState.getBlock().implementsSimulateRandTicks();
-        if (!implementsSimulate)
+        if (!blockState.getBlock().hasRandTicks())
             return;
 
         if (UnloadedActivity.config.debugLogs)

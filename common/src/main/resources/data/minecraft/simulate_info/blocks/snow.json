@@ -1,0 +1,15 @@
+{
+  "layers": {
+    "is_precipitation": true,
+    "simulation_type": "int_property",
+    "conditions": [
+      {
+        "check": "should_snow",
+        "comparison": "equal",
+        "value": true
+      }
+    ],
+    "advance_probability": 1,
+    "max_value": "max_snow_height"
+  }
+}

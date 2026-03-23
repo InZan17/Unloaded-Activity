@@ -25,7 +25,6 @@ public class TimeMachine {
         long now = 0;
         if (UnloadedActivity.config.debugLogs) now = Instant.now().toEpochMilli();
 
-        TimeMachine.simulatePrecipitationTicks(timeDifference, level, chunk);
         TimeMachine.simulateRandomTicks(timeDifference, level, chunk, randomTickSpeed);
 
         long msTime = 0;
@@ -35,62 +34,6 @@ public class TimeMachine {
             UnloadedActivity.LOGGER.info(msTime + "ms to simulate random ticks on chunk after " + timeDifference + " ticks.");
         };
         return msTime;
-    }
-
-    public static void simulatePrecipitationTicks(long timeDifference, ServerLevel level, LevelChunk chunk) {
-
-        if (!UnloadedActivity.config.enablePrecipitationTicks)
-            return;
-
-        double precipitationPickChance = 1.0/4096.0; //1/(16*256). 16 for the chance of the chunk doing the tick and 256 for the chance of a block to be picked.
-
-        WorldWeatherData weatherData = level.getWeatherData();
-
-        long timeInWeather = weatherData.getTimeInWeather(timeDifference, level.getDayTime());
-
-        for (int z=0; z<16;z++)
-            for (int x=0; x<16;x++) {
-                ChunkPos chunkPos = chunk.getPos();
-                BlockPos airPos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(chunkPos.x*16+x,0,chunkPos.z*16+z));
-                BlockPos groundPos = airPos.below();
-                BlockState airPosState = chunk.getBlockState(airPos);
-                BlockState groundPosState = chunk.getBlockState(groundPos);
-                Block airPosBlock = airPosState.getBlock();
-                Block groundPosBlock = groundPosState.getBlock();
-                Biome biome = level.getBiome(airPos).value();
-
-                if (airPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(
-                        airPos,
-                        level,
-                        timeDifference,
-                        precipitationPickChance,
-                        timeInWeather,
-                        #if MC_VER >= MC_1_19_4
-                            biome.getPrecipitationAt(airPos
-                        #else
-                            biome.getPrecipitation(
-                        #endif
-                        #if MC_VER >= MC_1_21_3 , level.getSeaLevel()#endif
-                        )
-                    );
-
-                if (groundPosBlock.implementsSimulatePrecTicks())
-                    simulateBlockPrecipitationTick(
-                        groundPos,
-                        level,
-                        timeDifference,
-                        precipitationPickChance,
-                        timeInWeather,
-                        #if MC_VER >= MC_1_19_4
-                            biome.getPrecipitationAt(groundPos
-                        #else
-                            biome.getPrecipitation(
-                        #endif
-                        #if MC_VER >= MC_1_21_3, level.getSeaLevel() #endif
-                        )
-                    );
-        }
     }
 
     public static void simulateBlockPrecipitationTick(BlockPos pos, ServerLevel level, long timeDifference, double precipitationPickChance, long timeInWeather, Biome.Precipitation precipitation) {
@@ -136,7 +79,7 @@ public class TimeMachine {
                 BlockPos pos = BlockPos.of(longPos);
                 BlockState state = level.getBlockState(pos);
                 Block block = state.getBlock();
-                if (block.implementsSimulateRandTicks()) {
+                if (block.hasRandTicks()) {
                     newSimulationBlocks.add(longPos);
                     blockPosArray.add(pos);
                 } else {
@@ -160,7 +103,7 @@ public class TimeMachine {
                         BlockPos worldBlockPos = chunkBlockPos.offset(chunkPos.x*16,0,chunkPos.z*16);
                         BlockState state = chunk.getBlockState(chunkBlockPos);
                         Block block = state.getBlock();
-                        if (block.implementsSimulateRandTicks()) {
+                        if (block.hasRandTicks()) {
                             blockPosArray.add(worldBlockPos);
                             if (UnloadedActivity.config.rememberBlockPositions)
                                 newSimulationBlocks.add(worldBlockPos.asLong());
@@ -177,16 +120,44 @@ public class TimeMachine {
             }
         }
 
-        if (UnloadedActivity.config.randomizeBlockUpdates)
+        if (UnloadedActivity.config.randomizeBlockUpdates) {
             Collections.shuffle(blockPosArray);
+        }
 
-        for (BlockPos blockPos : blockPosArray)
-            simulateBlockRandomTicks(blockPos, level, timeDifference, randomTickSpeed);
+        ArrayList<Long> precipitationBlocks = new ArrayList<>();
+
+        for (int z=0; z<16;z++)
+            for (int x=0; x<16;x++) {
+                ChunkPos chunkPos = chunk.getPos();
+                BlockPos airPos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(chunkPos.x*16+x,0,chunkPos.z*16+z));
+                BlockPos groundPos = airPos.below();
+                BlockState airPosState = chunk.getBlockState(airPos);
+                BlockState groundPosState = chunk.getBlockState(groundPos);
+                Block airPosBlock = airPosState.getBlock();
+                Block groundPosBlock = groundPosState.getBlock();
+
+                if (airPosBlock.hasPrecTicks())
+                    precipitationBlocks.add(airPos.asLong());
+
+                if (groundPosBlock.hasPrecTicks())
+                    precipitationBlocks.add(groundPos.asLong());
+            }
+
+        for (Long blockLong : precipitationBlocks) {
+            BlockPos blockPos = BlockPos.of(blockLong);
+            simulateBlock(blockPos, level, timeDifference, randomTickSpeed, true);
+        }
+
+        for (BlockPos blockPos : blockPosArray) {
+            if (precipitationBlocks.contains(blockPos.asLong())) continue;
+            simulateBlock(blockPos, level, timeDifference, randomTickSpeed, false);
+        }
     }
 
-    public static void simulateBlockRandomTicks(BlockPos pos, ServerLevel level, long timeLeft, int randomTickSpeed) {
-        if (!UnloadedActivity.config.enableRandomTicks)
-            return;
+    public static void simulateBlock(BlockPos pos, ServerLevel level, long timeLeft, int randomTickSpeed, boolean allowPrecipitationTicks) {
+
+        double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
+        double precipitationPickChance = 1.0/4096.0; //1/(16*(16*16)). 16 for the chance of the chunk doing the tick and (16*16) for the chance of a block to be picked.
 
         BlockState state = level.getBlockState(pos);
 
@@ -210,7 +181,7 @@ public class TimeMachine {
                 String propertyName = entry.getKey();
                 var simulateProperty = entry.getValue();
 
-                if (block.isRandTicksFinished(state, level, pos, simulateProperty)) {
+                if (block.isPropertyFinished(state, level, pos, simulateProperty)) {
                     finishedProperties.put(propertyName, 0L);
                     pendingPropertiesIterator.remove();
                 }
@@ -232,6 +203,9 @@ public class TimeMachine {
                     long maxDuration = 0;
 
                     var simulateProperty = entry.getValue();
+                    if (simulateProperty.isPrecipitation && !allowPrecipitationTicks) {
+                        continue;
+                    }
                     var propertyName = entry.getKey();
                     for (String dependency : simulateProperty.dependencies) {
                         Long dependencyDuration = finishedProperties.get(dependency);
@@ -250,7 +224,7 @@ public class TimeMachine {
 
                     iterator.remove();
 
-                    if (!block.canSimulateRandTicks(state, level, pos, simulateProperty))
+                    if (!block.canSimulateProperty(state, level, pos, simulateProperty))
                         continue;
 
                     long simulateTime = timeLeft - maxDuration;
@@ -264,7 +238,7 @@ public class TimeMachine {
                     if (UnloadedActivity.config.debugLogs)
                         UnloadedActivity.LOGGER.info("Simulating property " + propertyName + " on block " + block);
 
-                    var result = block.simulateRandTicks(state, level, pos, simulateProperty, level.random, simulateTime, randomTickSpeed, propertiesWithDependents.contains(propertyName));
+                    var result = block.simulateProperty(state, level, pos, simulateProperty, level.random, simulateTime, randomPickChance, propertiesWithDependents.contains(propertyName));
                     if (result == null) {
                         continueCheck = false;
                         break;
@@ -289,7 +263,7 @@ public class TimeMachine {
                         break;
                     }
 
-                    if (block.isRandTicksFinished(state, level, pos, simulateProperty)) {
+                    if (block.isPropertyFinished(state, level, pos, simulateProperty)) {
                         continueCheck = true;
                         finishedProperties.put(propertyName, simulationDuration);
                     }

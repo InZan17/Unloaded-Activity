@@ -138,6 +138,29 @@ public class WorldWeatherData extends SavedData {
         }
     }
 
+    public boolean getWeatherAtTime(long currentTime) {
+        int indexOffset = shouldCheckForRain() ? 0 : 1;
+        for (int i=this.weatherList.size() - 1;i>=0;i--) {
+            if (this.weatherList.get(i) > currentTime) {
+                // If this passes the first index, it should be false (no weather) because it's outside the history range.
+                // After that, it alternates.
+                return i % 2 != indexOffset;
+            }
+        }
+        // If we need to check for rain, that means it's not raining.
+        return !shouldCheckForRain();
+    }
+
+    public long getNextWeatherChangeDuration(long currentTime) {
+        for (int i=this.weatherList.size() - 1;i>=0;i--) {
+            long duration = this.weatherList.get(i) - currentTime;
+            if (duration > 0) {
+                return duration;
+            }
+        }
+        return Long.MAX_VALUE;
+    }
+
     public long getTimeInWeather(long timePassed, long currentTime) {
         int time = 0;
 

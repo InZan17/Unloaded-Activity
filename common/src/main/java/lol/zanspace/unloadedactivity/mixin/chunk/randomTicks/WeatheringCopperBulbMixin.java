@@ -35,12 +35,12 @@ public abstract class WeatheringCopperBulbMixin extends CopperBulbBlock implemen
         return 0.05688889f;
     }
     @Override
-    public boolean implementsSimulateRandTicks() {return true;}
+    public boolean hasRandTicks() {return true;}
     @Shadow
     public WeatherState getAge() {
         return null;
     }
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+    @Override public boolean canSimulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.ageCopper) return false;
         int currentAge = getCurrentAgeUA(state);
         if (currentAge == getMaxAgeUA()) return false;
@@ -56,7 +56,7 @@ public abstract class WeatheringCopperBulbMixin extends CopperBulbBlock implemen
     }
 
     @Override
-    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double randomPickChance = Utils.getRandomPickOdds(randomTickSpeed);
 

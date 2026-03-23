@@ -35,9 +35,9 @@ public abstract class IceMixin extends HalfTransparentBlock {
     @Shadow protected void melt(BlockState state, Level level, BlockPos pos) {}
 
     @Override
-    public boolean implementsSimulateRandTicks() {return true;}
+    public boolean hasRandTicks() {return true;}
 
-    @Override public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
+    @Override public boolean canSimulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName) {
         if (!UnloadedActivity.config.meltIce) return false;
         #if MC_VER >= MC_1_21_3
         int opacity = state.getLightBlock();
@@ -49,7 +49,7 @@ public abstract class IceMixin extends HalfTransparentBlock {
     }
 
     @Override
-    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulationData.SimulateProperty simulateProperty, String propertyName, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed) * this.getOdds(level, state, pos, simulateProperty, propertyName);
 

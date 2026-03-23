@@ -21,6 +21,7 @@ import static lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData.re
 public class IncompleteSimulateProperty {
     public Set<String> dependencies = new HashSet<>();
     public Optional<SimulationType> simulationType = Optional.empty();
+    public Optional<Boolean> isPrecipitation = Optional.empty();
     public Optional<String> target = Optional.empty();
     public Optional<Integer> maxHeight = Optional.empty();
     public Optional<Boolean> updateNeighbors = Optional.empty();
@@ -32,7 +33,7 @@ public class IncompleteSimulateProperty {
     public Optional<Boolean> onlyInWater = Optional.empty();
     public Optional<Integer> updateType = Optional.empty();
     public Optional<CalculateValue> advanceProbability = Optional.empty();
-    public Optional<Integer> maxValue = Optional.empty();
+    public Optional<CalculateValue> maxValue = Optional.empty();
     public ArrayList<Condition> conditions = new ArrayList<>();
     public Optional<String> buddingDirectionProperty = Optional.empty();
     public Optional<Integer> minWaterValue = Optional.empty();
@@ -47,8 +48,8 @@ public class IncompleteSimulateProperty {
 
     public void merge(IncompleteSimulateProperty otherSimulateProperty) {
         this.simulationType = otherSimulateProperty.simulationType.or(() -> this.simulationType);
+        this.isPrecipitation = otherSimulateProperty.isPrecipitation.or(() -> this.isPrecipitation);
         this.target = otherSimulateProperty.target.or(() -> this.target);
-        this.maxValue = otherSimulateProperty.maxValue.or(() -> this.maxValue);
         this.maxHeight = otherSimulateProperty.maxHeight.or(() -> this.maxHeight);
         this.dependencies.addAll(otherSimulateProperty.dependencies);
         this.updateType = otherSimulateProperty.updateType.or(() -> this.updateType);
@@ -85,6 +86,17 @@ public class IncompleteSimulateProperty {
             this.advanceProbability = Optional.of(newProbability);
         } else {
             this.advanceProbability = otherSimulateProperty.advanceProbability.map(CalculateValue::replicate).or(() -> this.advanceProbability);
+        }
+
+        if (otherSimulateProperty.maxValue.isPresent() && this.maxValue.isPresent()) {
+            var oldValue = this.maxValue.get();
+            var newValue = otherSimulateProperty.maxValue.get().replicate();
+
+            newValue.replaceSuper(oldValue);
+
+            this.maxValue = Optional.of(newValue);
+        } else {
+            this.maxValue = otherSimulateProperty.maxValue.map(CalculateValue::replicate).or(() -> this.maxValue);
         }
 
         if (otherSimulateProperty.hatchCount.isPresent() && this.hatchCount.isPresent()) {
@@ -141,6 +153,18 @@ public class IncompleteSimulateProperty {
         }
 
         {
+            T mapValue = propertyInfo.get("is_precipitation");
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+
+                simulateProperty.isPrecipitation = valueResult.result();
+            }
+        }
+
+        {
             T mapValue = propertyInfo.get("target");
             if (mapValue != null) {
                 DataResult<String> valueResult = ops.getStringValue(mapValue);
@@ -186,11 +210,8 @@ public class IncompleteSimulateProperty {
         {
             T mapValue = propertyInfo.get("max_value");
             if (mapValue != null) {
-                DataResult<Number> valueResult = ops.getNumberValue(mapValue);
-                if (valueResult.error().isPresent()) {
-                    return returnError(valueResult);
-                }
-                simulateProperty.maxValue = valueResult.result().map(Number::intValue);
+                CalculateValue calculateValue = CalculateValue.parse(ops, mapValue);
+                simulateProperty.maxValue = Optional.of(calculateValue);
             }
         }
 

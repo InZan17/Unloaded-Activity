@@ -27,28 +27,30 @@ import net.minecraft.world.level.GameRules;
 @Mixin(SnowLayerBlock.class)
 public abstract class SnowLayerMixin extends Block {
 
+
     public SnowLayerMixin(Properties properties) {
         super(properties);
     }
+    /*
 
     @Override
     public boolean implementsSimulatePrecTicks() {
         return true;
     }
     @Override
-    public boolean implementsSimulateRandTicks() {
+    public boolean hasRandTicks() {
         return true;
     }
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+    public boolean canSimulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (!UnloadedActivity.config.meltSnow) return false;
         if (level.getBrightness(LightLayer.BLOCK, pos) <= 11) return false;
         return true;
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
 
         double pickOdds = Utils.getRandomPickOdds(randomTickSpeed)*1;//this.getOdds(level, state, pos, simulateProperty, propertyName);;
 
@@ -100,4 +102,5 @@ public abstract class SnowLayerMixin extends Block {
 
         level.setBlockAndUpdate(pos, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, currentSnowHeight+newLayers));
     }
+    */
 }

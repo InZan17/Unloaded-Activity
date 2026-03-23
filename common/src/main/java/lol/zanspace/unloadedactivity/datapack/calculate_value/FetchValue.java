@@ -4,15 +4,20 @@ import lol.zanspace.unloadedactivity.UnloadedActivity;
 import lol.zanspace.unloadedactivity.Utils;
 import lol.zanspace.unloadedactivity.datapack.CalculateValue;
 import lol.zanspace.unloadedactivity.mixin.CropBlockInvoker;
+import lol.zanspace.unloadedactivity.mixin.GameRulesAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks.getProperty;
@@ -61,6 +66,29 @@ public enum FetchValue implements CalculateValue {
         }
     },
 
+    SHOULD_SNOW {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            Biome biome = level.getBiome(pos).value();
+            return biome.shouldSnow(level, pos) ? 1 : 0;
+        }
+    },
+
+    MAX_SNOW_HEIGHT {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            int maxSnowHeight = #if MC_VER >= MC_1_21_11
+                level.getGameRules().get(GameRules.MAX_SNOW_ACCUMULATION_HEIGHT)
+            #elif MC_VER >= MC_1_19_4
+                level.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT)
+            #else
+                1
+            #endif;
+
+            return Math.min(maxSnowHeight, SnowLayerBlock.MAX_HEIGHT);
+        }
+    },
+
     INT_PROPERTY {
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
@@ -94,6 +122,29 @@ public enum FetchValue implements CalculateValue {
             } else {
                 return Double.NaN;
             }
+        }
+    },
+
+    GAME_RULE {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+
+            GameRules gameRules = level.getGameRules();
+
+            for (var entry : ((GameRulesAccessor)gameRules).unloaded_activity$getRules().entrySet()) {
+                String gameRuleId = entry.getKey().getId();
+                if (Objects.equals(gameRuleId, propertyName)) {
+                    GameRules.Value<?> value = entry.getValue();
+
+                    if (value instanceof GameRules.IntegerValue intValue) {
+                        return intValue.get();
+                    } else if (value instanceof GameRules.BooleanValue boolValue) {
+                        return boolValue.get() ? 1 : 0;
+                    }
+                }
+            }
+
+            return Double.NaN;
         }
     },
 
@@ -146,7 +197,12 @@ public enum FetchValue implements CalculateValue {
             case "is_sand_below" -> {
                 return Optional.of(IS_SAND_BELOW);
             }
-
+            case "should_snow" -> {
+                return Optional.of(SHOULD_SNOW);
+            }
+            case "max_snow_height" -> {
+                return Optional.of(MAX_SNOW_HEIGHT);
+            }
             case "super" -> {
                 return Optional.of(SUPER);
             }
@@ -163,6 +219,13 @@ public enum FetchValue implements CalculateValue {
             String propertyName = variableName.substring("bool_property:".length());
             FetchValue fetchValue = BOOL_PROPERTY;
             fetchValue.propertyName = propertyName;
+            return Optional.of(fetchValue);
+        }
+
+        if (variableName.toLowerCase().startsWith("game_rule:")) {
+            String ruleName = variableName.substring("game_rule:".length());
+            FetchValue fetchValue = GAME_RULE;
+            fetchValue.propertyName = ruleName;
             return Optional.of(fetchValue);
         }
 

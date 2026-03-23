@@ -56,19 +56,19 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
     #endif
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+    public boolean isPropertyFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (simulateProperty.isAction("grow_fruit")) {
             // When growing fruit, the stem block gets entirely replaced. There is nothing to check.
             return false;
         }
 
-        return super.isRandTicksFinished(state, level, pos, simulateProperty);
+        return super.isPropertyFinished(state, level, pos, simulateProperty);
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, double randomPickOdds, boolean calculateDuration) {
         if (simulateProperty.isAction("grow_fruit")) {
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty, 1, randomPickOdds, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);
@@ -106,6 +106,6 @@ public abstract class StemMixin extends #if MC_VER >= MC_1_21_5 VegetationBlock 
             }
             return Triple.of(state, result, pos);
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateProperty(state, level, pos, simulateProperty, random, timePassed, randomPickOdds, calculateDuration);
     }
 }

@@ -3,6 +3,7 @@ package lol.zanspace.unloadedactivity;
 
 import com.mojang.datafixers.util.Pair;
 import lol.zanspace.unloadedactivity.datapack.CalculateValue;
+import lol.zanspace.unloadedactivity.datapack.SimulateProperty;
 import lol.zanspace.unloadedactivity.datapack.SimulationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,11 +30,9 @@ public class Utils {
         return 1.0-pow(1.0 - 1.0 / 4096.0, randomTickSpeed);
     }
 
-    public static OccurrencesAndDuration getOccurrences(ServerLevel level, BlockState state, BlockPos pos, long endTime, long cycles, CalculateValue probability, int maxOccurrences, int randomTickSpeed, boolean calculateDuration, RandomSource random) {
+    public static OccurrencesAndDuration getOccurrences(ServerLevel level, BlockState state, BlockPos pos, long endTime, long cycles, SimulateProperty property, int maxOccurrences, double randomPickOdds, boolean calculateDuration, RandomSource random) {
         if (maxOccurrences <= 0)
             return OccurrencesAndDuration.empty();
-
-        double randomPickOdds = getRandomPickOdds(randomTickSpeed);
 
         int successes = 0;
 
@@ -41,13 +40,29 @@ public class Utils {
 
         double averageProbability = 0.0;
 
+        CalculateValue probability = property.advanceProbability;
+
+        WorldWeatherData weatherData = level.getWeatherData();
+
         while (remainingCycles > 0) {
             long currentTime = endTime - remainingCycles;
-            long nextOddsSwitch = probability.getNextOddsSwitchDuration(level, state, pos, currentTime, false, false);
+            boolean isRaining = weatherData.getWeatherAtTime(currentTime);
 
-            long simulateForCycles = Math.min(nextOddsSwitch, remainingCycles);
+            if (property.isPrecipitation && !isRaining) {
+                long nextWeatherSwitchDuration = weatherData.getNextWeatherChangeDuration(currentTime);
+                remainingCycles -= nextWeatherSwitchDuration;
+                continue;
+            }
 
-            double odds = probability.calculateValue(level, state, pos, currentTime, false, false);
+            long nextOddsSwitchDuration = probability.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, false);
+            if (probability.isAffectedByWeather(level, state, pos)) {
+                long nextWeatherSwitchDuration = weatherData.getNextWeatherChangeDuration(currentTime);
+                nextOddsSwitchDuration = Math.min(nextOddsSwitchDuration, nextWeatherSwitchDuration);
+            }
+
+            long simulateForCycles = Math.min(nextOddsSwitchDuration, remainingCycles);
+
+            double odds = probability.calculateValue(level, state, pos, currentTime, isRaining, false);
             double totalOdds = odds * randomPickOdds;
 
             if (UnloadedActivity.config.debugLogs)

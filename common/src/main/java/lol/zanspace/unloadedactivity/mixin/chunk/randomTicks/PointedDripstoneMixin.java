@@ -84,19 +84,19 @@ public abstract class PointedDripstoneMixin extends Block {
     private static float LAVA_TRANSFER_PROBABILITY_PER_RANDOM_TICK;
 
     @Override
-    public boolean canSimulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+    public boolean canSimulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (simulateProperty.isAction("dripstone"))
             return isStalactiteStartPos(state, level, pos);
 
-        return super.canSimulateRandTicks(state, level, pos, simulateProperty);
+        return super.canSimulateProperty(state, level, pos, simulateProperty);
     }
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+    public boolean isPropertyFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (simulateProperty.isAction("dripstone"))
             return false; // im so lazy
 
-        return super.isRandTicksFinished(state, level, pos, simulateProperty);
+        return super.isPropertyFinished(state, level, pos, simulateProperty);
     }
 
     @Unique
@@ -145,10 +145,10 @@ public abstract class PointedDripstoneMixin extends Block {
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, double randomPickOdds, boolean calculateDuration) {
 
         if (!simulateProperty.isAction("dripstone"))
-            return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
+            return super.simulateProperty(state, level, pos, simulateProperty, random, timePassed, randomPickOdds, calculateDuration);
 
         BlockPos tipPos = findTip(state, level, pos, 12, false);
 
@@ -186,7 +186,7 @@ public abstract class PointedDripstoneMixin extends Block {
                 if (canGrow(dripstoneBlockState, liquidState)) {
                     if (PointedDripstoneBlock.canDrip(tip) && canTipGrow(tip, level, tipPos)) {
 
-                        var upperResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, lengthDifference, randomTickSpeed, false, random);
+                        var upperResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty, lengthDifference, randomPickOdds, false, random);
                         averageUpperProbability = upperResult.averageProbability();
                         totalUpperDripGrowth = upperResult.occurrences();
 
@@ -195,7 +195,7 @@ public abstract class PointedDripstoneMixin extends Block {
                                 var recalculatedDuration = OccurrencesAndDuration.recalculatedDuration(successesUntilReachGround, timePassed, averageUpperProbability, random);
                                 long leftover = timePassed - recalculatedDuration.duration();
                                 int maxGroundGrowth = min(stalagmiteGroundDistance, MAX_STALAGMITE_SEARCH_RANGE_WHEN_GROWING);
-                                var lowerResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), leftover, simulateProperty.advanceProbability, maxGroundGrowth, randomTickSpeed, false, random);
+                                var lowerResult = Utils.getOccurrences(level, state, pos, level.getDayTime(), leftover, simulateProperty, maxGroundGrowth, randomPickOdds, false, random);
                                 totalLowerDripGrowth = lowerResult.occurrences();
                             }
                         }
@@ -212,7 +212,7 @@ public abstract class PointedDripstoneMixin extends Block {
             #endif;
 
             if (liquidState.is(Blocks.MUD) && !ultraWarm) {
-                double totalDripOdds = WATER_TRANSFER_PROBABILITY_PER_RANDOM_TICK * Utils.getRandomPickOdds(randomTickSpeed);
+                double totalDripOdds = WATER_TRANSFER_PROBABILITY_PER_RANDOM_TICK * randomPickOdds;
                 int dripOccurrences = Utils.getOccurrencesBinomial(timePassed, totalDripOdds, 1, random);
                 if (dripOccurrences != 0) {
 
@@ -231,7 +231,7 @@ public abstract class PointedDripstoneMixin extends Block {
                     AbstractCauldronBlockInvoker abstractCauldronBlockInvoker = (AbstractCauldronBlockInvoker)cauldronBlock;
 
                     if (!cauldronBlock.isFull(cauldronState) && abstractCauldronBlockInvoker.canReceiveStalactiteDrip(dripstoneFluid)) {
-                        double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * Utils.getRandomPickOdds(randomTickSpeed);
+                        double totalDripOdds = getCauldronDripOdds(dripstoneFluid) * randomPickOdds;
 
                         long leftover = timePassed;
 

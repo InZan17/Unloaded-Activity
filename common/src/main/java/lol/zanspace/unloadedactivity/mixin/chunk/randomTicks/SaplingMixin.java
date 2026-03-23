@@ -42,19 +42,19 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
     #endif
 
     @Override
-    public boolean isRandTicksFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
+    public boolean isPropertyFinished(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty) {
         if (simulateProperty.isAction("grow_tree")) {
             return false;
         }
 
-        return super.isRandTicksFinished(state, level, pos, simulateProperty);
+        return super.isPropertyFinished(state, level, pos, simulateProperty);
     }
 
     @Override
-    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateRandTicks(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, int randomTickSpeed, boolean calculateDuration) {
+    public @Nullable Triple<BlockState, OccurrencesAndDuration, BlockPos> simulateProperty(BlockState state, ServerLevel level, BlockPos pos, SimulateProperty simulateProperty, RandomSource random, long timePassed, double randomPickOdds, boolean calculateDuration) {
         if (simulateProperty.isAction("grow_tree")) {
 
-            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty.advanceProbability, 1, randomTickSpeed, calculateDuration, random);
+            OccurrencesAndDuration result = Utils.getOccurrences(level, state, pos, level.getDayTime(), timePassed, simulateProperty, 1, randomPickOdds, calculateDuration, random);
 
             if (result.occurrences() == 0)
                 return Triple.of(state, result, pos);
@@ -63,6 +63,6 @@ public abstract class SaplingMixin extends #if MC_VER >= MC_1_21_5 VegetationBlo
 
             return null;
         }
-        return super.simulateRandTicks(state, level, pos, simulateProperty, random, timePassed, randomTickSpeed, calculateDuration);
+        return super.simulateProperty(state, level, pos, simulateProperty, random, timePassed, randomPickOdds, calculateDuration);
     }
 }

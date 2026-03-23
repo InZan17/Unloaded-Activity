@@ -1,0 +1,21 @@
+{
+  "snow": {
+    "is_precipitation": true,
+    "simulation_type": "decay",
+    "conditions": [
+      {
+        "check": "should_snow",
+        "comparison": "equal",
+        "value": true
+      },
+      {
+        "check": "max_snow_height",
+        "comparison": "greater_or_equal",
+        "value": 1
+      }
+    ],
+    "advance_probability": 1,
+    "block_replacement": "minecraft:snow",
+    "drops_resources": false
+  }
+}
