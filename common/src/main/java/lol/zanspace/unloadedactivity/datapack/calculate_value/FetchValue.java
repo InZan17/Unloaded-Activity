@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -56,6 +57,20 @@ public enum FetchValue implements CalculateValue {
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
             return level.getRawBrightness(pos.above(), 0);
+        }
+    },
+
+    BLOCK_BRIGHTNESS {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            return level.getBrightness(LightLayer.BLOCK, pos);
+        }
+    },
+
+    BLOCK_BRIGHTNESS_ABOVE {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            return level.getBrightness(LightLayer.BLOCK, pos.above());
         }
     },
 
@@ -193,6 +208,12 @@ public enum FetchValue implements CalculateValue {
             }
             case "raw_brightness_above" -> {
                 return Optional.of(RAW_BRIGHTNESS_ABOVE);
+            }
+            case "block_brightness" -> {
+                return Optional.of(BLOCK_BRIGHTNESS);
+            }
+            case "block_brightness_above" -> {
+                return Optional.of(BLOCK_BRIGHTNESS_ABOVE);
             }
             case "is_sand_below" -> {
                 return Optional.of(IS_SAND_BELOW);
