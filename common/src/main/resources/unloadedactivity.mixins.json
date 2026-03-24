@@ -18,7 +18,6 @@
     "LevelChunkMixin",
     "ServerLevelMixin",
     "block_entities.AbstractFurnaceBlockEntityMixin",
-    "chunk.Both.SnowLayerMixin",
     "chunk.precipitationTicks.CauldronMixin",
     "chunk.precipitationTicks.LayeredCauldronMixin",
     "chunk.precipitationTicks.LiquidMixin",

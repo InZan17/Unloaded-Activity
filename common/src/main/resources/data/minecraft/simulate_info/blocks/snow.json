@@ -11,5 +11,16 @@
     ],
     "advance_probability": 1,
     "max_value": "max_snow_height"
+  },
+  "melt": {
+    "simulation_type": "decay",
+    "conditions": [
+      {
+        "check": "block_brightness",
+        "comparison": "greater_than",
+        "value": 11
+      }
+    ],
+    "advance_probability": 1
   }
 }
