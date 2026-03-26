@@ -252,7 +252,9 @@ public class TimeMachine {
                     if (UnloadedActivity.config.debugLogs)
                         UnloadedActivity.LOGGER.info("Simulating property " + propertyName + " on block " + block);
 
-                    var result = block.simulateProperty(state, level, pos, simulateProperty, level.random, simulateTime, randomPickChance, propertiesWithDependents.contains(propertyName));
+                    double pickChance = simulateProperty.isPrecipitation ? precipitationPickChance : randomPickChance;
+
+                    var result = block.simulateProperty(state, level, pos, simulateProperty, level.random, simulateTime, pickChance, propertiesWithDependents.contains(propertyName));
                     if (result == null) {
                         continueCheck = false;
                         break;
