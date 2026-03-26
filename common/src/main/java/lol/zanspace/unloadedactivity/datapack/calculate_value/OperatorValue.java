@@ -67,11 +67,33 @@ public class OperatorValue implements CalculateValue {
     }
 
     @Override
-    public long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-        long firstLong = value.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
+    public boolean canBeAffectedByWeather() {
+        if (value.canBeAffectedByWeather())
+            return true;
+
+        if (secondaryValue != null)
+            return secondaryValue.canBeAffectedByWeather();
+
+        return false;
+    }
+
+    @Override
+    public boolean canBeAffectedByTime() {
+        if (value.canBeAffectedByTime())
+            return true;
+
+        if (secondaryValue != null)
+            return secondaryValue.canBeAffectedByTime();
+
+        return false;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        long firstLong = value.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
 
         if (secondaryValue != null) {
-            long secondaryLong = secondaryValue.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
+            long secondaryLong = secondaryValue.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
             return Math.min(firstLong, secondaryLong);
         }
 

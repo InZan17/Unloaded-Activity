@@ -37,14 +37,18 @@ public class TimeValue implements CalculateValue {
 
         return currentPair.getSecond().calculateValue(level, state, pos, currentTime, isRaining, isThundering);
     }
-
     @Override
-    public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
+    public boolean canBeAffectedByWeather() {
         return false;
     }
 
     @Override
-    public long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+    public boolean canBeAffectedByTime() {
+        return true;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
         if (this.list.isEmpty())
             return Long.MAX_VALUE;
 
@@ -67,7 +71,7 @@ public class TimeValue implements CalculateValue {
             nextPair = this.list.get(0);
         }
 
-        long currentNextOddsSwitch = currentPair.getSecond().getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
+        long currentNextOddsSwitch = currentPair.getSecond().getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
         long nextOddsSwitch;
 
         if (nextPair.getFirst() == currentPair.getFirst()) {

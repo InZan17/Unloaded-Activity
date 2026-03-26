@@ -35,14 +35,26 @@ public class ConditionalValue implements CalculateValue {
     }
 
     @Override
-    public long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+    public boolean canBeAffectedByWeather() {
+        return condition.canBeAffectedByWeather()
+                || trueValue.canBeAffectedByWeather()
+                || falseValue.canBeAffectedByWeather();
+    }
+
+    @Override
+    public boolean canBeAffectedByTime() {
+        return false;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
         boolean isValid = condition.isValid(level, state, pos, currentTime, isRaining, isThundering);
         long conditionSwitch = condition.getNextConditionSwitchDuration(level, state, pos, currentTime, isRaining, isThundering);
 
         return Math.min(
                 isValid ?
-                        trueValue.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, isThundering) :
-                        falseValue.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, isThundering)
+                        trueValue.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering) :
+                        falseValue.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering)
                 ,
                 conditionSwitch
         );

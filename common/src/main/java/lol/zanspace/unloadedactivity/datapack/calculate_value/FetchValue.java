@@ -104,65 +104,6 @@ public enum FetchValue implements CalculateValue {
         }
     },
 
-    INT_PROPERTY {
-        @Override
-        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-
-
-            Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
-            if (maybeProperty.isEmpty())
-                return Double.NaN;
-
-            Property<?> property = maybeProperty.get();
-
-            if (property instanceof IntegerProperty integerProperty) {
-                return state.getValue(integerProperty);
-            } else {
-                return Double.NaN;
-            }
-        }
-    },
-
-    BOOL_PROPERTY {
-        @Override
-        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-            Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
-            if (maybeProperty.isEmpty())
-                return Double.NaN;
-
-            Property<?> property = maybeProperty.get();
-
-            if (property instanceof BooleanProperty booleanProperty) {
-                return state.getValue(booleanProperty) ? 1 : 0;
-            } else {
-                return Double.NaN;
-            }
-        }
-    },
-
-    GAME_RULE {
-        @Override
-        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-
-            GameRules gameRules = level.getGameRules();
-
-            for (var entry : ((GameRulesAccessor)gameRules).unloaded_activity$getRules().entrySet()) {
-                String gameRuleId = entry.getKey().getId();
-                if (Objects.equals(gameRuleId, propertyName)) {
-                    GameRules.Value<?> value = entry.getValue();
-
-                    if (value instanceof GameRules.IntegerValue intValue) {
-                        return intValue.get();
-                    } else if (value instanceof GameRules.BooleanValue boolValue) {
-                        return boolValue.get() ? 1 : 0;
-                    }
-                }
-            }
-
-            return Double.NaN;
-        }
-    },
-
     SUPER {
         @Override
         public boolean isSuper() {
@@ -175,15 +116,18 @@ public enum FetchValue implements CalculateValue {
         }
     };
 
-    public String propertyName = "";
-
     @Override
-    public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
+    public boolean canBeAffectedByWeather() {
         return false;
     }
 
     @Override
-    public long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+    public boolean canBeAffectedByTime() {
+        return false;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
         return Long.MAX_VALUE;
     }
 
@@ -227,27 +171,6 @@ public enum FetchValue implements CalculateValue {
             case "super" -> {
                 return Optional.of(SUPER);
             }
-        }
-
-        if (variableName.toLowerCase().startsWith("int_property:")) {
-            String propertyName = variableName.substring("int_property:".length());
-            FetchValue fetchValue = INT_PROPERTY;
-            fetchValue.propertyName = propertyName;
-            return Optional.of(fetchValue);
-        }
-
-        if (variableName.toLowerCase().startsWith("bool_property:")) {
-            String propertyName = variableName.substring("bool_property:".length());
-            FetchValue fetchValue = BOOL_PROPERTY;
-            fetchValue.propertyName = propertyName;
-            return Optional.of(fetchValue);
-        }
-
-        if (variableName.toLowerCase().startsWith("game_rule:")) {
-            String ruleName = variableName.substring("game_rule:".length());
-            FetchValue fetchValue = GAME_RULE;
-            fetchValue.propertyName = ruleName;
-            return Optional.of(fetchValue);
         }
 
         return Optional.empty();

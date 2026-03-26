@@ -54,7 +54,7 @@ public class Utils {
                 continue;
             }
 
-            long nextOddsSwitchDuration = probability.getNextOddsSwitchDuration(level, state, pos, currentTime, isRaining, false);
+            long nextOddsSwitchDuration = probability.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, false);
             if (probability.isAffectedByWeather(level, state, pos)) {
                 long nextWeatherSwitchDuration = weatherData.getNextWeatherChangeDuration(currentTime);
                 nextOddsSwitchDuration = Math.min(nextOddsSwitchDuration, nextWeatherSwitchDuration);

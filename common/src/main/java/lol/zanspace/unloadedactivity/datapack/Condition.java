@@ -1,12 +1,11 @@
 package lol.zanspace.unloadedactivity.datapack;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
+import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.datapack.calculate_value.ConditionalValue;
 import lol.zanspace.unloadedactivity.datapack.calculate_value.FetchValue;
-import lol.zanspace.unloadedactivity.datapack.condition.LocalBrightnessAboveCondition;
-import lol.zanspace.unloadedactivity.datapack.condition.StaticCondition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,11 +14,34 @@ import java.util.Optional;
 
 import static lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData.returnError;
 
-public interface Condition {
-    boolean isValid(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
-    boolean isDynamic();
-    boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos);
-    long getNextConditionSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
+public record Condition (CalculateValue value1, CalculateValue value2, Comparison comparison) {
+    public boolean isValid(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        double calculatedValue1 = value1.calculateValue(level, state, pos, currentTime, isRaining, isThundering);
+        double calculatedValue2 = value2.calculateValue(level, state, pos, currentTime, isRaining, isThundering);
+        boolean result = comparison.compare(calculatedValue1, calculatedValue2);
+
+        if (UnloadedActivity.config.debugLogs)
+            UnloadedActivity.LOGGER.info("Checking if " + value1.getClass().getSimpleName() + " (" + calculatedValue1 + ") " + comparison.name() + " " + value2.getClass().getSimpleName() +  " (" + calculatedValue2 + ") (" + result + ")");
+
+        return result;
+    }
+
+    public boolean isDynamic() {
+        return this.canBeAffectedByWeather() || this.canBeAffectedByTime();
+    };
+    public boolean canBeAffectedByWeather() {
+        return value1.canBeAffectedByWeather() || value2.canBeAffectedByWeather();
+    };
+    public boolean canBeAffectedByTime() {
+        return value1.canBeAffectedByTime() || value2.canBeAffectedByTime();
+    };
+    public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
+        return value1.isAffectedByWeather(level, state, pos) || value2.isAffectedByWeather(level, state, pos);
+    };
+
+    public long getNextConditionSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        return Math.min(value1.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering), value2.getNextValueSwitchDuration(level, state, pos, currentTime, isRaining, isThundering));
+    };
 
     public static <T> DataResult<Condition> parse(DynamicOps<T> ops, T input) {
         var mapValue = ops.getMap(input);
@@ -39,43 +61,13 @@ public interface Condition {
 
             Comparison comparison = maybeComparison.get();
 
-            DataResult<String> checkResult = ops.getStringValue(map.get("check"));
-            if (checkResult.error().isPresent()) {
-                return returnError(checkResult);
-            }
-            String check = checkResult.result().get();
+            T checkValue = map.get("check");
+            CalculateValue checkCalculateValue = CalculateValue.parse(ops, checkValue);
 
-            T compareValue = map.get("value");
+            T valueValue = map.get("value");
+            CalculateValue valueCalculateValue = CalculateValue.parse(ops, valueValue);
 
-            int value;
-
-            DataResult<Number> numberValue = ops.getNumberValue(compareValue);
-
-            if (numberValue.result().isPresent()) {
-                value = numberValue.result().get().intValue();
-            } else {
-                DataResult<Boolean> booleanValue = ops.getBooleanValue(compareValue);
-                if (booleanValue.result().isPresent()) {
-                    boolean boolValue = booleanValue.result().get();
-                    value = boolValue ? 1 : 0;
-                } else {
-                    throw new RuntimeException("Invalid value to compare to. Must be a number or a boolean");
-                }
-            }
-
-            Optional<FetchValue> maybeFetchValue = FetchValue.fromString(check);
-
-            if (maybeFetchValue.isPresent()) {
-                FetchValue fetchValue = maybeFetchValue.get();
-
-                return DataResult.success(new StaticCondition(fetchValue, comparison, value));
-            }
-
-            if (check.equals("local_brightness_above")) {
-                return DataResult.success(new LocalBrightnessAboveCondition(comparison, value));
-            }
-
-            throw new RuntimeException("Invalid condition check value: " + check);
+            return DataResult.success(new Condition(checkCalculateValue, valueCalculateValue, comparison));
         }
 
         throw new RuntimeException("Invalid condition");

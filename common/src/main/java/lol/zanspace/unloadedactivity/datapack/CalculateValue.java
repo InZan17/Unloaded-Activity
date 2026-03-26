@@ -6,8 +6,10 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 import lol.zanspace.unloadedactivity.datapack.calculate_value.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,9 +20,15 @@ import static lol.zanspace.unloadedactivity.datapack.IncompleteSimulationData.re
 public interface CalculateValue {
     double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
 
-    boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos);
+    default boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
+        return this.canBeAffectedByWeather();
+    };
 
-    long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
+    boolean canBeAffectedByWeather();
+
+    boolean canBeAffectedByTime();
+
+    long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering);
 
     /// Doesn't guarantee a clone. If a type doesn't get mutated, it's able to return itself.
     CalculateValue replicate();
@@ -38,14 +46,45 @@ public interface CalculateValue {
             return new NumberValue(numberValue.result().get().doubleValue());
         }
 
+        var booleanValue = ops.getBooleanValue(input);
+        if (booleanValue.result().isPresent()) {
+            return new NumberValue(booleanValue.result().get() ? 1 : 0);
+        }
+
         var stringValue = ops.getStringValue(input);
         if (stringValue.result().isPresent()) {
             String variableName = stringValue.result().get();
+
             Optional<FetchValue> maybeFetchValue = FetchValue.fromString(variableName);
             if (maybeFetchValue.isPresent()) {
                 return maybeFetchValue.get();
             }
-            throw new RuntimeException(variableName + " is not a valid fetch value.");
+
+            switch (variableName.toLowerCase()) {
+                case "local_brightness" -> {
+                    return new LocalBrightnessValue();
+                }
+                case "local_brightness_above" -> {
+                    return new LocalBrightnessValue(new Vec3i(0, 1, 0));
+                }
+            }
+
+            if (variableName.toLowerCase().startsWith("local_brightness:")) {
+                String propertyName = variableName.substring("property:".length());
+                return new PropertyValue(propertyName);
+            }
+
+            if (variableName.toLowerCase().startsWith("property:")) {
+                String propertyName = variableName.substring("property:".length());
+                return new PropertyValue(propertyName);
+            }
+
+            if (variableName.toLowerCase().startsWith("game_rule:")) {
+                String ruleName = variableName.substring("game_rule:".length());
+                return new GameRuleValue(ruleName);
+            }
+
+            throw new RuntimeException(variableName + " is not a valid value.");
         }
 
         var mapValue = ops.getMap(input);

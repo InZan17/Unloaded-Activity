@@ -11,7 +11,11 @@ public class SimulationData {
 
         for (var entry : incomplete.propertyMap.entrySet()) {
             String key = entry.getKey();
-            newPropertyMap.put(key, new SimulateProperty(entry.getValue(), key));
+            try {
+                newPropertyMap.put(key, new SimulateProperty(entry.getValue(), key));
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to verify property " + key + ".\n" + e.getMessage());
+            }
         }
 
         this.propertyMap = Map.copyOf(newPropertyMap);

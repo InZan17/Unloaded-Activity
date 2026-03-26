@@ -1,13 +1,26 @@
-package lol.zanspace.unloadedactivity.datapack.condition;
+package lol.zanspace.unloadedactivity.datapack.calculate_value;
 
+import lol.zanspace.unloadedactivity.UnloadedActivity;
+import lol.zanspace.unloadedactivity.datapack.CalculateValue;
 import lol.zanspace.unloadedactivity.datapack.Comparison;
-import lol.zanspace.unloadedactivity.datapack.Condition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class LocalBrightnessAboveCondition  implements Condition {
+public class LocalBrightnessValue implements CalculateValue {
+
+    Vec3i offset;
+
+    public LocalBrightnessValue() {
+        this.offset = Vec3i.ZERO;
+    }
+
+    public LocalBrightnessValue(Vec3i offset) {
+        this.offset = offset;
+    }
+
     // https://www.desmos.com/calculator/bl10cndxzq
     public final static long[] NORMAL_SKY_DARKNESS_START = {
             12041L, // 1
@@ -81,45 +94,78 @@ public class LocalBrightnessAboveCondition  implements Condition {
         assert NORMAL_SKY_DARKNESS_START.length == NORMAL_SKY_DARKNESS_END.length;
         assert RAIN_SKY_DARKNESS_START.length == RAIN_SKY_DARKNESS_END.length;
         assert RAIN_THUNDER_SKY_DARKNESS_START.length == RAIN_THUNDER_SKY_DARKNESS_END.length;
+        new LocalBrightnessValue(Vec3i.ZERO).test();
+    }
+
+    public void test() {
+        assert getNextValueSwitchDurationFromLights(15, 0, 13000, false, false) == Long.MAX_VALUE;
+        assert getNextValueSwitchDurationFromLights(5, 15, 13600, false, false) == NORMAL_SKY_DARKNESS_END[9] - 13600;
+        assert getNextValueSwitchDurationFromLights(4, 15, 13600, false, false) == NORMAL_SKY_DARKNESS_START[10] - 13600;
     }
 
     public final static int MAX_DARKNESS = 11;
 
-    private int targetBrightness;
-    private Comparison comparison;
+    @Override
+    public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos.offset(offset));
+        int skyLight = level.getBrightness(LightLayer.SKY, pos.offset(offset));
 
-    public LocalBrightnessAboveCondition(Comparison comparison, int targetBrightness) {
-        this.comparison = comparison;
-        this.targetBrightness = targetBrightness;
+        int currentDarken = getCurrentSkyDarken(currentTime, isRaining, isThundering);
+
+        return Math.max(blockLight, skyLight - currentDarken);
     }
 
     @Override
-    public boolean isValid(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
-        int blockLight = level.getBrightness(LightLayer.BLOCK, pos.above());
-        int skyLight = level.getBrightness(LightLayer.SKY, pos.above());
-
-        int darken = getCurrentSkyDarken(currentTime, isRaining, isThundering);
-
-        int value = Math.max(blockLight, skyLight - darken);
-
-        return comparison.compare(value, targetBrightness);
-    }
-
-    @Override
-    public boolean isDynamic() {
+    public boolean canBeAffectedByWeather() {
         return true;
     }
 
     @Override
-    public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
-        return false;
+    public boolean canBeAffectedByTime() {
+        return true;
     }
 
     @Override
-    public long getNextConditionSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos.offset(offset));
+        int skyLight = level.getBrightness(LightLayer.SKY, pos.offset(offset));
 
-        int blockLight = level.getBrightness(LightLayer.BLOCK, pos.above());
-        int skyLight = level.getBrightness(LightLayer.SKY, pos.above());
+        return getNextValueSwitchDurationFromLights(blockLight, skyLight, currentTime, isRaining, isThundering);
+    }
+
+    public long getNextValueSwitchDurationFromLights(int blockLight, int skyLight, long currentTime, boolean isRaining, boolean isThundering) {
+        int maxDarkenBeforeUnaffected = Math.min(MAX_DARKNESS, Math.max(skyLight - blockLight, 0));
+
+        int currentDarken = getCurrentSkyDarken(currentTime, isRaining, isThundering);
+
+        int darkenStartCheck = Math.min(currentDarken + 1, maxDarkenBeforeUnaffected);
+        int darkenStopCheck = Math.min(currentDarken, maxDarkenBeforeUnaffected);
+
+        long nextDarkenStart = getNextSkyDarkenStartDuration(darkenStartCheck, currentTime, isRaining, isThundering);
+        long currentDarkenEnd = getNextSkyDarkenStopDuration(darkenStopCheck, currentTime, isRaining, isThundering);
+
+        long finalDuration =  Math.min(nextDarkenStart, currentDarkenEnd);
+
+        if (finalDuration <= 0) {
+            throw new RuntimeException("Duration is 0 or negative.");
+        }
+
+        return finalDuration;
+    }
+
+    @Override
+    public CalculateValue replicate() {
+        return this;
+    }
+
+    @Override
+    public void replaceSuper(CalculateValue superValue) {}
+
+    public long getNextConditionSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering, double target, Comparison comparison) {
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos.offset(offset));
+        int skyLight = level.getBrightness(LightLayer.SKY, pos.offset(offset));
+
+        int targetBrightness = (int)target;
 
         switch (comparison) {
             case NE, EQ -> {
@@ -263,16 +309,16 @@ public class LocalBrightnessAboveCondition  implements Condition {
             long darkEnd = endTimes[i];
 
             if (modTime >= darkStart && modTime < darkEnd) {
-                return i + darkenOffset;
+                return i + darkenOffset + 1;
             }
 
             if (darkStart > darkEnd) {
                 if (modTime >= darkStart || modTime < darkEnd) {
-                    return i + darkenOffset;
+                    return i + darkenOffset + 1;
                 }
             }
         }
-        return darkenOffset - 1;
+        return darkenOffset;
     }
 
     public long getNextSkyDarkenStartDuration(int darken, long currentTime, boolean isRaining, boolean isThundering) {
@@ -280,7 +326,7 @@ public class LocalBrightnessAboveCondition  implements Condition {
 
         int darkenOffset = MAX_DARKNESS - startTimes.length;
 
-        int index = darken - darkenOffset;
+        int index = darken - darkenOffset - 1;
 
         if (index < 0) {
             return Long.MAX_VALUE;
@@ -292,7 +338,7 @@ public class LocalBrightnessAboveCondition  implements Condition {
 
         startTime += daysPassed * 24000;
 
-        if (currentTime > startTime) {
+        if (currentTime >= startTime) {
             startTime += 24000;
         }
 
@@ -304,7 +350,7 @@ public class LocalBrightnessAboveCondition  implements Condition {
 
         int darkenOffset = MAX_DARKNESS - endTimes.length;
 
-        int index = darken - darkenOffset;
+        int index = darken - darkenOffset - 1;
 
         if (index < 0) {
             return Long.MAX_VALUE;
@@ -316,7 +362,7 @@ public class LocalBrightnessAboveCondition  implements Condition {
 
         endTime += daysPassed * 24000;
 
-        if (currentTime > endTime) {
+        if (currentTime >= endTime) {
             endTime += 24000;
         }
 

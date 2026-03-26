@@ -95,6 +95,7 @@ public class TimeMachine {
         } else {
             if (UnloadedActivity.config.debugLogs)
                 UnloadedActivity.LOGGER.info("Looping through entire chunk.");
+
             for (int z=0; z<16;z++)
                 for (int x=0; x<16;x++)
                     for (int y=minY; y<maxY;y++) {
@@ -168,11 +169,17 @@ public class TimeMachine {
 
             Block block = state.getBlock();
 
+
             Map<String, SimulateProperty> pendingProperties = new HashMap<>(block.getSimulationData().propertyMap);
 
             Map<String, Long> finishedProperties = new HashMap<>();
 
             Set<String> propertiesWithDependents = new HashSet<>();
+
+
+            if (UnloadedActivity.config.debugLogs)
+                if (!state.isAir())
+                    UnloadedActivity.LOGGER.info("Simulating block " + block + " with " + pendingProperties.size() + " properties.");
 
             var pendingPropertiesIterator = pendingProperties.entrySet().iterator();
             while (pendingPropertiesIterator.hasNext()) {
@@ -219,19 +226,26 @@ public class TimeMachine {
                     }
 
                     if (!validDependencies) {
+                        if (UnloadedActivity.config.debugLogs)
+                            UnloadedActivity.LOGGER.info("Skipping simulating property " + propertyName + " due to invalid dependencies.");
                         continue;
                     }
 
                     iterator.remove();
 
-                    if (!block.canSimulateProperty(state, level, pos, simulateProperty))
+                    if (!block.canSimulateProperty(state, level, pos, simulateProperty)) {
+                        if (UnloadedActivity.config.debugLogs)
+                            UnloadedActivity.LOGGER.info("Skipping simulating property " + propertyName + " due to invalid conditions.");
                         continue;
+                    }
 
                     long simulateTime = timeLeft - maxDuration;
 
                     assert (simulateTime >= 0);
 
                     if (simulateTime == 0) {
+                        if (UnloadedActivity.config.debugLogs)
+                            UnloadedActivity.LOGGER.info("Skipping simulating property " + propertyName + " due to no simulation time.");
                         continue;
                     }
 

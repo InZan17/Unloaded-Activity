@@ -12,12 +12,17 @@ public record NumberValue(double v) implements CalculateValue {
     }
 
     @Override
-    public boolean isAffectedByWeather(ServerLevel level, BlockState state, BlockPos pos) {
+    public boolean canBeAffectedByWeather() {
         return false;
     }
 
     @Override
-    public long getNextOddsSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+    public boolean canBeAffectedByTime() {
+        return false;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
         return Long.MAX_VALUE;
     }
 

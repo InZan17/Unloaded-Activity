@@ -1,0 +1,65 @@
+package lol.zanspace.unloadedactivity.datapack.calculate_value;
+
+import lol.zanspace.unloadedactivity.datapack.CalculateValue;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+
+import java.util.Optional;
+
+import static lol.zanspace.unloadedactivity.interfaces.SimulateChunkBlocks.getProperty;
+
+public class PropertyValue implements CalculateValue {
+    private String propertyName;
+
+    public PropertyValue(String propertyName) {
+        this.propertyName = propertyName;
+    }
+
+    @Override
+    public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        Optional<Property<?>> maybeProperty = getProperty(state, propertyName);
+        if (maybeProperty.isEmpty())
+            return Double.NaN;
+
+        Property<?> property = maybeProperty.get();
+
+        if (property instanceof IntegerProperty integerProperty) {
+            return state.getValue(integerProperty);
+        }
+
+        if (property instanceof BooleanProperty booleanProperty) {
+            return state.getValue(booleanProperty) ? 1 : 0;
+        }
+
+        return Double.NaN;
+    }
+
+    @Override
+    public boolean canBeAffectedByWeather() {
+        return false;
+    }
+
+    @Override
+    public boolean canBeAffectedByTime() {
+        return false;
+    }
+
+    @Override
+    public long getNextValueSwitchDuration(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
+    public CalculateValue replicate() {
+        return this;
+    }
+
+    @Override
+    public void replaceSuper(CalculateValue superValue) {
+
+    }
+}
