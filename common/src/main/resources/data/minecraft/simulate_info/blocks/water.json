@@ -1,0 +1,36 @@
+{
+  "freezing": {
+    "is_precipitation": true,
+    "requires_rain": false,
+    "simulation_type": "decay",
+    "conditions": [
+      {
+        "check": "should_freeze",
+        "comparison": "equal",
+        "value": true
+      }
+    ],
+    "advance_probability": 1,
+    "future_advance_probability_when_groups_gets_implemented": {
+      "predicate": {
+        "check": "group_sum",
+        "comparison": "not_equal",
+        "value": 4
+      },
+      "success": 1,
+      "fail": 0
+    },
+    "block_replacement": "minecraft:ice",
+    "drops_resources": false,
+    "group_simulate": {
+      "group_name": "unloaded_activity:ice_freezing",
+      "affecting_offsets": [
+        {"x":  0, "y":  0, "z":  1},
+        {"x":  0, "y":  0, "z":  -1},
+        {"x":  1, "y":  0, "z":  0},
+        {"x":  -1, "y":  0, "z":  0}
+      ],
+      "group_value": 1
+    }
+  }
+}

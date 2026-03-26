@@ -20,7 +20,6 @@
     "block_entities.AbstractFurnaceBlockEntityMixin",
     "chunk.precipitationTicks.CauldronMixin",
     "chunk.precipitationTicks.LayeredCauldronMixin",
-    "chunk.precipitationTicks.LiquidMixin",
     "chunk.randomTicks.BambooMixin",
     "chunk.randomTicks.BambooSaplingMixin",
     "chunk.randomTicks.IceMixin",
