@@ -48,7 +48,7 @@ public class Utils {
             long currentTime = endTime - remainingCycles;
             boolean isRaining = weatherData.getWeatherAtTime(currentTime);
 
-            if (property.isPrecipitation && !isRaining) {
+            if (property.requiresRain && !isRaining) {
                 long nextWeatherSwitchDuration = weatherData.getNextWeatherChangeDuration(currentTime);
                 remainingCycles -= nextWeatherSwitchDuration;
                 continue;

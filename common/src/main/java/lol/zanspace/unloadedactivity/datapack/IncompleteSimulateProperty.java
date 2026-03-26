@@ -22,6 +22,7 @@ public class IncompleteSimulateProperty {
     public Set<String> dependencies = new HashSet<>();
     public Optional<SimulationType> simulationType = Optional.empty();
     public Optional<Boolean> isPrecipitation = Optional.empty();
+    public Optional<Boolean> requiresRain = Optional.empty();
     public Optional<String> target = Optional.empty();
     public Optional<Integer> maxHeight = Optional.empty();
     public Optional<Boolean> updateNeighbors = Optional.empty();
@@ -49,6 +50,7 @@ public class IncompleteSimulateProperty {
     public void merge(IncompleteSimulateProperty otherSimulateProperty) {
         this.simulationType = otherSimulateProperty.simulationType.or(() -> this.simulationType);
         this.isPrecipitation = otherSimulateProperty.isPrecipitation.or(() -> this.isPrecipitation);
+        this.requiresRain = otherSimulateProperty.requiresRain.or(() -> this.requiresRain);
         this.target = otherSimulateProperty.target.or(() -> this.target);
         this.maxHeight = otherSimulateProperty.maxHeight.or(() -> this.maxHeight);
         this.dependencies.addAll(otherSimulateProperty.dependencies);
@@ -161,6 +163,18 @@ public class IncompleteSimulateProperty {
                 }
 
                 simulateProperty.isPrecipitation = valueResult.result();
+            }
+        }
+
+        {
+            T mapValue = propertyInfo.get("requires_rain");
+            if (mapValue != null) {
+                DataResult<Boolean> valueResult = ops.getBooleanValue(mapValue);
+                if (valueResult.error().isPresent()) {
+                    return returnError(valueResult);
+                }
+
+                simulateProperty.requiresRain = valueResult.result();
             }
         }
 

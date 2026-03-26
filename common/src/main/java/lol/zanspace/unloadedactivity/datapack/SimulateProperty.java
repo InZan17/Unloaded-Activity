@@ -22,6 +22,7 @@ public class SimulateProperty {
     public String target;
     public SimulationType simulationType;
     public boolean isPrecipitation;
+    public boolean requiresRain;
     public CalculateValue advanceProbability;
 
     public List<String> dependencies;
@@ -108,6 +109,7 @@ public class SimulateProperty {
 
         // Default values for optional fields with defaults.
         this.isPrecipitation = incomplete.isPrecipitation.orElse(false);
+        this.requiresRain = incomplete.requiresRain.orElse(this.isPrecipitation);
         this.updateType = incomplete.updateType.orElse(Block.UPDATE_ALL);
         this.updateNeighbors = incomplete.updateNeighbors.orElse(false);
         this.resetOnHeightChange = incomplete.resetOnHeightChange.orElse(true);
