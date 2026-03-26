@@ -89,6 +89,14 @@ public enum FetchValue implements CalculateValue {
         }
     },
 
+    SHOULD_FREEZE {
+        @Override
+        public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
+            Biome biome = level.getBiome(pos.above()).value();
+            return biome.shouldFreeze(level, pos) ? 1 : 0;
+        }
+    },
+
     MAX_SNOW_HEIGHT {
         @Override
         public double calculateValue(ServerLevel level, BlockState state, BlockPos pos, long currentTime, boolean isRaining, boolean isThundering) {
@@ -164,6 +172,9 @@ public enum FetchValue implements CalculateValue {
             }
             case "should_snow" -> {
                 return Optional.of(SHOULD_SNOW);
+            }
+            case "should_freeze" -> {
+                return Optional.of(SHOULD_FREEZE);
             }
             case "max_snow_height" -> {
                 return Optional.of(MAX_SNOW_HEIGHT);
