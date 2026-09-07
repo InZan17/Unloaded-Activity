@@ -131,6 +131,6 @@ public class SimulationDataResource extends JsonResourcesCollector {
 
         double aPriority = (aPrimitive != null && aPrimitive.isNumber()) ? aPrimitive.getAsDouble() : 1000;
         double bPriority = (bPrimitive != null && bPrimitive.isNumber()) ? bPrimitive.getAsDouble() : 1000;
-        return Double.compare(aPriority, bPriority);
+        return Double.compare(bPriority, aPriority);
     }
 }
