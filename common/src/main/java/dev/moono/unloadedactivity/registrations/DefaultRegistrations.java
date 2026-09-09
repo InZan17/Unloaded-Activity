@@ -72,6 +72,11 @@ public class DefaultRegistrations implements UnloadedActivityApi {
         );
 
         registry.register(
+            UnloadedActivity.id("is_raining"),
+            new IsRainingValue()
+        );
+
+        registry.register(
             UnloadedActivity.id("is_precipitation"),
             data -> {
                 JsonElement unparsedPrecipitationName = data.get("precipitation");
