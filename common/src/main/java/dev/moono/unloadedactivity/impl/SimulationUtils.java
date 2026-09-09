@@ -39,7 +39,7 @@ public abstract class SimulationUtils {
         return newState;
     }
 
-    public static BlockState applySetNamedProperties(BlockState state, RandomizedContext context, Map<String, RandomizedValueExpression<String>>  setProperties) {
+    public static BlockState applySetNamedProperties(BlockState state, RandomizedContext context, Map<String, RandomizedValueExpression<String>> setProperties) {
         BlockState newState = state;
         for (var entry : setProperties.entrySet()) {
             String propertyName = entry.getKey();
@@ -59,11 +59,10 @@ public abstract class SimulationUtils {
 
     public static<T extends Comparable<T>> BlockState setNamedPropertyValue(BlockState state, Property<T> property, String value) {
         for (T possibleValue : property.getPossibleValues()) {
-            if (!possibleValue.toString().equals(value)) continue;
+            if (!property.getName(possibleValue).equals(value)) continue;
 
             return state.setValue(property, possibleValue);
         }
-
         return state;
     }
 
