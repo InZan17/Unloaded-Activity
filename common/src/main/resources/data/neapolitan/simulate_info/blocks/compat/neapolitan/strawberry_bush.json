@@ -1,0 +1,35 @@
+{
+  "grow_crop": {
+    "simulation_method": "property",
+    "property_name": "age",
+    "update_type": "update_clients",
+
+    "conditions": [
+      {
+        "check": "raw_brightness",
+        "comparison": "greater_or_equal",
+        "value": 13
+      }
+    ],
+
+    "max_value": {
+      "predicate": {
+        "fetcher_id": "is_block",
+        "offset": "below",
+        "block": "minecraft:coarse_dirt"
+      },
+      "success": 2,
+      "fail": 6
+    },
+
+    "advance_probability": {
+      "value1": 1,
+      "operator": "/",
+      "value2": {
+        "predicate": "is_raining",
+        "success": 5,
+        "fail": 7
+      }
+    }
+  }
+}

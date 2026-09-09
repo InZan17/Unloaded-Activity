@@ -77,6 +77,16 @@ processResources {
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/1_19_hemp.json")
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/1_20_hemp.json")
     }
+
+    // Neapolitan
+    if (mc_info.MC_VER <= mc_info.MC_1_20_6) {
+        exclude("data/neapolitan/simulate_info/blocks/compat/neapolitan/strawberry_bush.json")
+        filesMatching("data/neapolitan/simulate_info/blocks/compat/neapolitan/1_20_strawberry_bush.json") {
+            path = path.replaceFirst("1_20_strawberry_bush", "strawberry_bush")
+        }
+    } else {
+        exclude("data/neapolitan/simulate_info/blocks/compat/neapolitan/1_20_strawberry_bush.json")
+    }
 }
 
 dependencies {
@@ -118,6 +128,15 @@ dependencies {
     } else if (mc_info.MC_VER >= mc_info.MC_1_19_2) {
         compileOnly "maven.modrinth:fFEIiSDQ:UQu29fD5" // Supplementaries Forge 1.19.2-2.4.20
         compileOnly "maven.modrinth:twkfQtEc:4R7I44b3" // Moonlight Lib Forge 1.19.2-2.3.7
+    }
+
+    // Neapolitan
+    if (mc_info.MC_VER >= mc_info.MC_1_21_1) {
+        compileOnly "maven.modrinth:neapolitan:6.0.1"
+    } else if (mc_info.MC_VER >= mc_info.MC_1_20_1) {
+        compileOnly "maven.modrinth:neapolitan:5.1.0"
+    } else if (mc_info.MC_VER >= mc_info.MC_1_19_2) {
+        compileOnly "maven.modrinth:neapolitan:4.1.0"
     }
 
     // No Man's Land

@@ -1,0 +1,86 @@
+{
+  "grow_crop": {
+    "simulation_method": "property",
+    "property_name": "age",
+    "update_type": "update_clients",
+
+    "conditions": [
+      {
+        "check": "raw_brightness",
+        "comparison": "greater_or_equal",
+        "value": 13
+      }
+    ],
+
+    "max_value": {
+      "predicate": {
+        "fetcher_id": "is_block",
+        "offset": "below",
+        "block": "minecraft:coarse_dirt"
+      },
+      "success": 2,
+      "fail": 5
+    },
+
+    "advance_probability": {
+      "value1": 1,
+      "operator": "/",
+      "value2": {
+        "predicate": "is_raining",
+        "success": 5,
+        "fail": 7
+      }
+    }
+  },
+  "grow_crop_final": {
+    "simulation_method": "replace",
+    "block_replacement": "neapolitan:strawberry_bush",
+
+    "dependencies": ["grow_crop"],
+
+    "conditions": [
+      {
+        "check": "raw_brightness",
+        "comparison": "greater_or_equal",
+        "value": 13
+      },
+      {
+        "predicate": {
+          "fetcher_id": "is_block",
+          "offset": "below",
+          "block": "minecraft:coarse_dirt"
+        },
+        "success": false,
+        "fail": true
+      },
+      {
+        "check": {
+          "fetcher_id": "property",
+          "property_name": "age"
+        },
+        "comparison": "equal",
+        "value": 5
+      }
+    ],
+
+    "advance_probability": {
+      "value1": 1,
+      "operator": "/",
+      "value2": {
+        "predicate": "is_raining",
+        "success": 5,
+        "fail": 7
+      }
+    },
+    "set_properties": {
+      "age": 6
+    },
+    "set_named_properties": {
+      "type": {
+        "predicate": "neapolitan:is_white",
+        "success": "white",
+        "fail": "red"
+      }
+    }
+  }
+}
