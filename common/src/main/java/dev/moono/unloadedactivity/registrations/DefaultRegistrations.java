@@ -77,6 +77,15 @@ public class DefaultRegistrations implements UnloadedActivityApi {
         );
 
         registry.register(
+            UnloadedActivity.id("is_raining_at"),
+                data -> {
+                    JsonElement offsetUnparsed = data.get("offset");
+                    if (offsetUnparsed == null) return new IsRainingAtValue();
+                    return new IsRainingAtValue(GameUtils.parseOffset(offsetUnparsed));
+                }
+        );
+
+        registry.register(
             UnloadedActivity.id("is_precipitation"),
             data -> {
                 JsonElement unparsedPrecipitationName = data.get("precipitation");
