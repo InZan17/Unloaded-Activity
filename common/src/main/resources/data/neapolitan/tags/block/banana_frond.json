@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "neapolitan:small_banana_frond",
+      "required": false
+    },
+    "neapolitan:banana_frond",
+    {
+      "id": "neapolitan:large_banana_frond",
+      "required": false
+    }
+  ]
+}

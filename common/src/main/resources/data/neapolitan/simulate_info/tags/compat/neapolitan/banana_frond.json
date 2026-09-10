@@ -1,0 +1,35 @@
+{
+  "moist": {
+    "simulation_method": "property",
+    "property_name": "moist",
+    "conditions": ["neapolitan:should_be_moist"],
+    "advance_probability": 1
+  },
+
+  "unmoist": {
+    "simulation_method": "property",
+    "property_name": "moist",
+    "conditions": [
+      {
+        "predicate": "neapolitan:should_be_moist",
+        "success": false,
+        "fail": true
+      }
+    ],
+    "progress_values": ["true", "false"],
+    "advance_probability": 1
+  },
+
+  "grow_banana": {
+    "simulation_method": "neapolitan:grow_banana",
+
+    "dependencies": ["moist"],
+    "conditions": ["neapolitan:should_be_moist"],
+
+    "advance_probability": {
+      "predicate": "is_raining_at",
+      "success": 0.5,
+      "fail": 0
+    }
+  }
+}
