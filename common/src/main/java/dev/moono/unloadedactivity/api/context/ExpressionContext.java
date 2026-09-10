@@ -82,6 +82,11 @@ public class ExpressionContext extends RandomizedContext {
     }
 
     @Override
+    public ServerLevel getServerLevel() {
+        return this.level;
+    }
+
+    @Override
     public BlockState getBlockState() {
         return this.state;
     }

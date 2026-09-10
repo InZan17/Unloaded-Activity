@@ -9,6 +9,7 @@ import net.minecraft.world.level.GameRules;
 import dev.moono.unloadedactivity.api.ActiveGroupSimulateData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 public interface FixedContext {
     LevelReader getLevel();
+    ServerLevel getServerLevel();
     BlockState getBlockState();
     BlockPos getBlockPos();
     Map<String, Number> getNumberMap();
