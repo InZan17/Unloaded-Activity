@@ -16,6 +16,13 @@ rootDir.listFiles().each { file ->
         mc_info.load(file.newReader())
     }
 }
+
+def mc_ver = Integer.parseInt((String)mc_info.MC_VER)
+def mc_1_19_2 = Integer.parseInt((String)mc_info.MC_1_19_2)
+def mc_1_19_4 = Integer.parseInt((String)mc_info.MC_1_19_4)
+def mc_1_20_1 = Integer.parseInt((String)mc_info.MC_1_20_1)
+def mc_1_21_1 = Integer.parseInt((String)mc_info.MC_1_21_1)
+
 processResources {
     if (rootProject.using_legacy_folders) {
         filesMatching("**/tags/block/**") {
@@ -42,7 +49,7 @@ processResources {
     }
 
     // Farmer's Delight
-    if (mc_info.MC_VER <= mc_info.MC_1_19_4) {
+    if (mc_ver <= mc_1_19_4) {
         exclude("data/farmersdelight/simulate_info/blocks/compat/farmersdelight/tomatoes.json")
         exclude("data/farmersdelight/simulate_info/blocks/compat/farmersdelight/tomatoes_on_rope.json")
 
@@ -54,19 +61,19 @@ processResources {
     }
 
     // No Man's Land
-    if (mc_info.MC_VER != mc_info.MC_1_21_1) {
+    if (mc_ver != mc_1_21_1) {
         exclude("data/nomansland")
     }
 
     // Immersive Engineering
-    if (mc_info.MC_VER <= mc_info.MC_1_19_4) {
+    if (mc_ver <= mc_1_19_4) {
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/hemp.json")
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/1_20_hemp.json")
 
         filesMatching("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/1_19_hemp.json") {
             path = path.replaceFirst("1_19_hemp", "hemp")
         }
-    } else if (mc_info.MC_VER <= mc_info.MC_1_20_6) {
+    } else if (mc_ver < mc_1_21_1) {
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/hemp.json")
         exclude("data/immersiveengineering/simulate_info/blocks/compat/immersiveengineering/1_19_hemp.json")
 
@@ -79,7 +86,7 @@ processResources {
     }
 
     // Neapolitan
-    if (mc_info.MC_VER <= mc_info.MC_1_20_6) {
+    if (mc_ver < mc_1_21_1) {
         exclude("data/neapolitan/simulate_info/blocks/compat/neapolitan/strawberry_bush.json")
         filesMatching("data/neapolitan/simulate_info/blocks/compat/neapolitan/1_20_strawberry_bush.json") {
             path = path.replaceFirst("1_20_strawberry_bush", "strawberry_bush")
@@ -98,18 +105,18 @@ dependencies {
     // for it will get the closest mod version for that Minecraft version.
 
     // Farmer's Delight
-    if (mc_info.MC_VER >= mc_info.MC_1_21_1) {
+    if (mc_ver >= mc_1_21_1) {
         compileOnly "maven.modrinth:farmers-delight:1.21.1-1.3.2"
 
-    } else if (mc_info.MC_VER >= mc_info.MC_1_20_1) {
+    } else if (mc_ver >= mc_1_20_1) {
         compileOnly "maven.modrinth:farmers-delight:1.20.1-1.3.2"
 
-    } else if (mc_info.MC_VER >= mc_info.MC_1_19_2) {
+    } else if (mc_ver >= mc_1_19_2) {
         compileOnly "maven.modrinth:farmers-delight:1.19.2-1.2.4"
     }
 
     // Supplementaries
-    if (mc_info.MC_VER >= mc_info.MC_1_21_1) {
+    if (mc_ver >= mc_1_21_1) {
         compileOnly ("net.mehvahdjukaar:supplementaries-common:1.21.1-3.8.10") {
             transitive = false
         }
@@ -117,31 +124,31 @@ dependencies {
             transitive = false
         }
 
-    } else if (mc_info.MC_VER >= mc_info.MC_1_20_1) {
+    } else if (mc_ver >= mc_1_20_1) {
         compileOnly "maven.modrinth:fFEIiSDQ:S0TIJ1hU" // Supplementaries Forge 1.20-3.1.43-forge
         compileOnly "maven.modrinth:twkfQtEc:43kjMXMx" // Moonlight Lib Forge 1.20-2.16.34-forge
 
-    } else if (mc_info.MC_VER >= mc_info.MC_1_19_4) {
+    } else if (mc_ver >= mc_1_19_4) {
         compileOnly "maven.modrinth:fFEIiSDQ:YkUV4QJ2" // Supplementaries Forge 1.19.4-2.4.15
         compileOnly "maven.modrinth:twkfQtEc:G82otMKn" // Moonlight Lib Forge 1.19.4-2.4.15
 
-    } else if (mc_info.MC_VER >= mc_info.MC_1_19_2) {
+    } else if (mc_ver >= mc_1_19_2) {
         compileOnly "maven.modrinth:fFEIiSDQ:UQu29fD5" // Supplementaries Forge 1.19.2-2.4.20
         compileOnly "maven.modrinth:twkfQtEc:4R7I44b3" // Moonlight Lib Forge 1.19.2-2.3.7
     }
 
     // Neapolitan
-    if (mc_info.MC_VER >= mc_info.MC_1_21_1) {
+    if (mc_ver >= mc_1_21_1) {
         compileOnly "maven.modrinth:neapolitan:6.0.1"
-    } else if (mc_info.MC_VER >= mc_info.MC_1_20_1) {
+    } else if (mc_ver >= mc_1_20_1) {
         compileOnly "maven.modrinth:neapolitan:5.1.0"
-    } else if (mc_info.MC_VER >= mc_info.MC_1_19_2) {
+    } else if (mc_ver >= mc_1_19_2) {
         compileOnly "maven.modrinth:neapolitan:4.1.0"
     }
 
     // No Man's Land
     // This mod only supports 1.21.1.
-    if (mc_info.MC_VER == mc_info.MC_1_21_1) {
+    if (mc_ver == mc_1_21_1) {
         compileOnly "maven.modrinth:kjZCvAn6:bcszfrVc" // 1.5.12
     }
 }
