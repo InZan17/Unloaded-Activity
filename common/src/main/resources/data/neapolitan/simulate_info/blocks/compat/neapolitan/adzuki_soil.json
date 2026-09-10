@@ -1,0 +1,20 @@
+{
+  "grow_beans": {
+    "simulation_method": "grow_block",
+    "grow_block": "neapolitan:adzuki_sprouts",
+    "bottom_block_replacement": "minecraft:dirt",
+
+    "conditions": [
+      {
+        "check": {
+          "fetcher_id": "raw_brightness",
+          "offset": "above"
+        },
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+
+    "advance_probability": 0.25
+  }
+}

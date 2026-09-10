@@ -1,0 +1,28 @@
+{
+  "grow_crop": {
+    "simulation_method": "property",
+    "property_name": "age",
+    "update_type": "update_clients",
+
+    "conditions": [
+      {
+        "check": "raw_brightness",
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+
+    "advance_probability": {
+      "value1": 1,
+      "operator": "/",
+      "value2": {
+        "predicate": {
+          "fetcher_id": "property",
+          "property_name": "flowering"
+        },
+        "success": 3,
+        "fail": 6
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "grow_crop": {
+    "simulation_method": "property",
+    "property_name": "age",
+    "update_type": "update_clients",
+
+    "conditions": [
+      {
+        "check": "raw_brightness",
+        "comparison": "greater_or_equal",
+        "value": 9
+      }
+    ],
+
+    "advance_probability": 0.111111111
+  }
+}
