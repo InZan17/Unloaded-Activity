@@ -24,6 +24,8 @@ def mc_1_20_1 = Integer.parseInt((String)mc_info.MC_1_20_1)
 def mc_1_21_1 = Integer.parseInt((String)mc_info.MC_1_21_1)
 
 processResources {
+    exclude("dev_icons")
+
     if (rootProject.using_legacy_folders) {
         filesMatching("**/tags/block/**") {
             path = path.replaceFirst("block", "blocks")

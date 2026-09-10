@@ -24,7 +24,7 @@
   },
 
   "license": "GNU LGPLv3",
-  "icon": "icon256.png",
+  "icon": "icon.png",
 
   "environment": "*",
   "entrypoints": {
